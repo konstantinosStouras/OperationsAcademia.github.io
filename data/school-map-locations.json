@@ -19062,6 +19062,112 @@
       ],
       "checked": "2026-10-30",
       "notes": "University identifies Analytics & Optimization within Mathematics and places department on ninth floor of New University Building. Named building point from OSM."
+    },
+    {
+      "id": "cal-poly-pomona-technology-operations-building-164",
+      "institution": "California State Polytechnic University, Pomona",
+      "rowIds": [
+        "california-state-polytechnic-university-pomona____technology-and-operations-management"
+      ],
+      "school": "College of Business Administration",
+      "department": "Technology and Operations Management",
+      "building": "College of Business Administration Building 164",
+      "address": "Room 1030, Building 164, 3801 West Temple Avenue, Pomona, CA 91768, United States",
+      "lat": 34.06158,
+      "lng": -117.819819,
+      "addressSource": "https://www.cpp.edu/cba/technology-and-operations-management/contact-us.shtml",
+      "coordinateSource": "https://www.openstreetmap.org/way/428083175#map=19/34.061580/-117.819819",
+      "supportingSources": [
+        "https://www.cpp.edu/maps/text-map.php?id=682375&list=loc",
+        "https://www.cpp.edu/cba/img/maps/164-building.pdf"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The official department contact explicitly gives Building 164 room 1030. The university campus map names Building 164 as the college faculty and administrative offices. OpenStreetMap way 428083175 names this exact building; opening the way in Chrome auto-centered the map on the displayed coordinate, visually checked inside the highlighted footprint. The point represents the building, not room-level position or neighboring Building 163."
+    },
+    {
+      "id": "cal-poly-pomona-computer-information-systems-building-164",
+      "institution": "California State Polytechnic University, Pomona",
+      "rowIds": [
+        "california-state-polytechnic-university-pomona__college-of-business-administration__computer-information-systems"
+      ],
+      "school": "College of Business Administration",
+      "department": "Computer Information Systems",
+      "building": "College of Business Administration Building 164",
+      "address": "Room 3017, Building 164, 3801 West Temple Avenue, Pomona, CA 91768, United States",
+      "lat": 34.06158,
+      "lng": -117.819819,
+      "addressSource": "https://www.cpp.edu/faculty/zma/index.shtml",
+      "coordinateSource": "https://www.openstreetmap.org/way/428083175#map=19/34.061580/-117.819819",
+      "supportingSources": [
+        "https://www.cpp.edu/maps/text-map.php?id=682375&list=loc",
+        "https://www.cpp.edu/cba/img/maps/164-building.pdf"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The current official faculty page gives department chair Zhongming Ma office Building 164 room 3017. The university campus map names Building 164 as faculty and administrative offices. OpenStreetMap way 428083175 names this exact building; opening the way in Chrome auto-centered the map on the displayed coordinate, visually checked inside the highlighted footprint. The point represents the building, not room-level position or neighboring Building 163."
+    },
+    {
+      "id": "uclouvain-lidam-core-roman-pays",
+      "institution": "UCLouvain",
+      "rowIds": [
+        "uclouvain__louvain-school-of-management__louvain-institute-of-data-analysis-and-modeling-in-economics"
+      ],
+      "school": "Louvain School of Management",
+      "department": "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE",
+      "building": "Center for Operations Research and Econometrics (CORE)",
+      "address": "Voie du Roman Pays 34, 1348 Louvain-la-Neuve, Belgium",
+      "lat": 50.6688327,
+      "lng": 4.6153418,
+      "addressSource": "https://uclouvain.be/en/research-institutes/lidam/contact",
+      "coordinateSource": "https://www.openstreetmap.org/node/3846926618",
+      "supportingSources": [
+        "https://uclouvain.be/en/research-institutes/lidam/core/people",
+        "https://uclouvain.be/en/research-institutes/lidam/lfin/contact"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Official LIDAM contact explicitly lists CORE at Voie du Roman Pays 34 and the current CORE chair at office B115. OpenStreetMap node 3846926618 explicitly names CORE and tags this address and university operator, last checked May 2026; coordinates are the named research-office point, not LIDAM offices at other sites."
+    },
+    {
+      "id": "sf-state-decision-sciences-business",
+      "institution": "San Francisco State University (SFSU)",
+      "rowIds": [
+        "san-francisco-state-university____decision-sciences"
+      ],
+      "school": "Lam Family College of Business",
+      "department": "Decision Sciences",
+      "building": "Business Building",
+      "address": "1600 Holloway Avenue, San Francisco, CA 94132, United States",
+      "lat": 37.72206,
+      "lng": -122.47673,
+      "addressSource": "https://cob.sfsu.edu/contact",
+      "coordinateSource": "https://mapcarta.com/W338711134",
+      "supportingSources": [
+        "https://mba.sfsu.edu/resources/department-operating-hours",
+        "https://maps.sfsu.edu/home",
+        "https://cob.sfsu.edu/decision-sciences/directory/leyla-ozsen"
+      ],
+      "checked": "2026-10-31",
+      "notes": "University lists Decision Sciences office BUS 310 at Business Building. Mapcarta names the Business building and lists Decision Sciences as a nearby office; its placement agrees with the university campus map."
+    },
+    {
+      "id": "nevada-reno-mechanical-palmer",
+      "institution": "University of Nevada, Reno",
+      "rowIds": [
+        "university-of-nevada-reno__college-of-engineering__mechanical-industrial-and-materials-engineering"
+      ],
+      "school": "College of Engineering",
+      "department": "Mechanical, Industrial and Materials Engineering",
+      "building": "Palmer Engineering",
+      "address": "1664 N. Virginia Street, Reno, NV 89557, United States",
+      "lat": 39.539484,
+      "lng": -119.812868,
+      "addressSource": "https://www.unr.edu/me/people/petros-voulgaris",
+      "coordinateSource": "https://www.openstreetmap.org/way/354410162",
+      "supportingSources": [
+        "https://www.unr.edu/building-directory/palmer-engineering",
+        "https://www.unr.edu/nevada-today/nevada-stories/dean-manos-maragakis"
+      ],
+      "checked": "2026-10-31",
+      "notes": "University lists school head in PE 204C and mechanical department in Palmer Engineering. Coordinates are map center for the named Palmer Engineering building footprint; address is campus mailing address."
     }
   ]
 }

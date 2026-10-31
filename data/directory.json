@@ -2913,8 +2913,17 @@
   "lastPosted": "2014-09-26",
   "lat": 34.0595698,
   "lng": -117.8194997,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cal-poly-pomona-technology-operations-building-164"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "California State Polytechnic University, Pomona"
+  ],
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Technology and Operations Management"
+  ]
  },
  {
   "id": "california-state-polytechnic-university-pomona__college-of-business-administration__computer-information-systems",
@@ -2929,8 +2938,22 @@
   ],
   "n": 1,
   "lastPosted": "2026-08-11",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "cal-poly-pomona-computer-information-systems-building-164"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "California State Polytechnic University, Pomona"
+  ],
+  "mapSearchTerms": [
+   "College of Business Administration",
+   "Computer Information Systems"
+  ],
+  "mapDepartmentLinks": {
+   "cal-poly-pomona-computer-information-systems-building-164": {
+    "facultyUrl": "https://www.cpp.edu/cba/computer-information-systems/faculty/faculty-staff-directory.shtml"
+   }
+  },
   "facultyUrl": "https://www.cpp.edu/cba/computer-information-systems/faculty/faculty-staff-directory.shtml"
  },
  {
@@ -6337,7 +6360,15 @@
   ],
   "mapSearchTerms": [
    "Business Information Systems"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "eastern-connecticut-bis-webb": {
+    "facultyUrl": "https://www.easternct.edu/faculty-directory/index.html?department=accounting-and-business-information-systems&link=/accounting-business-information-systems/",
+    "facultyDirectoryHint": "This roster covers Accounting and Business Information Systems faculty and staff."
+   }
+  },
+  "facultyUrl": "https://www.easternct.edu/faculty-directory/index.html?department=accounting-and-business-information-systems&link=/accounting-business-information-systems/",
+  "facultyDirectoryHint": "This roster covers Accounting and Business Information Systems faculty and staff."
  },
  {
   "id": "eastern-illinois-university____om",
@@ -7378,7 +7409,8 @@
   "lastPosted": "2026-01-18",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved",
-  "deptUrl": "https://business.fiu.edu/academics/departments/isba/"
+  "deptUrl": "https://business.fiu.edu/academics/departments/isba/",
+  "facultyUrl": "https://business.fiu.edu/academics/departments/isba/faculty/index.html"
  },
  {
   "id": "florida-international-university__college-of-business-administration__decision-sciences-and-information-systems",
@@ -7545,7 +7577,13 @@
   "mapSearchTerms": [
    "Frankfurt School of Finance & Management",
    "BA/OM"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "frankfurt-school-campus-ba-om": {
+    "facultyUrl": "https://www.frankfurt-school.de/en/research-and-faculty/departments/management"
+   }
+  },
+  "facultyUrl": "https://www.frankfurt-school.de/en/research-and-faculty/departments/management"
  },
  {
   "id": "frankfurt-school-of-finance-and-management____management",
@@ -7612,7 +7650,13 @@
   "mapSearchTerms": [
    "Frankfurt School of Finance & Management",
    "Technology and Operations Management"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "frankfurt-school-campus-technology-and-operations-management": {
+    "facultyUrl": "https://www.frankfurt-school.de/en/research-and-faculty/departments/management"
+   }
+  },
+  "facultyUrl": "https://www.frankfurt-school.de/en/research-and-faculty/departments/management"
  },
  {
   "id": "franklin-and-marshall-college____business-organizations-and-society",
@@ -9486,7 +9530,9 @@
   "n": 1,
   "lastPosted": "2025-05-18",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+  "facultyDirectoryHint": "This roster covers the broader Operations & Business Analytics area."
  },
  {
   "id": "ie-business-school____om",
@@ -9501,7 +9547,9 @@
   "n": 1,
   "lastPosted": "2025-05-18",
   "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationKind": "unresolved",
+  "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+  "facultyDirectoryHint": "This roster covers the broader Operations & Business Analytics area."
  },
  {
   "id": "ie-business-school____operations-and-business-analytics",
@@ -17923,8 +17971,17 @@
   ],
   "lat": 37.7212,
   "lng": -122.4768438,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "sf-state-decision-sciences-business"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "San Francisco State University (SFSU)"
+  ],
+  "mapSearchTerms": [
+   "Lam Family College of Business",
+   "Decision Sciences"
+  ]
  },
  {
   "id": "san-jose-state-university____ba-and-marketing",
@@ -22754,8 +22811,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-27",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "uclouvain-lidam-core-roman-pays"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "UCLouvain"
+  ],
+  "mapSearchTerms": [
+   "Louvain School of Management",
+   "Louvain Institute of Data Analysis and Modeling in Economics and Statistics (LIDAM), CORE"
+  ],
+  "mapDepartmentLinks": {
+   "uclouvain-lidam-core-roman-pays": {
+    "facultyUrl": "https://uclouvain.be/en/research-institutes/lidam/directory",
+    "facultyDirectoryHint": "Use the people categories and identify CORE; this directory covers the entire LIDAM institute."
+   }
+  },
   "facultyUrl": "https://uclouvain.be/en/research-institutes/lidam/directory",
   "facultyDirectoryHint": "Use the people categories and identify CORE; this directory covers the entire LIDAM institute."
  },
@@ -28359,8 +28431,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-27",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "nevada-reno-mechanical-palmer"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Nevada, Reno"
+  ],
+  "mapSearchTerms": [
+   "College of Engineering",
+   "Mechanical, Industrial and Materials Engineering"
+  ],
+  "mapDepartmentLinks": {
+   "nevada-reno-mechanical-palmer": {
+    "facultyUrl": "https://www.unr.edu/me/people",
+    "facultyDirectoryHint": "This is the mechanical engineering people page, including the head of the broader school; it may not cover every industrial and materials faculty member."
+   }
+  },
   "facultyUrl": "https://www.unr.edu/me/people",
   "facultyDirectoryHint": "This is the mechanical engineering people page, including the head of the broader school; it may not cover every industrial and materials faculty member."
  },

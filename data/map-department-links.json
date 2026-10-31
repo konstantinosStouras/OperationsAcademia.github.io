@@ -8067,6 +8067,126 @@
       ],
       "checked": "2026-10-30",
       "notes": "Official academic area page lists its faculty. Replaces earlier obsolete destination."
+    },
+    {
+      "institution": "Frankfurt School of Finance and Management",
+      "school": "Frankfurt School of Finance & Management",
+      "department": "BA/OM",
+      "facultyUrl": "https://www.frankfurt-school.de/en/research-and-faculty/departments/management",
+      "facultyLabel": "Management Department faculty (broader scope)",
+      "sources": [
+        "https://www.frankfurt-school.de/en/research-and-faculty/departments/management"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Official Management Department page explicitly lists Technology & Operations and Data & Decision Sciences as expertise areas; Chrome rendered a populated, paginated faculty roster with operations and supply-chain professors. Roster is department-wide, not filtered to this row."
+    },
+    {
+      "institution": "Frankfurt School of Finance and Management",
+      "school": "Frankfurt School of Finance & Management",
+      "department": "Technology and Operations Management",
+      "facultyUrl": "https://www.frankfurt-school.de/en/research-and-faculty/departments/management",
+      "facultyLabel": "Management Department faculty (broader scope)",
+      "sources": [
+        "https://www.frankfurt-school.de/en/research-and-faculty/departments/management"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Official Management Department page explicitly lists Technology & Operations and Data & Decision Sciences as expertise areas; Chrome rendered a populated, paginated faculty roster with operations and supply-chain professors. Roster is department-wide, not filtered to this row."
+    },
+    {
+      "institution": "Florida International University",
+      "school": "College of Business",
+      "department": "Information Systems and Business Analytics",
+      "rowIds": [
+        "florida-international-university____is"
+      ],
+      "facultyUrl": "https://business.fiu.edu/academics/departments/isba/faculty/index.html",
+      "sources": [
+        "https://business.fiu.edu/academics/departments/isba/faculty/index.html"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The official department faculty page eventually populated in Chrome with dozens of named faculty including chair Karlene Cousins and others; it separately labels adjuncts."
+    },
+    {
+      "institution": "Florida International University",
+      "school": "",
+      "department": "IS",
+      "rowIds": [
+        "florida-international-university____is"
+      ],
+      "facultyUrl": "https://business.fiu.edu/academics/departments/isba/faculty/index.html",
+      "sources": [
+        "https://business.fiu.edu/academics/departments/isba/faculty/index.html"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The official department faculty page eventually populated in Chrome with dozens of named faculty including chair Karlene Cousins and others; it separately labels adjuncts."
+    },
+    {
+      "institution": "IE Business School",
+      "school": "",
+      "department": "DS",
+      "rowIds": [
+        "ie-business-school____ds"
+      ],
+      "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+      "facultyLabel": "Operations & Business Analytics faculty",
+      "sources": [
+        "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+        "https://www.ie.edu/business-school/faculty-and-research/faculty/emmanouil-avgerinos/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Official IE faculty directory loaded slowly in Chrome with Operations & Business Analytics selected and populated multi-page faculty roster. Decision Sciences and Operations are represented within this broader area; individual profile confirms Decision Sciences affiliation.",
+      "directoryFilter": "This roster covers the broader Operations & Business Analytics area."
+    },
+    {
+      "institution": "IE Business School",
+      "school": "",
+      "department": "OM",
+      "rowIds": [
+        "ie-business-school____om"
+      ],
+      "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+      "facultyLabel": "Operations & Business Analytics faculty",
+      "sources": [
+        "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+        "https://www.ie.edu/business-school/faculty-and-research/faculty/emmanouil-avgerinos/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Official IE faculty directory loaded slowly in Chrome with Operations & Business Analytics selected and populated multi-page faculty roster. Decision Sciences and Operations are represented within this broader area; individual profile confirms Decision Sciences affiliation.",
+      "directoryFilter": "This roster covers the broader Operations & Business Analytics area."
+    },
+    {
+      "institution": "IE Business School",
+      "school": "",
+      "department": "Operations and Business Analytics",
+      "rowIds": [
+        "ie-business-school____operations-and-business-analytics"
+      ],
+      "facultyUrl": "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+      "facultyLabel": "Operations & Business Analytics faculty",
+      "sources": [
+        "https://www.ie.edu/university/about/faculty/?ACADEMIC_AREA=29477&page=1",
+        "https://www.ie.edu/business-school/faculty-and-research/faculty/emmanouil-avgerinos/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "Official IE faculty directory loaded slowly in Chrome with Operations & Business Analytics selected and populated multi-page faculty roster. Decision Sciences and Operations are represented within this broader area; individual profile confirms Decision Sciences affiliation.",
+      "directoryFilter": "This roster covers the broader Operations & Business Analytics area."
+    },
+    {
+      "institution": "Eastern Connecticut State University",
+      "school": "",
+      "department": "Business Information Systems",
+      "rowIds": [
+        "eastern-connecticut-state-university____business-information-systems"
+      ],
+      "facultyUrl": "https://www.easternct.edu/faculty-directory/index.html?department=accounting-and-business-information-systems&link=/accounting-business-information-systems/",
+      "facultyLabel": "Accounting and Business Information Systems faculty and staff",
+      "sources": [
+        "https://www.easternct.edu/accounting-business-information-systems/index.html",
+        "https://www.easternct.edu/faculty-directory/index.html?department=accounting-and-business-information-systems&link=/accounting-business-information-systems/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The official department page links to a populated department-filtered directory; Chrome displayed named faculty, lecturers, staff and emeritus. It encompasses accounting and business information systems.",
+      "directoryFilter": "This roster covers Accounting and Business Information Systems faculty and staff."
     }
   ]
 }
