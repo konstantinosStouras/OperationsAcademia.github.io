@@ -14967,8 +14967,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-27",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "nccu-school-of-business-lawson-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "North Carolina Central University"
+  ],
+  "mapSearchTerms": [
+   "School of Business",
+   "Decision Sciences"
+  ],
+  "mapDepartmentLinks": {
+   "nccu-school-of-business-lawson-building": {
+    "facultyUrl": "https://www.nccu.edu/business/business-faculty-and-staff",
+    "facultyDirectoryHint": "Find the Department of Decision Sciences, Economics, and Finance; the directory also lists other departments."
+   }
+  },
   "facultyUrl": "https://www.nccu.edu/business/business-faculty-and-staff",
   "facultyDirectoryHint": "Find the Department of Decision Sciences, Economics, and Finance; the directory also lists other departments."
  },
@@ -23262,8 +23277,16 @@
   ],
   "lat": -34.5480059,
   "lng": -58.4469439,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "di-tella-escuela-de-negocios-edificio-alcorta"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Universidad Torcuato di Tella"
+  ],
+  "mapSearchTerms": [
+   "School of Business"
+  ]
  },
  {
   "id": "universidade-catolica-portuguesa__catolica-lisbon-school-of-business-and-economics__operations-and-data-science",
@@ -25058,8 +25081,16 @@
   ],
   "lat": 37.3637343,
   "lng": -120.4311096,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "uc-merced-engineering-se2"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of California, Merced"
+  ],
+  "mapSearchTerms": [
+   "School of Engineering"
+  ]
  },
  {
   "id": "university-of-california-riverside____is",
@@ -28258,8 +28289,17 @@
   "lastPosted": "2014-10-22",
   "lat": 42.3184187,
   "lng": -83.2310262,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "um-dearborn-cob-fairlane-center-south"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Michigan-Dearborn"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "Decision Sciences/Operations Management"
+  ]
  },
  {
   "id": "university-of-michigan-flint____om-scm",

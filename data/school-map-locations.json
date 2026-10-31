@@ -20214,6 +20214,98 @@
       ],
       "checked": "2026-10-31",
       "notes": "SCHOOL-BUILDING reference for a department-level row: 'Sustainable Supply Chain Management' is the subject of a 2026 lectureship at the Global Business School for Health, not a department with its own office. Re-verified today on UCL's official profile system: the operations and supply chain academic Rodolfo Catena's address reads 'University College London, Global Business School for Health, Level 6, UCL East, Marshgate, 7 Sidings Street, LONDON, E20 2AE', and the school's own job description for the Lecturer in Sustainable Supply Chain Management gives 'Department: UCL Global Business School for Health, Location: UCL East'. Coordinates reuse the existing Marshgate records (OpenStreetMap way 964277509, 'Marshgate', Stratford, E20 2AD, lookup repeated today). The ucl.ac.uk pages themselves were behind a Cloudflare check on the check date."
+    },
+    {
+      "id": "nccu-school-of-business-lawson-building",
+      "institution": "North Carolina Central University",
+      "rowIds": [
+        "north-carolina-central-university__school-of-business__decision-sciences"
+      ],
+      "school": "School of Business",
+      "department": "Decision Sciences",
+      "building": "School of Business building (new, opened 2024; campus map no. 62 \"New School of Business\")",
+      "address": "829 East Lawson Street (corner of E. Lawson Street and S. Alston Avenue), Durham, NC 27701, United States",
+      "lat": 35.9758691,
+      "lng": -78.8937744,
+      "addressSource": "https://www.nccu.edu/business/business-faculty-and-staff",
+      "coordinateSource": "https://www.openstreetmap.org/way/1126802792",
+      "supportingSources": [
+        "https://www.nccu.edu/news/nccu-introduces-innovative-school-business-building",
+        "https://sites.math.duke.edu/Tricams/NCCU-Campus-Map.pdf",
+        "https://nominatim.openstreetmap.org/search?q=829+East+Lawson+Street+Durham+NC&format=jsonv2",
+        "https://www.openstreetmap.org/changeset/130846558"
+      ],
+      "checked": "2026-10-31",
+      "notes": "NCCU's official School of Business faculty/staff directory puts the Dean (Room 370) and the Department of Decision Sciences, Economics, and Finance chair Ibrahim Salama (Decision Sciences, Room 317) and its faculty (Rooms 319-326) in the 'School of Business' building, listed separately from the 'C. T. Willis Commerce Building' where a few adjuncts remain. NCCU news (ribbon-cutting 28 Feb 2024) places the 76,000 sq ft new School of Business building at the corner of Lawson Street and South Alston Avenue; NCCU's own campus map (copy hosted by Duke) shows it as no. 62 'New School of Business' at that corner, and the construction bid address is 829 East Lawson Street (OSM address node 5949718695 at 35.97571, -78.89398 sits at its frontage). The building has no donor name yet (only the Lowe's Auditorium inside is named). Coordinates are the centroid of the UNNAMED OSM footprint tagged building=university (way 1126802792, added Jan 2023 'Added several new university buildings'), the three-winged building between E. Lawson St, S. Alston Ave and Dupree St matching the campus map's no. 62; the Willis building (map no. 18) is elsewhere and was deliberately not used."
+    },
+    {
+      "id": "um-dearborn-cob-fairlane-center-south",
+      "institution": "University of Michigan-Dearborn",
+      "rowIds": [
+        "university-of-michigan-dearborn__college-of-business__decision-sciences-operations-management"
+      ],
+      "school": "College of Business",
+      "department": "Decision Sciences/Operations Management",
+      "building": "Fairlane Center South (FCS)",
+      "address": "19000 Hubbard Drive, Dearborn, MI 48126, United States",
+      "lat": 42.3224371,
+      "lng": -83.2240861,
+      "addressSource": "https://umdearborn.edu/cob/about-college-business/contact-us",
+      "coordinateSource": "https://nominatim.openstreetmap.org/search?q=Fairlane+Center+South+Dearborn&format=jsonv2",
+      "supportingSources": [
+        "https://www.openstreetmap.org/relation/4245890",
+        "https://umdearborn.edu/cob/about/staff-directory",
+        "https://umdearborn.edu/university-unions-events/about-university-unions-events/history",
+        "https://umdearborn.edu/maps-and-directions-0",
+        "https://catalog.umd.umich.edu/undergraduate/college-business/"
+      ],
+      "checked": "2026-10-31",
+      "notes": "The College of Business (incl. its Dean's Office, 141 FCS) is at Fairlane Center South, 19000 Hubbard Drive, the former Ford Fairlane Training Center east of the main campus; this is its CURRENT home (a 2027 relocation to the main campus is planned and is NOT represented here). Coordinates are the centroid of the OSM named building relation 4245890 'Fairlane Center - South' (display_name 'Fairlane Center - South, Rouge Gateway Trail - North Campus Connector, Dearborn, MI 48124'), as returned by Nominatim; Fairlane Center North (OSM way 315559931, now closed) is a separate footprint to the north. Scope: school building only; the department (Management Studies / now 'Management and Marketing' per the 2026-27 catalog) is listed in the college's staff directory under the same FCS address but no departmental room was verified. CAVEAT: umdearborn.edu answered HTTP 403 to every fetch from this environment, so the addressSource page content was corroborated only via search-engine excerpts of those official pages (and the caller's prior research), not by loading them here."
+    },
+    {
+      "id": "uc-merced-engineering-se2",
+      "institution": "University of California, Merced",
+      "rowIds": [
+        "university-of-california-merced__school-of-engineering"
+      ],
+      "school": "School of Engineering",
+      "department": "",
+      "building": "Science & Engineering Building 2 (SE2)",
+      "address": "Science & Engineering 2, Suite 315, 5200 N. Lake Road, Merced, CA 95343, United States",
+      "lat": 37.3657887,
+      "lng": -120.4219238,
+      "addressSource": "https://directory.ucmerced.edu/department/E200",
+      "coordinateSource": "https://nominatim.openstreetmap.org/search?q=Science+%26+Engineering+Building+2+Merced&format=jsonv2",
+      "supportingSources": [
+        "https://www.openstreetmap.org/way/564489516",
+        "https://engineering.ucmerced.edu/contact-us-engineering",
+        "https://news.ucmerced.edu/news/2014/campus-expands-new-science-and-engineering-building"
+      ],
+      "checked": "2026-10-31",
+      "notes": "UC Merced's official campus directory (department E200, School of Engineering) lists Dean Rakesh Goel, the Director of Undergraduate Student Services, the Director of Personnel Services and the undergraduate academic advisors with office 'Science & Engineering 2 315', and the Director of Administration in SE2 305A; the school's own contact page (not loadable here, 403) is reported to say the Dean's Suite is on the 3rd floor of SE2, Suite 315, 5200 N. Lake Road. Coordinates are Nominatim's centroid for the OSM named building 'Science & Engineering Building 2' (way 564489516, short_name SE2), adjacent to and distinct from 'Science and Engineering Building I' (way 180831793). Scope: school dean's office; the row has no department. 5200 N. Lake Road is the campus-wide mailing address."
+    },
+    {
+      "id": "di-tella-escuela-de-negocios-edificio-alcorta",
+      "institution": "Universidad Torcuato di Tella",
+      "rowIds": [
+        "universidad-torcuato-di-tella__school-of-business"
+      ],
+      "school": "School of Business",
+      "department": "",
+      "building": "Edificio Alcorta (Campus Di Tella)",
+      "address": "Av. Figueroa Alcorta 7350, C1428BCW Ciudad Autónoma de Buenos Aires, Argentina",
+      "lat": -34.5474683,
+      "lng": -58.4467909,
+      "addressSource": "https://www.utdt.edu/campusditella/Plano-del-Campus-Di-Tella.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/377553064",
+      "supportingSources": [
+        "https://utdt.edu/campusditella",
+        "https://www.utdt.edu/campusditella/tpls/plano.tpl.htm",
+        "https://www.openstreetmap.org/way/53205084",
+        "https://www.openstreetmap.org/node/6482010674"
+      ],
+      "checked": "2026-10-31",
+      "notes": "UTDT's official campus map (Plano del Campus Di Tella, 'Mapa_Digital_2026') places the Escuela de Negocios offices in Edificio Alcorta: floor 4 'Oficinas de profesores / Escuela de Negocios: Admisiones, Coordinación' (beside the Aula Magna) and the ground-floor entrepiso 'Coordinación grado Escuela de Negocios'; the Edificio Alcorta pedestrian entrance is Av. Figueroa Alcorta 7350. The single campus also has Edificio Sáenz Valiente (classrooms; entrance Sáenz Valiente 1000 / Alcorta 7380), Edificio Monroe (Alcorta 7310) and the forthcoming Edificio Parque. Coordinates are the centroid of the UNNAMED 5-storey OSM footprint (way 377553064, building=university, height 17 m) that fronts Av. Figueroa Alcorta inside the campus polygon carrying addr 7350 (way 53205084), next to the Ecobici station '234 - Universidad Di Tella'; it was identified as Edificio Alcorta from the official plano's site plan (the long block along the avenue between Monroe and Sáenz Valiente), not from an OSM name, so treat the building attribution of the point as inferred. Scope: school offices (admissions/coordination and faculty offices); no department."
     }
   ]
 }
