@@ -6758,8 +6758,17 @@
   ],
   "lat": 51.9168242,
   "lng": 4.52566,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "erasmus-econometric-institute-e-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Erasmus University Rotterdam"
+  ],
+  "mapSearchTerms": [
+   "Econometric Institute",
+   "Operations and Supply Chain Management"
+  ]
  },
  {
   "id": "erasmus-university-rotterdam__rotterdam-school-of-management__technology-and-operations-management",
@@ -7736,8 +7745,17 @@
   "lastPosted": "2026-09-09",
   "lat": 31.2967376,
   "lng": 121.506265,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "fudan-management-science-li-dasan-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Fudan University"
+  ],
+  "mapSearchTerms": [
+   "School of Management",
+   "Management Science"
+  ]
  },
  {
   "id": "george-fox-university__college-of-business__business-analytics-and-quantitative-methods",
@@ -10113,8 +10131,16 @@
   ],
   "lat": 19.131019,
   "lng": 72.9172156,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "iit-bombay-ieor-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Indian Institute of Technology (IIT) Bombay"
+  ],
+  "mapSearchTerms": [
+   "Industrial Engineering and Operations Research"
+  ]
  },
  {
   "id": "indian-school-of-business",
@@ -12743,8 +12769,17 @@
   ],
   "lat": 41.1091964,
   "lng": 29.0086093,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "mef-industrial-engineering-maslak-campus"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "MEF University"
+  ],
+  "mapSearchTerms": [
+   "Faculty of Engineering",
+   "Industrial Engineering"
+  ]
  },
  {
   "id": "memorial-university-of-newfoundland__faculty-of-business-administration",
@@ -16464,8 +16499,23 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-18",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "puc-chile-industrial-systems-engineering-raul-deves"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Pontificia Universidad Catolica de Chile (PUC)"
+  ],
+  "mapSearchTerms": [
+   "School of Engineering",
+   "Industrial and Systems Engineering and Electrical Engineering"
+  ],
+  "mapDepartmentLinks": {
+   "puc-chile-industrial-systems-engineering-raul-deves": {
+    "facultyUrl": "https://www.ing.uc.cl/academicos-e-investigacion/academicos-e-investigadores/",
+    "facultyDirectoryHint": "This school-wide list covers all engineering departments, including Industrial and Systems Engineering and Electrical Engineering."
+   }
+  },
   "facultyUrl": "https://www.ing.uc.cl/academicos-e-investigacion/academicos-e-investigadores/",
   "facultyDirectoryHint": "This school-wide list covers all engineering departments, including Industrial and Systems Engineering and Electrical Engineering."
  },
@@ -16483,8 +16533,17 @@
   ],
   "lat": -33.4411279,
   "lng": -70.6407933,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "puc-chile-school-of-management-edificio-fundacion"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Pontificia Universidad Catolica de Chile (PUC)"
+  ],
+  "mapSearchTerms": [
+   "School of Management",
+   "Management Science"
+  ]
  },
  {
   "id": "prairie-view-a-m-university____scm-quantitative-mgt",
@@ -23072,8 +23131,17 @@
   ],
   "lat": -33.4445011,
   "lng": -70.650879,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "uchile-industrial-engineering-beauchef-851-torre-oriente"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Universidad de Chile"
+  ],
+  "mapSearchTerms": [
+   "Facultad de Ciencias Físicas y Matemáticas",
+   "Industrial Engineering"
+  ]
  },
  {
   "id": "universidad-de-los-andes",
@@ -23216,8 +23284,17 @@
   "lastPosted": "2026-09-22",
   "lat": 50.6697528,
   "lng": 4.6152477,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "uclouvain-lsm-core-roman-pays"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Université catholique de Louvain"
+  ],
+  "mapSearchTerms": [
+   "Louvain School of Management",
+   "Center for Operations Research and Econometrics"
+  ]
  },
  {
   "id": "universite-laval__faculty-of-business-administration__operations-and-decision-systems",
@@ -27390,8 +27467,17 @@
   "lastPosted": "2025-12-08",
   "lat": 49.4874592,
   "lng": 8.4660395,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "mannheim-production-management-schneckenhof-ost"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Mannheim"
+  ],
+  "mapSearchTerms": [
+   "Business School",
+   "Chair of Production Management"
+  ]
  },
  {
   "id": "university-of-mannheim__business-school__operations-management",
@@ -27404,8 +27490,23 @@
    "omlist",
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "mannheim-operations-management-schneckenhof-ost"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Mannheim"
+  ],
+  "mapSearchTerms": [
+   "Business School",
+   "Operations Management"
+  ],
+  "country": "Germany",
+  "mapDepartmentLinks": {
+   "mannheim-operations-management-schneckenhof-ost": {
+    "facultyUrl": "https://www.bwl.uni-mannheim.de/operations/"
+   }
+  },
   "facultyUrl": "https://www.bwl.uni-mannheim.de/operations/"
  },
  {
@@ -27430,11 +27531,22 @@
     "department": "Supply Chain Management"
    }
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "mannheim-supply-chain-management-schneckenhof-ost"
+  ],
+  "mapLocationKind": "exact",
   "mapSearchTerms": [
+   "Business School",
    "Supply Chain Management"
   ],
+  "mapInstitutionNames": [
+   "University of Mannheim"
+  ],
+  "mapDepartmentLinks": {
+   "mannheim-supply-chain-management-schneckenhof-ost": {
+    "facultyUrl": "https://www.bwl.uni-mannheim.de/en/fleischmann/team/"
+   }
+  },
   "facultyUrl": "https://www.bwl.uni-mannheim.de/en/fleischmann/team/"
  },
  {
