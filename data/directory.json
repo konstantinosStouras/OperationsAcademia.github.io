@@ -5519,8 +5519,16 @@
   "lastPosted": "2014-10-21",
   "lat": 40.755644,
   "lng": -73.9560965,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cornell-johnson-school-sage-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Cornell University/ Cornell Tech"
+  ],
+  "mapSearchTerms": [
+   "Samuel Curtis Johnson Graduate School of Management"
+  ]
  },
  {
   "id": "cottey-college____operation-management",
@@ -7407,8 +7415,17 @@
   ],
   "n": 1,
   "lastPosted": "2026-01-18",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "fiu-isba-ryder-business-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Florida International University"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "IS"
+  ],
   "deptUrl": "https://business.fiu.edu/academics/departments/isba/",
   "facultyUrl": "https://business.fiu.edu/academics/departments/isba/faculty/index.html"
  },
@@ -7430,8 +7447,19 @@
   "lastPosted": "2014-11-17",
   "lat": 25.7569643,
   "lng": -80.3798661,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "fiu-isba-ryder-business-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Florida International University"
+  ],
+  "mapSearchTerms": [
+   "College of Business",
+   "IS"
+  ],
+  "deptUrl": "https://business.fiu.edu/academics/departments/isba/",
+  "deptUrlInherited": true
  },
  {
   "id": "florida-polytechnic-university____ba-ds",
@@ -22202,8 +22230,17 @@
   ],
   "lat": 30.2889433,
   "lng": -97.7354746,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "ut-austin-orie-engineering-teaching-center-ii"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "The University of Texas at Austin"
+  ],
+  "mapSearchTerms": [
+   "Cockrell School of Engineering",
+   "Operations Research and Industrial Engineering"
+  ]
  },
  {
   "id": "university-of-texas-at-austin__mccombs-school-of-business__information-risk-and-operations-management",
@@ -27181,8 +27218,17 @@
   ],
   "lat": 38.2131244,
   "lng": -85.760937,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "louisville-industrial-systems-engineering-speed-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Louisville"
+  ],
+  "mapSearchTerms": [
+   "J. B. Speed School of Engineering",
+   "Industrial Engineering"
+  ]
  },
  {
   "id": "university-of-luxembourg____operations-management",
@@ -27727,8 +27773,22 @@
   ],
   "n": 1,
   "lastPosted": "2025-10-02",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "miami-herbert-management-jenkins-building"
+  ],
+  "mapLocationKind": "school",
+  "mapInstitutionNames": [
+   "University of Miami"
+  ],
+  "mapSearchTerms": [
+   "Miami Herbert Business School"
+  ],
+  "mapDepartmentLinks": {
+   "miami-herbert-management-jenkins-building": {
+    "facultyUrl": "https://www.mbs.miami.edu/faculty-research/directory/index.html",
+    "facultyDirectoryHint": "School faculty directory; this hiring initiative spans departments."
+   }
+  },
   "facultyUrl": "https://www.mbs.miami.edu/faculty-research/directory/index.html",
   "facultyDirectoryHint": "School faculty directory; this hiring initiative spans departments."
  },
@@ -27761,8 +27821,17 @@
   "lastPosted": "2024-10-11",
   "lat": 25.7201133,
   "lng": -80.2763875,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "miami-herbert-management-jenkins-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Miami"
+  ],
+  "mapSearchTerms": [
+   "Miami Herbert Business School",
+   "Management Area"
+  ]
  },
  {
   "id": "university-of-miami__miami-herbert-business-school__operations-management",
@@ -27773,10 +27842,22 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "miami-herbert-management-jenkins-building"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Miami"
+  ],
+  "mapSearchTerms": [
+   "Miami Herbert Business School",
+   "Management Area"
+  ],
+  "country": "United States",
   "facultyUrl": "https://www.mbs.miami.edu/faculty-research/directory/index.html",
-  "facultyDirectoryHint": "In Program, select Operations Management. The directory does not preserve this filter in its URL."
+  "facultyDirectoryHint": "In Program, select Operations Management. The directory does not preserve this filter in its URL.",
+  "deptUrl": "https://www.herbert.miami.edu/faculty-research/directory/index.html",
+  "deptUrlInherited": true
  },
  {
   "id": "university-of-michigan____information",
@@ -33307,8 +33388,17 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-28",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved",
+  "mapLocationIds": [
+   "washington-st-louis-scot-ai-cluster-knight-hall"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "Washington University in St. Louis"
+  ],
+  "mapSearchTerms": [
+   "Olin Business School",
+   "Supply Chain, Operations, and Technology (AI Cluster hire)"
+  ],
   "facultyUrl": "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology"
  },
  {
