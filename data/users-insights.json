@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-31T14:51:22.091Z",
- "members": 433,
+ "generated": "2026-11-01T11:12:42.113Z",
+ "members": 435,
  "k": 3,
  "affiliation": {
-  "listed": 351,
+  "listed": 353,
   "other": 48,
   "none": 34
  },
  "universities": {
-  "count": 156,
+  "count": 157,
   "shown": [
    {
     "name": "National University of Singapore",
@@ -51,6 +51,11 @@
     "members": 6
    },
    {
+    "name": "University of Toronto",
+    "country": "Canada",
+    "members": 6
+   },
+   {
     "name": "McGill University",
     "country": "Canada",
     "members": 5
@@ -58,11 +63,6 @@
    {
     "name": "University of Massachusetts Amherst",
     "country": "United States",
-    "members": 5
-   },
-   {
-    "name": "University of Toronto",
-    "country": "Canada",
     "members": 5
    },
    {
@@ -211,7 +211,7 @@
     "members": 3
    }
   ],
-  "rest": 168
+  "rest": 169
  },
  "countries": {
   "count": 18,
@@ -222,7 +222,7 @@
    },
    {
     "name": "Canada",
-    "members": 25
+    "members": 26
    },
    {
     "name": "Singapore",
@@ -230,7 +230,7 @@
    },
    {
     "name": "Hong Kong",
-    "members": 13
+    "members": 14
    },
    {
     "name": "China",
