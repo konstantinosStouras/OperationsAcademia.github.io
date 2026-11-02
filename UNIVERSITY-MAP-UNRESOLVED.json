@@ -2,7 +2,7 @@
   "snapshotDate": "2026-11-02",
   "lastPublishedMapCommit": "(see git log: the round 3 publication of 31 October 2026)",
   "source": "data/directory.json",
-  "unresolvedLocationCount": 47,
+  "unresolvedLocationCount": 66,
   "missingFacultyRosterCount": 4,
   "unresolvedLocations": [
     {
@@ -66,6 +66,16 @@
     {
       "id": "carnegie-mellon-university",
       "institution": "Carnegie Mellon University",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "city-university-of-hong-kong",
+      "institution": "City University of Hong Kong",
       "type": "University",
       "sources": [
         "seed"
@@ -165,6 +175,15 @@
       "mapLocationKind": "unresolved"
     },
     {
+      "id": "hec-paris",
+      "institution": "HEC Paris",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
       "id": "ie-university____business",
       "institution": "IE University",
       "department": "Business",
@@ -177,6 +196,20 @@
       ],
       "lat": 40.9528852,
       "lng": -4.1188364,
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "iese-business-school",
+      "institution": "IESE Business School",
+      "type": "Business School",
+      "country": "Spain",
+      "sources": [
+        "postings",
+        "seed"
+      ],
+      "n": 1,
+      "lastPosted": "2014-07-22",
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -236,6 +269,30 @@
     {
       "id": "lehigh-university",
       "institution": "Lehigh University",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "mcmaster-university",
+      "institution": "McMaster University",
+      "type": "University",
+      "country": "Canada",
+      "sources": [
+        "postings",
+        "seed"
+      ],
+      "n": 1,
+      "lastPosted": "2025-06-22",
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "michigan-state-university",
+      "institution": "Michigan State University",
       "type": "University",
       "sources": [
         "seed"
@@ -318,6 +375,21 @@
       "mapLocationKind": "unresolved"
     },
     {
+      "id": "singapore-university-of-technology-and-design",
+      "institution": "Singapore University of Technology and Design (SUTD)",
+      "type": "University",
+      "country": "Singapore",
+      "address": "8 Somapah Rd, Singapore 487372",
+      "facultyUrl": "http://www.sutd.edu.sg/faculty_members.aspx",
+      "sources": [
+        "directory"
+      ],
+      "lat": 1.3413132,
+      "lng": 103.9637565,
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
       "id": "srm-university____operation-and-supply-chain-management",
       "institution": "SRM University",
       "department": "Operation and Supply Chain Management",
@@ -335,8 +407,37 @@
       "mapLocationKind": "unresolved"
     },
     {
+      "id": "tbs-education",
+      "institution": "TBS Education",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
       "id": "temple-university",
       "institution": "Temple University",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "chinese-university-of-hong-kong-shenzhen",
+      "institution": "The Chinese University of Hong Kong, Shenzhen",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "hong-kong-polytechnic-university",
+      "institution": "The Hong Kong Polytechnic University",
       "type": "University",
       "sources": [
         "seed"
@@ -367,6 +468,16 @@
     {
       "id": "university-of-hong-kong",
       "institution": "The University of Hong Kong",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "tilburg-university",
+      "institution": "Tilburg University",
       "type": "University",
       "sources": [
         "seed"
@@ -414,6 +525,16 @@
       "mapLocationKind": "unresolved"
     },
     {
+      "id": "university-of-california-berkeley",
+      "institution": "University of California, Berkeley",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
       "id": "university-of-cambridge",
       "institution": "University of Cambridge",
       "type": "University",
@@ -444,8 +565,32 @@
       "mapLocationKind": "unresolved"
     },
     {
+      "id": "university-of-illinois-at-urbana-champaign",
+      "institution": "University of Illinois at Urbana-Champaign",
+      "type": "University",
+      "country": "United States",
+      "sources": [
+        "postings",
+        "seed"
+      ],
+      "n": 1,
+      "lastPosted": "2014-09-11",
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
       "id": "university-of-london",
       "institution": "University of London",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "university-of-mannheim",
+      "institution": "University of Mannheim",
       "type": "University",
       "sources": [
         "seed"
@@ -474,8 +619,58 @@
       "mapLocationKind": "unresolved"
     },
     {
+      "id": "university-of-notre-dame",
+      "institution": "University of Notre Dame",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
       "id": "university-of-san-diego",
       "institution": "University of San Diego",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "university-of-south-carolina",
+      "institution": "University of South Carolina",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "university-of-texas-at-dallas",
+      "institution": "University of Texas at Dallas",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "university-of-utah",
+      "institution": "University of Utah",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "university-of-virginia",
+      "institution": "University of Virginia",
       "type": "University",
       "sources": [
         "seed"
@@ -496,6 +691,16 @@
       ],
       "lat": 30.5491387,
       "lng": -87.2185862,
+      "mapLocationIds": [],
+      "mapLocationKind": "unresolved"
+    },
+    {
+      "id": "university-of-wisconsin-madison",
+      "institution": "University of Wisconsin-Madison",
+      "type": "University",
+      "sources": [
+        "seed"
+      ],
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },

@@ -1,6 +1,6 @@
 # University map research and publication handoff
 
-Snapshot: 2 November 2026. Generated from the current data/directory.json. The snapshot contains **47 unresolved location rows** and **4 missing faculty rosters** (down from 110 unresolved rows at the start of 31 October 2026; the fourth roster gap, a UIUC Grainger ISE row, arrived from the tracking sheet the same day). These are directory rows, not necessarily distinct universities or buildings. Recalculate after synchronizing the repository.
+Snapshot: 2 November 2026. Generated from the current data/directory.json. The snapshot contains **66 unresolved location rows** and **4 missing faculty rosters** (down from 110 unresolved rows at the start of 31 October 2026; the fourth roster gap, a UIUC Grainger ISE row, arrived from the tracking sheet the same day). These are directory rows, not necessarily distinct universities or buildings. Recalculate after synchronizing the repository.
 
 ## Objective and authorization
 
@@ -14,8 +14,9 @@ Remote: https://github.com/konstantinosStouras/OperationsAcademia.github.io.git
 
 Branch: master. GitHub Pages serves the repository root. Other tasks publish concurrently: inspect status, fetch the latest remote before work, and check again before pushing. Never overwrite others' work or force-push.
 
-Latest completed map update: the university-level seat cards publication of 31 October 2026 (see git log). At the owner's word ("I want university-level cards on the map") the map now carries UNIVERSITY-LEVEL CARDS: an institution-only row is resolved to the university's official main administration building (the president's, chancellor's or rector's office), verified on an official page and placed on an OSM named-building point. Nineteen such rows are on the map: TBS Education (registered seat, Sébastopol Building), Notre Dame (Main Building), Wisconsin-Madison (Bascom Hall), UC Berkeley (California Hall), UT Dallas (Administration Building), Illinois Urbana-Champaign (Swanlund Administration Building), Michigan State (Hannah Administration Building), Virginia (Madison Hall), Utah (Park Building), South Carolina (Osborne Administration Building), City University of Hong Kong (Cheng Yick-chi Building), PolyU (Li Ka Shing Tower), CUHK-Shenzhen (Administration Building), Tilburg (Cobbenhagen Building), Mannheim (Schloss Ostflügel, Rektorat), McMaster (Gilmour Hall), SUTD (Building 1), Skoltech (Bolshoy Boulevard 30) and TED University (A Block). A university-level card is titled with the university name, carries the address link, Current jobs and the university profile, and is left out when a school-type filter (Business school / Non-business school) is active, since it is not a school; the browser test pins UIUC as two school cards plus one seat card. IESE: on 2 November 2026 an institution alias in assets/oa-schools.js folds the bare acronym IESE into IESE Business School (the University of Navarra seed card keeps IESE as its school), so the two institution rows became one, the archived IESE postings were healed to the new spelling (their ids follow the institution name, as with every alias here), and the single IESE Business School row carries the Avenida Pearson 21 headquarters card. UNIVERSITY-MAP-REVERTED-SEATS.json is empty. Rule for future institution-only rows: one campus (or an official registered seat) and an official page naming the main administration building, with an OSM or official map point; multi-campus universities and federations stay unresolved. Round 1 and 2 (batches A to E, same day) resolved forty-five rows with forty-one records, listed below.
+Latest completed map update: 2 November 2026 (see git log). THE RULE FOR INSTITUTION-ONLY ROWS, settled by the owner on 2 November 2026 after seeing HEC Paris drawn twice: a map point must list its departments, and a university's departments live on its school cards, so NO separate university seat card is drawn for a university that already has a school or department card ("one map point to just say the school name. No!"). The twenty-one seat records built on 31 October and 2 November (Notre Dame, Wisconsin-Madison, UC Berkeley, UT Dallas, Illinois Urbana-Champaign, Michigan State, Virginia, Utah, South Carolina, City University of Hong Kong, PolyU, CUHK-Shenzhen, Tilburg, Mannheim, McMaster, SUTD, HEC Paris, TBS Education and IESE Business School) are therefore OUT of the evidence file and kept with their sources in UNIVERSITY-MAP-REVERTED-SEATS.json; their institution-only rows count as unresolved in the inventory below although each university is on the map through its schools. A university-level record is kept only where the university has no other card at all, which is the convention earlier sessions already used (Windsor, Wisconsin-Whitewater, Wichita State, WPI, Queensland, Bielefeld, Nazarbayev, Sungkyunkwan, Sogang, Chalmers, UCD) and now covers Skoltech (Bolshoy Boulevard 30) and TED University (A Block) too. The IESE institution alias of 2 November stands: the bare acronym folds into IESE Business School. Round 1 and 2 (batches A to E, 31 October) resolved forty-five rows with forty-one records, listed below.
 
+Earlier (batches A to E):
 Earlier the same day (batches A to E):
 Earlier the same day (batches A to E):
 Earlier the same day (batches A to E): Forty-one new location records resolved forty-five directory rows: UT Austin ORIE (Engineering Teaching Center II); Louisville Industrial Engineering (James B. Speed Building); FIU ISBA (Ryder Business Building, two rows); Miami Herbert (George W. Jenkins Building, school-building scope, two rows plus one school reference); Cornell Johnson (Sage Hall); WashU Olin SCOT AI cluster seat (Knight Hall); Fudan School of Management (Li Dasan Building, school scope); MEF University engineering (single campus building); Mannheim operations chairs (Schloss Schneckenhof Ost, three rows); IIT Bombay IEOR Building; Universidad de Chile Industrial Engineering (Beauchef 851 east tower); PUC Chile Industrial and Systems Engineering (Edificio Raúl Devés) and School of Management (Edificio Fundación); Erasmus Econometric Institute (E Building); UCLouvain CORE (Voie du Roman Pays 34); CUHK SEEM (William M. W. Mong Engineering Building); HKUST IEDA (Academic Building); SMU SCIS 1 (80 Stamford Road); KAIST College of Business (SUPEX Building, two rows); TBS Education IOMS (Sébastopol Building); Sabancı FENS Building; TOBB ETÜ main building (campus scope); Sydney Faculty of Engineering dean's office (faculty-level); Koç CASE Building; UCL GBSH Marshgate; NCCU School of Business building at 829 E. Lawson Street; UM-Dearborn Fairlane Center South; UC Merced Science and Engineering Building 2; UTDT Edificio Alcorta; SUSTech Business School Building; IE Business School María de Molina 12 (three rows, two records); and institution-level campus references for Nova SBE, Ewha School of Business, HEC Paris (Jouy-en-Josas, Bâtiment S), SUTD, Skoltech and TED University. All four local map checks and the full offline selftest passed; no faculty links were lost. Do not add these again. The earlier update 8fe2e3db57c3aa123d9305d852b416995ca15d6b (Dayton, Portland, RPI, Rutgers–Camden, Loyola Chicago, Seton Hall, Alberta, UCSD, Oxford) stands.
@@ -65,7 +66,7 @@ Generated outputs are data/directory.json and data/university-map.json; do not h
 
 ## Cache references
 
-Last published map version: 20261102-directory-updates-9. Last directory version: 20261102-rosters9. Choose new unique values for the next publication. Update all six references consistently:
+Last published map version: 20261102-directory-updates-10. Last directory version: 20261102-rosters10. Choose new unique values for the next publication. Update all six references consistently:
 
 - universities.html map-data preload
 - assets/oa-uni-map.js map-data fetch
@@ -115,7 +116,7 @@ Recorded so later agents do not repeat them. The agents' full logs with every UR
 
 ### Round 3 (institution-only rows), 31 October 2026
 
-- **University seats** (round 3) were briefly reverted and then restored at the owner's request; see the paragraph under Repository and completed work for the rule and the list.
+- **University seats** (round 3 and the 2 November restoration) were reverted for good on 2 November: a seat card beside a university's school cards duplicates the university and lists nothing. Do not add seat records for a university that has any other card; the only acceptable institution-level record is for a university with no card at all.
 - **Resolved only with the single-campus rule above.** Rows left unresolved because the university has several campuses of standing or is a system/federation: Arizona State, Auburn, CMU, Columbia, CUNY, Georgetown, Georgia Tech, Georgia State, Harvard, Imperial, Institut Mines-Télécom, KAIST (Daejeon and Seoul), Lehigh, NTU, NUS, Ohio State, Penn State, HKU, Temple, Tulane, UCL, University of London, Cambridge, Houston, Miami, Minnesota, West Florida, UNSW (Kensington is called the main campus but not designated a seat), IE University (Segovia and Madrid), SUFE (three campuses, no administration building named), ISB (Hyderabad and Mohali, no seat wording), AUB (AUB Mediterraneo in Paphos is a degree-granting branch; and no readable official page ties the President's Office to College Hall).
 - **Building verified but no map point**: United States Naval Academy (Larson Hall, formerly the Administration Building, per usna.edu; nothing named in OSM or Google).
 - **Point known but official page unreadable from the research environment** (503 or TLS failures, not circumvented): Villanova (Tolentine Hall, OSM way 23547093), DePauw (Studebaker Administration Building, OSM way 733990084), University of San Diego (Hughes Administration Center, OSM way 260541744), University of Cyprus (University House Anastasios G. Leventis, OSM way 24272795; Cloudflare wall). Each needs one official page read to confirm the administration building.
@@ -134,47 +135,66 @@ The following list is the complete snapshot. Empty school or department values a
 | 4 | auburn-university | Auburn University | — | — |
 | 5 | bellarmine-university____information-systems-and-artificial-intelligence | Bellarmine University | — | Information Systems and Artificial Intelligence |
 | 6 | carnegie-mellon-university | Carnegie Mellon University | — | — |
-| 7 | city-university-of-new-york | City University of New York (CUNY) | — | — |
-| 8 | columbia-university | Columbia University | — | — |
-| 9 | columbia-university____data-driven-decision-making-optimization-under-uncertainty | Columbia University | — | data-driven decision-making, optimization under uncertainty |
-| 10 | depauw-university | DePauw University | — | — |
-| 11 | georgetown-university | Georgetown University | — | — |
-| 12 | georgia-institute-of-technology | Georgia Institute of Technology | — | — |
-| 13 | georgia-state-university | Georgia State University | — | — |
-| 14 | harvard-university | Harvard University | — | — |
-| 15 | ie-university____business | IE University | — | Business |
-| 16 | imperial-college-london | Imperial College London | — | — |
-| 17 | indian-school-of-business | Indian School of Business | — | — |
-| 18 | insead____humanitarian-research-group-hrg-social-innovation-center | INSEAD | — | Humanitarian Research Group (HRG), Social Innovation Center |
-| 19 | institut-mines-telecom | Institut Mines-Télécom | — | — |
-| 20 | kaist | KAIST | — | — |
-| 21 | lehigh-university | Lehigh University | — | — |
-| 22 | nanyang-technological-university | Nanyang Technological University | — | — |
-| 23 | national-university-of-singapore | National University of Singapore | — | — |
-| 24 | new-york-university-shanghai____business-area-statistics-operations-management | New York University Shanghai | — | Business Area, Statistics/Operations Management |
-| 25 | ozyegin-university | Özyeğin University | — | — |
-| 26 | shanghai-university-of-finance-and-economics | Shanghai University of Finance and Economics | — | — |
-| 27 | shanghai-university-of-finance-and-economics__school-of-information-management-and-engineering-sime__management-science-information-systems-financial-information | Shanghai University of Finance and Economics (SUFE) | School of Information Management and Engineering (SIME) | Management Science, Information Systems, Financial Information, and Computer Science |
-| 28 | srm-university____operation-and-supply-chain-management | SRM University | — | Operation and Supply Chain Management |
-| 29 | temple-university | Temple University | — | — |
-| 30 | ohio-state-university | The Ohio State University | — | — |
-| 31 | pennsylvania-state-university | The Pennsylvania State University | — | — |
-| 32 | university-of-hong-kong | The University of Hong Kong | — | — |
-| 33 | tulane-university | Tulane University | — | — |
-| 34 | united-states-naval-academy | United States Naval Academy | — | — |
-| 35 | universidad-de-los-andes | Universidad de los Andes | — | — |
-| 36 | university-college-london | University College London | — | — |
-| 37 | university-of-cambridge | University of Cambridge | — | — |
-| 38 | university-of-cyprus | University of Cyprus | — | — |
-| 39 | university-of-houston | University of Houston | — | — |
-| 40 | university-of-london | University of London | — | — |
-| 41 | university-of-miami | University of Miami | — | — |
-| 42 | university-of-minnesota | University of Minnesota | — | — |
-| 43 | university-of-san-diego | University of San Diego | — | — |
-| 44 | university-of-west-florida | University of West Florida | — | — |
-| 45 | unsw-sydney | UNSW Sydney | — | — |
-| 46 | villanova-university | Villanova University | — | — |
-| 47 | woxsen-university__school-of-business__business-analytics | Woxsen University | School of Business | Business Analytics |
+| 7 | city-university-of-hong-kong | City University of Hong Kong | — | — |
+| 8 | city-university-of-new-york | City University of New York (CUNY) | — | — |
+| 9 | columbia-university | Columbia University | — | — |
+| 10 | columbia-university____data-driven-decision-making-optimization-under-uncertainty | Columbia University | — | data-driven decision-making, optimization under uncertainty |
+| 11 | depauw-university | DePauw University | — | — |
+| 12 | georgetown-university | Georgetown University | — | — |
+| 13 | georgia-institute-of-technology | Georgia Institute of Technology | — | — |
+| 14 | georgia-state-university | Georgia State University | — | — |
+| 15 | harvard-university | Harvard University | — | — |
+| 16 | hec-paris | HEC Paris | — | — |
+| 17 | ie-university____business | IE University | — | Business |
+| 18 | iese-business-school | IESE Business School | — | — |
+| 19 | imperial-college-london | Imperial College London | — | — |
+| 20 | indian-school-of-business | Indian School of Business | — | — |
+| 21 | insead____humanitarian-research-group-hrg-social-innovation-center | INSEAD | — | Humanitarian Research Group (HRG), Social Innovation Center |
+| 22 | institut-mines-telecom | Institut Mines-Télécom | — | — |
+| 23 | kaist | KAIST | — | — |
+| 24 | lehigh-university | Lehigh University | — | — |
+| 25 | mcmaster-university | McMaster University | — | — |
+| 26 | michigan-state-university | Michigan State University | — | — |
+| 27 | nanyang-technological-university | Nanyang Technological University | — | — |
+| 28 | national-university-of-singapore | National University of Singapore | — | — |
+| 29 | new-york-university-shanghai____business-area-statistics-operations-management | New York University Shanghai | — | Business Area, Statistics/Operations Management |
+| 30 | ozyegin-university | Özyeğin University | — | — |
+| 31 | shanghai-university-of-finance-and-economics | Shanghai University of Finance and Economics | — | — |
+| 32 | shanghai-university-of-finance-and-economics__school-of-information-management-and-engineering-sime__management-science-information-systems-financial-information | Shanghai University of Finance and Economics (SUFE) | School of Information Management and Engineering (SIME) | Management Science, Information Systems, Financial Information, and Computer Science |
+| 33 | singapore-university-of-technology-and-design | Singapore University of Technology and Design (SUTD) | — | — |
+| 34 | srm-university____operation-and-supply-chain-management | SRM University | — | Operation and Supply Chain Management |
+| 35 | tbs-education | TBS Education | — | — |
+| 36 | temple-university | Temple University | — | — |
+| 37 | chinese-university-of-hong-kong-shenzhen | The Chinese University of Hong Kong, Shenzhen | — | — |
+| 38 | hong-kong-polytechnic-university | The Hong Kong Polytechnic University | — | — |
+| 39 | ohio-state-university | The Ohio State University | — | — |
+| 40 | pennsylvania-state-university | The Pennsylvania State University | — | — |
+| 41 | university-of-hong-kong | The University of Hong Kong | — | — |
+| 42 | tilburg-university | Tilburg University | — | — |
+| 43 | tulane-university | Tulane University | — | — |
+| 44 | united-states-naval-academy | United States Naval Academy | — | — |
+| 45 | universidad-de-los-andes | Universidad de los Andes | — | — |
+| 46 | university-college-london | University College London | — | — |
+| 47 | university-of-california-berkeley | University of California, Berkeley | — | — |
+| 48 | university-of-cambridge | University of Cambridge | — | — |
+| 49 | university-of-cyprus | University of Cyprus | — | — |
+| 50 | university-of-houston | University of Houston | — | — |
+| 51 | university-of-illinois-at-urbana-champaign | University of Illinois at Urbana-Champaign | — | — |
+| 52 | university-of-london | University of London | — | — |
+| 53 | university-of-mannheim | University of Mannheim | — | — |
+| 54 | university-of-miami | University of Miami | — | — |
+| 55 | university-of-minnesota | University of Minnesota | — | — |
+| 56 | university-of-notre-dame | University of Notre Dame | — | — |
+| 57 | university-of-san-diego | University of San Diego | — | — |
+| 58 | university-of-south-carolina | University of South Carolina | — | — |
+| 59 | university-of-texas-at-dallas | University of Texas at Dallas | — | — |
+| 60 | university-of-utah | University of Utah | — | — |
+| 61 | university-of-virginia | University of Virginia | — | — |
+| 62 | university-of-west-florida | University of West Florida | — | — |
+| 63 | university-of-wisconsin-madison | University of Wisconsin-Madison | — | — |
+| 64 | unsw-sydney | UNSW Sydney | — | — |
+| 65 | villanova-university | Villanova University | — | — |
+| 66 | woxsen-university__school-of-business__business-analytics | Woxsen University | School of Business | Business Analytics |
 
 ## Full missing faculty roster inventory
 
