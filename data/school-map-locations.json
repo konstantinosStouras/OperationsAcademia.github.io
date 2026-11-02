@@ -13226,32 +13226,6 @@
       ],
       "checked": "2026-10-25",
       "notes": "Current university profile links Markakis CV identifying North Campus S-501. Official department directory confirms Operations, Information and Technology affiliation. Coordinates inferred by matching the university MBA Welcome Guide map (2017–2019, mirrored transcription page16) to aerial imagery and OpenStreetMap footprint: S, T, U are the three faculty-office bars northwest-to-southeast immediately north of Q; S is the separate northwest rectangle, way644435048. Independent second-agent review corroborated ordering and footprint. Marker represents this verified departmental faculty office, not South Campus reception or the University of Navarra campus in Pamplona. Map labels and architect campus description corroborate the office-block arrangement.",
-      "id": "iese-operations-building-s",
-      "institutionKey": "IESE",
-      "rowIds": [
-        "iese__iese-business-school__operations-information-and-technology"
-      ],
-      "locationIdentity": "iese-operations-building-s"
-    },
-    {
-      "institution": "University of Navarra",
-      "school": "Instituto de Estudios Superiores de la Empresa (IESE Business School)",
-      "department": "Operations, Information and Technology",
-      "building": "North Campus, Building S – operations faculty offices",
-      "address": "Carrer d’Arnús i de Garí 3–7, 08034 Barcelona, Spain",
-      "lat": 41.39401275,
-      "lng": 2.10513155,
-      "addressSource": "https://www.iese.edu/wp-content/uploads/2024/06/Mihalis-Markakis-CV.pdf",
-      "coordinateSource": "https://www.openstreetmap.org/way/644435048",
-      "supportingSources": [
-        "https://www.iese.edu/faculty-research/faculty/mihalis-markakis/",
-        "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/",
-        "https://www.readkong.com/page/mba-welcome-guide-welcome-to-do-s-contents-iese-business-8604077",
-        "https://www.iese.edu/about/campuses/barcelona/",
-        "https://ribas-arquitectos.com/portfolio/2006-campus-norte-iese-2/"
-      ],
-      "checked": "2026-10-25",
-      "notes": "Current university profile links Markakis CV identifying North Campus S-501. Official department directory confirms Operations, Information and Technology affiliation. Coordinates inferred by matching the university MBA Welcome Guide map (2017–2019, mirrored transcription page16) to aerial imagery and OpenStreetMap footprint: S, T, U are the three faculty-office bars northwest-to-southeast immediately north of Q; S is the separate northwest rectangle, way644435048. Independent second-agent review corroborated ordering and footprint. Marker represents this verified departmental faculty office, not South Campus reception or the University of Navarra campus in Pamplona. Map labels and architect campus description corroborate the office-block arrangement.",
       "id": "navarra-iese-operations-building-s",
       "institutionKey": "University of Navarra",
       "rowIds": [
@@ -13277,7 +13251,7 @@
         "https://ribas-arquitectos.com/portfolio/2006-campus-norte-iese-2/"
       ],
       "checked": "2026-10-25",
-      "notes": "Current university profile links Markakis CV identifying North Campus S-501. Official department directory confirms Operations, Information and Technology affiliation. Coordinates inferred by matching the university MBA Welcome Guide map (2017–2019, mirrored transcription page16) to aerial imagery and OpenStreetMap footprint: S, T, U are the three faculty-office bars northwest-to-southeast immediately north of Q; S is the separate northwest rectangle, way644435048. Independent second-agent review corroborated ordering and footprint. Marker represents this verified departmental faculty office, not South Campus reception or the University of Navarra campus in Pamplona. Map labels and architect campus description corroborate the office-block arrangement.",
+      "notes": "Current university profile links Markakis CV identifying North Campus S-501. Official department directory confirms Operations, Information and Technology affiliation. Coordinates inferred by matching the university MBA Welcome Guide map (2017–2019, mirrored transcription page16) to aerial imagery and OpenStreetMap footprint: S, T, U are the three faculty-office bars northwest-to-southeast immediately north of Q; S is the separate northwest rectangle, way644435048. Independent second-agent review corroborated ordering and footprint. Marker represents this verified departmental faculty office, not South Campus reception or the University of Navarra campus in Pamplona. Map labels and architect campus description corroborate the office-block arrangement. The sibling record iese-operations-building-s, which covered the former bare IESE department row, was folded into this one on 2026-11-02 when the IESE institution alias merged the two rows.",
       "id": "iese-business-school-operations-building-s",
       "institutionKey": "IESE Business School",
       "rowIds": [
@@ -20815,6 +20789,28 @@
       ],
       "checked": "2026-10-31",
       "notes": "Institution-level campus reference, not a school or department office. The Office of the President's contact page gives its location as \"Gilmour Hall, Room 238, 1280 Main Street West, Hamilton, Ontario, L8S 4L8\". Coordinates are the OSM footprint centroid of way 259698121 (\"Gilmour Hall\", building=university, operator McMaster University). The main campus is in Hamilton; McMaster also runs the Ron Joyce Centre in Burlington (DeGroote MBA and executive education, per the Provost's page) and regional medical-education sites in Kitchener-Waterloo, Niagara and downtown Hamilton, which are satellite sites of the one main campus rather than campuses of standing."
+    },
+    {
+      "id": "iese-business-school-barcelona-south-campus-headquarters-seat",
+      "institution": "IESE Business School",
+      "rowIds": [
+        "iese-business-school"
+      ],
+      "school": "",
+      "department": "",
+      "building": "South Campus (Campus Sur), IESE headquarters, Avenida Pearson 21",
+      "address": "Avinguda de Pearson 21, 08034 Barcelona, Spain",
+      "lat": 41.3935611,
+      "lng": 2.1079674,
+      "addressSource": "https://www.iese.edu/legal-notice/",
+      "coordinateSource": "https://www.openstreetmap.org/node/2681809198",
+      "supportingSources": [
+        "https://www.iese.edu/about/campuses/barcelona/",
+        "https://www.iese.edu/contact-us/",
+        "https://nominatim.openstreetmap.org/search?q=IESE+Avinguda+de+Pearson+21+Barcelona&format=jsonv2&addressdetails=1&limit=6"
+      ],
+      "checked": "2026-11-02",
+      "notes": "Institution-level campus reference, not a school or department office. Covers the directory row IESE Business School, into which the bare IESE row folded on 2026-11-02 through an institution alias. IESE's official legal notice states the school is \"headquartered in Barcelona, Avenida Pearson, 21\" (entity: IESE Business School-University of Navarra), and the official Barcelona campus page names the Av. Pearson 21 site as the South Campus (the North Campus is at Carrer d'Arnús i de Garí 3-7). Coordinates are the OpenStreetMap named point 'IESE Business School' tagged addr Avinguda de Pearson 21, note 'Campus Sur (South Campus)' (node 2681809198), not a city or campus-polygon centroid. IESE also has campuses of standing in Madrid (Camino del Cerro del Águila 3), Munich (Maria-Theresia-Straße 15), New York (165 West 57th Street) and São Paulo (Rua Martiniano de Carvalho 573), plus offices in London, Singapore, Tokyo, Hong Kong and Shanghai; this record marks the officially designated headquarters only and makes no claim about where any department sits."
     }
   ]
 }

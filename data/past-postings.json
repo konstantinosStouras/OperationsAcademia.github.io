@@ -2283,15 +2283,14 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2025-iese-20240807",
+  "id": "2025-iese-business-school-20240807",
   "year": 2025,
   "years": [
    2025
   ],
   "posted": "2024-08-07",
-  "institution": "IESE",
-  "department": "IESE Business School, Operations, Information and Technology",
-  "school": "IESE Business School",
+  "institution": "IESE Business School",
+  "department": "Operations, Information and Technology",
   "unit": "Operations, Information and Technology",
   "type": "Business School",
   "levels": [
@@ -2309,7 +2308,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://apply.interfolio.com/151299",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=IESE",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=IESE%20Business%20School",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -5239,16 +5238,14 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-iese-20140722",
+  "id": "2015-iese-business-school-20140722",
   "year": 2015,
   "years": [
    2015
   ],
   "posted": "2014-07-22",
-  "institution": "IESE",
+  "institution": "IESE Business School",
   "department": "",
-  "school": "",
-  "unit": "",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -5265,7 +5262,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.operationsacademia.org/",
   "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=IESE",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=IESE%20Business%20School",
   "characteristics": [],
   "featured": false,
   "source": "sheet-import",

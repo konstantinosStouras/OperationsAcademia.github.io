@@ -9765,67 +9765,24 @@
   "facultyUrl": "https://www.ie.edu/university/about/faculty/?page=1&ACADEMIC_AREA=106077"
  },
  {
-  "id": "iese",
-  "institution": "IESE",
-  "type": "Business School",
-  "country": "Spain",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2014-07-22",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
- },
- {
-  "id": "iese__iese-business-school__operations-information-and-technology",
-  "institution": "IESE",
-  "school": "IESE Business School",
-  "department": "Operations, Information and Technology",
-  "type": "Business School",
-  "country": "Spain",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2024-08-07",
-  "mapLocationIds": [
-   "iese-operations-building-s"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Navarra"
-  ],
-  "mapSearchTerms": [
-   "Instituto de Estudios Superiores de la Empresa (IESE Business School)",
-   "Operations, Information and Technology"
-  ],
-  "mapDepartmentLinks": {
-   "iese-operations-building-s": {
-    "facultyUrl": "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/"
-   }
-  },
-  "facultyUrl": "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/",
-  "deptUrl": "https://www.iese.edu/faculty-research/academic-departments/operations-information-technology/",
-  "deptUrlInherited": true
- },
- {
   "id": "iese-business-school",
   "institution": "IESE Business School",
   "type": "Business School",
+  "country": "Spain",
   "sources": [
+   "postings",
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "n": 1,
+  "lastPosted": "2014-07-22",
+  "mapLocationIds": [
+   "iese-business-school-barcelona-south-campus-headquarters-seat"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "IESE Business School"
+  ],
+  "mapSearchTerms": []
  },
  {
   "id": "iese-business-school____iese-behavioral-lab",
@@ -9942,7 +9899,7 @@
    "postings",
    "seed"
   ],
-  "n": 2,
+  "n": 3,
   "lastPosted": "2026-09-02",
   "mapLocationIds": [
    "iese-business-school-operations-building-s"

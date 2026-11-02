@@ -59,6 +59,11 @@
     'UC Berkeley': 'University of California, Berkeley',
     'KU LEUVEN': 'KU Leuven',
     'Ozyegin University': 'Özyeğin University',
+    /* IESE is the business school of the University of Navarra and posts
+       under its own name; the bare acronym is the same institution (owner,
+       2026-11-02), so the two directory cards and the map search fold into
+       one. The University of Navarra seed card keeps IESE as its school. */
+    'IESE': 'IESE Business School',
     'Ozyegin Universitesi': 'Özyeğin University',
     'NUS': 'National University of Singapore',
     'CUHK': 'The Chinese University of Hong Kong',
