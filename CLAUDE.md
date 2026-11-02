@@ -2191,6 +2191,50 @@ afford the wider net because a person reads its answer; this one cannot.
 Pinned both ways in `selftest.mjs`, including the UCD and CityU cases and the
 sync's own source (rejects, never deletes).
 
+### A crawled posting dropped at ingest can be put back from the Actions tab
+
+Owner, 2026-11-02: *"I see a lot of jobs received to my Operation Academia
+at gmail.com email. But then I don't see these jobs being posted ... neither
+to my admin queue area for me to approve them."* Measured over the logs of
+the ten days before: every posting the review mailer announced was approved
+by the owner within hours and is on the site. What was NOT on the site, and
+not in the queue either, was a posting the mailer never announced, because
+it was never pending: **Georgia Gwinnett College, 28 October 2026, Supply
+Chain Management**, dropped at ingest as "the same advertisement as
+2026-valdosta-state-university-20251116".
+
+**A shared careers PORTAL is not one vacancy.** `publishedAdvertRepeat` in
+`assets/oa-advert-dup.js` is the ADMISSION rule for a fresh crawled row: a
+published advert link is enough, whatever the scraped institution, year,
+department or rank says, because a crawled copy of a live posting routinely
+misspells the university. That is right for a link that names ONE job (an
+Interfolio, HigherEdJobs or Workday id, `vacancyKey`) and wrong for a bare
+link: the University System of Georgia's PeopleSoft search page is the advert
+link of Valdosta State's 2025 posting and of Georgia Gwinnett College's 2026
+one, two universities and two searches. A bare link now counts only where
+`institutionKey` agrees as well; a link with a vacancy id still matches
+anywhere. Measured over the served file before and after, the same fourteen
+pairs are judged repeats, so no live posting moves; the admission tests in
+`_scraper/published-advert-test.mjs` carry the Georgia pair both ways.
+
+**And a dropped row has a road back.** Dropped means REJECTED, never deleted,
+and the Admin area lists pending documents alone, so a posting dropped at
+ingest was reachable from the Firestore console and nowhere else.
+`_scraper/review-decide.mjs`, pressed through
+`.github/workflows/oa-review-decide.yml` (dispatch only, a plan unless `write`
+is ticked, the publish-news shape), lists the queue under a status and writes
+the review card's own decision onto one document: `status`, `reviewedAt` and
+a `note` saying it was decided there. Approving a workbook row publishes it
+at the next sheet read, exactly as the card's Approve does, and the build
+writes its edit handle. The log names postings and never a person.
+
+**What was NOT changed, and is said rather than hidden.** `2027-bellarmine-
+university-20261023` was approved by the owner and is refused at publish as
+the same vacancy as `2027-bellarmine-university-20260718`, which IS live: the
+two advertisements carry the same position number (the `bellarmine:202704`
+alias in `vacancyKey`), so the job is on the site under its July posting.
+That refusal stands.
+
 ### Every posting under review, and a button to ask again
 
 Dropping a row as it is CRAWLED leaves the queue as it was: every posting

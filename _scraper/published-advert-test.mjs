@@ -54,3 +54,21 @@ assert.equal(advertRepeat(health, [human]), null);
 assert.equal(publishedAdvertRepeat(health, [human]), null);
 assert.equal(advertRepeat({ ...human, id: 'repeat', adUrl: human.adUrl.replace('#', '?utm_source=sheet#') }, [human])?.id, 'human');
 assert.equal(publishedAdvertRepeat({ ...human, id: 'repeat' }, [human])?.id, 'human');
+// A shared careers PORTAL is not one vacancy across universities (2026-10-28):
+// Georgia Gwinnett College and Valdosta State both link the University System
+// of Georgia's PeopleSoft search page, and Gwinnett's posting was rejected at
+// ingest as "the same vacancy" as Valdosta's 2025 one. A bare link matches only
+// within one university; a link carrying a vacancy id still matches anywhere.
+const usg = 'https://careers.hprod.onehcm.usg.edu/psc/careers/CAREERS/HRMS/c/HRS_HRAM_FL.HRS_CG_SEARCH_FL.GBL?Page=HRS_APP_SCHJOB_FL&Action=U';
+const valdosta = { id: '2026-valdosta-state-university-20251116', institution: 'Valdosta State University',
+  year: 2026, department: 'BA', levels: [], adUrl: usg };
+const gwinnett = { id: 'gwinnett', institution: 'Georgia Gwinnett College', year: 2027,
+  department: 'Supply Chain Management', levels: ['Assistant Professor'], adUrl: usg };
+assert.equal(publishedAdvertRepeat(gwinnett, [valdosta]), null,
+  'a careers portal shared by two universities is not one vacancy');
+assert.equal(publishedAdvertRepeat({ ...gwinnett, institution: 'The Valdosta State University' }, [valdosta])?.id,
+  valdosta.id, 'the same portal at the same university still is');
+assert.equal(publishedAdvertRepeat({ ...gwinnett, adUrl: 'https://apply.interfolio.com/195349' },
+  [{ ...valdosta, adUrl: 'https://apply.interfolio.com/195349' }])?.id, valdosta.id,
+  'and a vacancy id names one job whatever the institution says');
+console.log('Shared-portal admission checks passed.');

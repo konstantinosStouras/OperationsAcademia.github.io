@@ -150,15 +150,34 @@
     var posted = { adUrl: row.postedAtUrl };
     return [advertLink(row), vacancyKey(posted) ? advertLink(posted) : ''].filter(Boolean);
   }
+  // A BARE LINK IS ONE VACANCY ONLY WITHIN ONE UNIVERSITY. A link with a
+  // recognised vacancy id (vacancyKey) names one job wherever it is seen, so
+  // it matches whatever the scraped institution says. A link WITHOUT one is a
+  // careers portal, and a portal can be shared by several universities: the
+  // University System of Georgia's PeopleSoft search page is the advert link
+  // of Valdosta State's 2025 posting AND of Georgia Gwinnett College's 2026
+  // posting, and on 2026-10-28 the latter was rejected at ingest as "the same
+  // vacancy" as a posting at another university, with nobody told. So a bare
+  // link counts only where institutionKey agrees as well.
+  function bareLinkMatch(row, other, links) {
+    var shared = admissionLinks(other).filter(function (link) {
+      return link && links.indexOf(link) !== -1;
+    });
+    return shared.some(function (link) {
+      if (vacancyKey({ adUrl: 'https://' + link })) return true;   // names one job anywhere
+      // two named universities that differ contradict it; a row naming none
+      // contradicts nothing (the panel's own fixtures carry links alone)
+      return !(row.institution && other.institution &&
+        institutionKey(row.institution) !== institutionKey(other.institution));
+    });
+  }
   function publishedAdvertRepeat(row, published) {
     if (!row) return null;
     var links = admissionLinks(row);
     if (!links.length) return null;
     var match = (published || []).find(function (other) {
       if (!other || (row.id && other.id && String(row.id) === String(other.id))) return false;
-      return admissionLinks(other).some(function (link) {
-        return link && links.indexOf(link) !== -1;
-      });
+      return bareLinkMatch(row, other, links);
     });
     return match ? entry(match) : null;
   }
