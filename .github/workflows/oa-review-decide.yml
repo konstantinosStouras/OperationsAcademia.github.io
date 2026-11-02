@@ -1,0 +1,85 @@
+name: "OA jobs: decide a crawled posting from the Actions tab"
+
+# THE REVIEW CARD'S BUTTONS, PRESSED FROM HERE. A crawled posting the sheet
+# sync drops as "the same advertisement" as a live posting is REJECTED without
+# ever being queued, so the Admin area, which lists pending documents alone,
+# cannot show it and nothing on the site can put it back (CLAUDE.md, "A
+# crawled posting dropped at ingest can be put back from the Actions tab").
+# This writes the same `jobReviews` document the card's Approve, Reject and
+# the sync's own drop write.
+#
+# LEAVE THE ID BLANK TO LIST what the queue holds under the chosen status
+# (turned down by default): posting ids, dates, universities and the notes the
+# sync left. Nothing printed names a person.
+#
+# THE INPUT DEFAULTS TO A PLAN. `write: false` says what the document says now
+# and what it would say; tick it to write. Not a one-way door: every status is
+# one more press away.
+#
+# Nothing here is scheduled. Without FIREBASE_SERVICE_ACCOUNT nothing is read
+# or written; the run warns and exits 0.
+
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'Posting id as the queue names it (blank = list the queue under the status below)'
+        type: string
+        default: ''
+      status:
+        description: 'Decision (or, with no id, the status to list)'
+        type: choice
+        options: ['approved', 'pending', 'rejected']
+        default: 'approved'
+      write:
+        description: 'Write it (unticked = print the plan only)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-review-decide
+  cancel-in-progress: false
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Check the credential is present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: nothing will be read or written."
+          fi
+
+      # firebase-admin 12: _mail.mjs's firebaseAdmin() uses the namespaced
+      # admin.* surface, which 14 removed whole (see oa-publish-news.yml).
+      - name: Install firebase-admin
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      - name: The script's own checks
+        run: node _scraper/review-decide.mjs --selftest
+
+      # The id is free text and goes through the ENVIRONMENT, never pasted into
+      # the script by ${{ }}, which the shell would see before anything else.
+      - name: Decide
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          IN_ID: ${{ inputs.id }}
+          IN_STATUS: ${{ inputs.status }}
+          IN_WRITE: ${{ inputs.write }}
+        run: |
+          set -- "--status=$IN_STATUS"
+          if [ -n "$IN_ID" ]; then set -- "$@" "--id=$IN_ID"; fi
+          if [ "$IN_WRITE" = "true" ]; then set -- "$@" --write; fi
+          node _scraper/review-decide.mjs "$@"
