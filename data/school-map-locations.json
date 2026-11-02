@@ -19658,30 +19658,6 @@
       "notes": "Cornell's official events venue page gives the address 'Johnson Graduate School-Management, 106 Sage Hall, Ithaca, NY 14853-6201', the Johnson home page pictures Sage Hall as the school's building, and a current Johnson faculty profile (Li Chen) lists office 327 Sage Hall; coordinates are the OSM footprint centroid of way 310881940 'Sage Hall, Feeney Way, Ithaca 14853'. This is the Johnson school's main building on the Ithaca campus. The directory row's institution string also names Cornell Tech: the Johnson Cornell Tech MBA is 'based at the Cornell Tech campus on Roosevelt Island', footer address 2 West Loop Road, New York, NY 10044, which is the address of the Emma and Georgina Bloomberg Center, but the official MBA page does not name a building, so the New York location is recorded here as a limitation (see existing record cornell-tech-operations-research-bloomberg for that campus) rather than as a second record; the row's existing 2 W Loop Rd address/lat-lng describe Cornell Tech, not Sage Hall."
     },
     {
-      "id": "washington-st-louis-scot-ai-cluster-knight-hall",
-      "institution": "Washington University in St. Louis",
-      "rowIds": [
-        "washington-university-in-st-louis____supply-chain-operations-and-technology-ai-cluster-hire"
-      ],
-      "school": "Olin Business School",
-      "department": "Supply Chain, Operations, and Technology (AI Cluster hire)",
-      "building": "Knight Hall",
-      "address": "Knight Hall, One Brookings Drive, St. Louis, Missouri 63130-4899, United States",
-      "lat": 38.649616,
-      "lng": -90.31083,
-      "addressSource": "https://bpb-us-e2.wpmucdn.com/sites.wustl.edu/dist/b/4921/files/2025/12/cv.pdf",
-      "coordinateSource": "https://happenings.washu.edu/knight_hall_413",
-      "supportingSources": [
-        "https://olin.washu.edu/faculty/fuqiang-zhang",
-        "https://olin.washu.edu/about/contact-us.php",
-        "https://apply.interfolio.com/196468",
-        "https://ai.washu.edu/about/ai-faculty-cluster-hires/",
-        "https://olin.washu.edu/faculty-and-research/faculty-directory/index.php?area=Supply%20Chain%20Operations%20%26%20Technology"
-      ],
-      "checked": "2026-10-31",
-      "notes": "Resolved to the Olin Business School SCOT area building, copying the address and coordinates of the existing verified record washington-st-louis-operations-knight. Re-verified today: the Interfolio posting (Oct 27, 2026) is 'Olin Business School - Supply Chain, Operations, and Technology (SCOT)' and says the position 'is part of Washington University's university-wide AI Faculty Cluster Hire initiative', which the ai.washu.edu page describes as a provost-led, seven-school effort; the AI cluster itself is cross-university and only the SCOT seat is placed here. The December 2025 CV linked from Fuqiang Zhang's current Olin profile (Dan Broida Professor of SCOT) gives 'Knight Hall 435, Olin Business School', Olin's contact page lists Knight Hall at One Brookings Drive, and the university event venue page for Knight Hall carries structured latitude 38.649616 / longitude -90.31083. Olin's directory pages do not print office rooms, so only this one SCOT office was verified."
-    },
-    {
       "id": "fudan-management-science-li-dasan-building",
       "institution": "Fudan University",
       "rowIds": [

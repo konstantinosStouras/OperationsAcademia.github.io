@@ -66,7 +66,7 @@ Generated outputs are data/directory.json and data/university-map.json; do not h
 
 ## Cache references
 
-Last published map version: 20261102-directory-updates-11. Last directory version: 20261102-rosters12. Choose new unique values for the next publication. Update all six references consistently:
+Last published map version: 20261102-directory-updates-12. Last directory version: 20261102-rosters12. Choose new unique values for the next publication. Update all six references consistently:
 
 - universities.html map-data preload
 - assets/oa-uni-map.js map-data fetch
@@ -123,6 +123,8 @@ Recorded so later agents do not repeat them. The agents' full logs with every UR
 - **Point known but official page unreadable from the research environment** (503 or TLS failures, not circumvented): Villanova (Tolentine Hall, OSM way 23547093), DePauw (Studebaker Administration Building, OSM way 733990084), University of San Diego (Hughes Administration Center, OSM way 260541744), University of Cyprus (University House Anastasios G. Leventis, OSM way 24272795; Cloudflare wall). Each needs one official page read to confirm the administration building.
 - **Single campus but no official page names an administration building**: Alfaisal University (fallback pin stands), Özyeğin University (campus-map URLs 404).
 - **Still open department rows**: NYU Shanghai (official hosts unreachable), SUFE SIME (own building known, no map point; the OSM block dump shows every SUFE academic footprint unnamed), Woxsen (no named academic building), SRM (site refused; several campuses), Bellarmine IS&AI (no official source), Columbia hiring topic and INSEAD HRG (no department).
+
+- **Washington University in St. Louis, AI cluster hire row** (2 November 2026, evening): the tracking sheet's second WashU posting of 28 October (2027-washington-university-in-st-louis-20261028-2, "Supply Chain, Operations, and Technology (AI Cluster hire)") left data/jobs.json in the 17:21 UTC publish, so its directory row washington-university-in-st-louis____supply-chain-operations-and-technology-ai-cluster-hire disappeared and the school-location check went red on the orphaned evidence. The evidence record washington-st-louis-scot-ai-cluster-knight-hall (Knight Hall, the same point as washington-st-louis-operations-knight) and its reviewed link record (the Olin SCOT filtered directory, the same roster the SCOT row carries) were removed. If the posting returns, add that row id to the rowIds of washington-st-louis-operations-knight and re-add the link record pointing at the Olin SCOT directory.
 
 ## How to read the unresolved inventory
 
