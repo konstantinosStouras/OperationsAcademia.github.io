@@ -165,8 +165,10 @@
     });
     return shared.some(function (link) {
       if (vacancyKey({ adUrl: 'https://' + link })) return true;   // names one job anywhere
-      return !!(row.institution && other.institution &&
-        institutionKey(row.institution) === institutionKey(other.institution));
+      // two named universities that differ contradict it; a row naming none
+      // contradicts nothing (the panel's own fixtures carry links alone)
+      return !(row.institution && other.institution &&
+        institutionKey(row.institution) !== institutionKey(other.institution));
     });
   }
   function publishedAdvertRepeat(row, published) {
