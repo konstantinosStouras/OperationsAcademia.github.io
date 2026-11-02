@@ -20413,6 +20413,75 @@
       ],
       "checked": "2026-10-31",
       "notes": "Institution-level campus reference, not a department office. TED University's official English site gives one address, 'Ziya Gökalp Caddesi No:48 06420, Kolej Çankaya Ankara', and describes a single campus in the city centre (an Ulus entrepreneurship centre is called a 'new center', not a campus). The university's official wayfinding map for A Block shows the ground floor holding the Entrance Hall, Infodesk & Security, General Secretariat, Assistant Secretary General, Student Affairs, International Programs Office and Financial Affairs, so A Block is used as the administrative/main building; the faculties' deans' offices are in D Block (official D Block map) and the rectorate's room was not located on the maps. Coordinates are the centroid of the OSM building 'TEDU A Blok' (way 998194019), inside the OSM campus polygon 'TED Üniversitesi Kolej Kampüsü' at No:48 (way 1537708617, centroid 39.92281, 32.86174)."
+    },
+    {
+      "id": "cuny-central-office-bartholomew-building-seat",
+      "institution": "City University of New York (CUNY)",
+      "rowIds": [
+        "city-university-of-new-york"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Bartholomew Building (CUNY University Offices, 205 East 42nd Street)",
+      "address": "205 East 42nd Street, New York, NY 10017, United States",
+      "lat": 40.7508287,
+      "lng": -73.9736048,
+      "addressSource": "https://hunter-graduate.catalog.cuny.edu/about/city-university-of-new-york-administration",
+      "coordinateSource": "https://www.openstreetmap.org/way/265869516",
+      "supportingSources": [
+        "https://www.cuny.edu/contact-us/",
+        "https://www.cuny.edu/about/trustees/",
+        "https://a856-gbol.nyc.gov/GBOLWebsite/GreenBook/Details?orgId=2900",
+        "https://skyscraperpage.com/b56159",
+        "https://nominatim.openstreetmap.org/search?q=Bartholomew+Building+New+York&format=jsonv2&addressdetails=1&limit=3"
+      ],
+      "checked": "2026-11-02",
+      "notes": "Institution-level campus reference, not a school or department office. CUNY is a SYSTEM of 25 colleges; this point is the system's central administration (the University Offices), not any college campus. The official CUNY catalog's 'City University of New York Administration' page lists 'University Offices, 205 E 42nd Street, New York, NY 10017' with Felix V. Matos Rodriguez, Chancellor, at its head; cuny.edu's Contact Us page gives the same address as 'City University of New York University Offices', the Board of Trustees page gives it for the Office of the Secretary of the Board, and the NYC Green Book lists CUNY and its Chancellor at 205 E. 42nd St. The Chancellor's own cuny.edu page carries no street address. Coordinates are the OpenStreetMap building footprint named 'Bartholomew Building' (way 265869516, start_date 1929), the 21-storey 1929 office building at 205 East 42nd Street (skyscraperpage), whose footprint contains the directory row's own map point (40.75093, -73.97350); the OSM way carries no housenumber tag, so the name-to-address tie rests on the skyscraperpage record and the row's coordinates. Some CUNY central offices sit elsewhere (e.g. 395 Hudson Street); the 25 colleges each have their own campuses."
+    },
+    {
+      "id": "uwf-crosby-hall-building-10-seat",
+      "institution": "University of West Florida",
+      "rowIds": [
+        "university-of-west-florida"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Building 10, Harold Bryan Crosby Hall (Office of the President)",
+      "address": "Building 10, 11000 University Parkway, Pensacola, FL 32514, United States",
+      "lat": 30.5512447,
+      "lng": -87.2206729,
+      "addressSource": "https://uwf.edu/offices/presidents-office/",
+      "coordinateSource": "https://www.openstreetmap.org/way/343193658",
+      "supportingSources": [
+        "https://uwf.edu/media/university-of-west-florida/finance-and-administration/pdf/kwycp_2024-campus-map_final.pdf",
+        "https://www.flbog.edu/university/university-of-west-florida/",
+        "https://uwf.edu/about/university-locations/"
+      ],
+      "checked": "2026-11-02",
+      "notes": "Institution-level campus reference, not a school or department office. UWF's official President's Office page gives the office as 'Building 10, 11000 University Parkway, Pensacola, FL 32514' (also the Florida Board of Governors' listing), and the official UWF campus map (revised Spring 2024) names 'Building 10: Harold Bryan Crosby Hall' with occupants 'Board of Trustees, ... Division of Academic Affairs, Division of Finance and Administration, General Counsel, ... and Office of the President'. Coordinates are the centroid of the OpenStreetMap building footprint named 'Building 10 - Harold B. Crosby Hall' (way 343193658, building=university), computed from the way's nodes via the OSM API; not the campus polygon. The directory row's 'Building 21' address is a different building (Center for Academic Success per the same map). UWF also has the UWF Emerald Coast campus at 1170 Martin Luther King, Jr. Blvd., Fort Walton Beach, FL 32547 (with a Crestview office) and Historic Pensacola downtown at 120 Church St.; this record marks the main Pensacola campus seat only."
+    },
+    {
+      "id": "unsw-kensington-chancellery-c22-seat",
+      "institution": "UNSW Sydney",
+      "rowIds": [
+        "unsw-sydney"
+      ],
+      "school": "",
+      "department": "",
+      "building": "Chancellery (C22), Kensington campus",
+      "address": "Chancellery (C22), UNSW Sydney, High Street, Kensington NSW 2033, Australia",
+      "lat": -33.9165327,
+      "lng": 151.2338574,
+      "addressSource": "https://www.estate.unsw.edu.au/sites/default/files/documents/Kensington%20Campus%20Map%20V2023.pdf",
+      "coordinateSource": "https://www.openstreetmap.org/way/265881082",
+      "supportingSources": [
+        "https://www.unsw.edu.au/about-us/our-story/contact-us",
+        "https://www.unsw.edu.au/about-us/vice-chancellor/contact-us",
+        "https://unsw.edu.au/about-us/our-story/our-campuses",
+        "https://nominatim.openstreetmap.org/search?q=David+Gonski+Chancellery+Kensington&format=jsonv2&addressdetails=1&limit=3"
+      ],
+      "checked": "2026-11-02",
+      "notes": "Institution-level campus reference, not a school or department office. UNSW's official Kensington Campus Map (Estate Management, V2023) lists the building 'Chancellery' at grid reference C22, and the official Contact Us page gives the main Kensington campus address as 'UNSW Sydney, High St, Kensington NSW 2033'. Coordinates are the OpenStreetMap building footprint 'David Gonski Chancellery - C22' (way 265881082, building=university, 5 levels, on University Walk/Chancellery Lane), not the campus centroid. LIMITATION: the official Vice-Chancellor and President contact page lists only a phone and e-mail with no building, and no unsw.edu.au page read here states in words that the Vice-Chancellor's office is in the Chancellery; the tie rests on the building being the university's officially named Chancellery (the Chancellor's/administration building) plus a UNSW 'Chancellery Security Concierge' job advertisement (read only on a third-party mirror) describing the role as based in the Chancellery Building with transport for the Vice-Chancellor. Other UNSW campuses: Paddington (School of Art & Design, Cnr Oxford St & Greens Rd, Paddington NSW 2021), UNSW Canberra at ADFA (Northcott Drive, Canberra ACT 2600) and the Canberra City precinct, a Sydney CBD campus (pilot), regional campuses and UNSW Bengaluru."
     }
   ]
 }

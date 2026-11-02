@@ -4332,8 +4332,14 @@
   ],
   "lat": 40.7509305,
   "lng": -73.9734987,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "cuny-central-office-bartholomew-building-seat"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "City University of New York (CUNY)"
+  ],
+  "mapSearchTerms": []
  },
  {
   "id": "clarkson-university____is",
@@ -32349,8 +32355,14 @@
   ],
   "lat": 30.5491387,
   "lng": -87.2185862,
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "uwf-crosby-hall-building-10-seat"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of West Florida"
+  ],
+  "mapSearchTerms": []
  },
  {
   "id": "university-of-windsor",
@@ -32620,8 +32632,15 @@
   "sources": [
    "seed"
   ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "unsw-kensington-chancellery-c22-seat"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "UNSW Sydney"
+  ],
+  "mapSearchTerms": [],
+  "country": "Australia"
  },
  {
   "id": "unsw-sydney__unsw-business-school__information-systems-and-technology-management",

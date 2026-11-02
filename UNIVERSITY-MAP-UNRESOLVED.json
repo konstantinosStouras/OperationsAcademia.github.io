@@ -2,7 +2,7 @@
   "snapshotDate": "2026-11-02",
   "lastPublishedMapCommit": "(see git log: the round 3 publication of 31 October 2026)",
   "source": "data/directory.json",
-  "unresolvedLocationCount": 66,
+  "unresolvedLocationCount": 63,
   "missingFacultyRosterCount": 4,
   "unresolvedLocations": [
     {
@@ -80,22 +80,6 @@
       "sources": [
         "seed"
       ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "city-university-of-new-york",
-      "institution": "City University of New York (CUNY)",
-      "type": "University",
-      "country": "United States",
-      "address": "205 E 42nd St, New York, NY 10017",
-      "mapUrl": "https://goo.gl/maps/EVd9u",
-      "facultyUrl": "https://sps.cuny.edu/whoweare/directory/faculty",
-      "sources": [
-        "directory"
-      ],
-      "lat": 40.7509305,
-      "lng": -73.9734987,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
     },
@@ -679,34 +663,9 @@
       "mapLocationKind": "unresolved"
     },
     {
-      "id": "university-of-west-florida",
-      "institution": "University of West Florida",
-      "type": "University",
-      "country": "United States",
-      "address": "Building 21, 11000 University Pkwy, Pensacola, FL 32514",
-      "mapUrl": "https://goo.gl/maps/eiTdH",
-      "facultyUrl": "http://uwf.edu/cob/",
-      "sources": [
-        "directory"
-      ],
-      "lat": 30.5491387,
-      "lng": -87.2185862,
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
       "id": "university-of-wisconsin-madison",
       "institution": "University of Wisconsin-Madison",
       "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [],
-      "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "unsw-sydney",
-      "institution": "UNSW Sydney",
       "sources": [
         "seed"
       ],
