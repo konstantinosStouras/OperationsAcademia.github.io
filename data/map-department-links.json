@@ -8217,6 +8217,20 @@
       ],
       "checked": "2026-10-31",
       "notes": "The specific AI cluster vacancy is in Olin Supply Chain, Operations and Technology. Official filtered academic-area directory loaded in Chrome with 15 results; it is the existing owner-approved SCOT roster, not the cross-university AI cluster."
+    },
+    {
+      "institution": "University of Illinois at Urbana-Champaign",
+      "school": "The Grainger College of Engineering",
+      "department": "Industrial and Systems Engineering and Electrical Engineering",
+      "rowIds": [
+        "university-of-illinois-at-urbana-champaign__the-grainger-college-of-engineering__industrial-and-systems-engineering-and-electrical-engineerin"
+      ],
+      "facultyUrl": "https://ise.illinois.edu/directory/faculty",
+      "sources": [
+        "https://ise.illinois.edu/directory/faculty"
+      ],
+      "checked": "2026-11-02",
+      "notes": "Owner confirmed on 2026-11-02 that the combined ISE and Electrical Engineering posting should carry the Industrial and Enterprise Systems Engineering faculty directory, the same official roster the sibling ISE row already uses. The roster covers ISE faculty only, not the Electrical and Computer Engineering department."
     }
   ]
 }

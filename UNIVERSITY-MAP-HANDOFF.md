@@ -1,6 +1,6 @@
 # University map research and publication handoff
 
-Snapshot: 2 November 2026. Generated from the current data/directory.json. The snapshot contains **63 unresolved location rows** and **4 missing faculty rosters** (down from 110 unresolved rows at the start of 31 October 2026; the fourth roster gap, a UIUC Grainger ISE row, arrived from the tracking sheet the same day). These are directory rows, not necessarily distinct universities or buildings. Recalculate after synchronizing the repository.
+Snapshot: 2 November 2026. Generated from the current data/directory.json. The snapshot contains **63 unresolved location rows** and **3 missing faculty rosters** (down from 110 unresolved rows and 4 roster gaps at the start of 31 October 2026; the UIUC Grainger ISE and EE row received the ISE faculty directory on 2 November 2026 at the owner's word). These are directory rows, not necessarily distinct universities or buildings. Recalculate after synchronizing the repository.
 
 ## Objective and authorization
 
@@ -66,7 +66,7 @@ Generated outputs are data/directory.json and data/university-map.json; do not h
 
 ## Cache references
 
-Last published map version: 20261102-directory-updates-11. Last directory version: 20261102-rosters11. Choose new unique values for the next publication. Update all six references consistently:
+Last published map version: 20261102-directory-updates-11. Last directory version: 20261102-rosters12. Choose new unique values for the next publication. Update all six references consistently:
 
 - universities.html map-data preload
 - assets/oa-uni-map.js map-data fetch
@@ -205,7 +205,6 @@ The following list is the complete snapshot. Empty school or department values a
 | 1 | abdullah-al-salem-university____scm-logistics | Abdullah Al Salem University (AASU) | — | SCM/Logistics | no |
 | 2 | columbia-university____data-driven-decision-making-optimization-under-uncertainty | Columbia University | — | data-driven decision-making, optimization under uncertainty | no |
 | 3 | insead____humanitarian-research-group-hrg-social-innovation-center | INSEAD | — | Humanitarian Research Group (HRG), Social Innovation Center | no |
-| 4 | university-of-illinois-at-urbana-champaign__the-grainger-college-of-engineering__industrial-and-systems-engineering-and-electrical-engineerin | University of Illinois at Urbana-Champaign | The Grainger College of Engineering | Industrial and Systems Engineering and Electrical Engineering | no |
 
 ## Machine-readable snapshot
 

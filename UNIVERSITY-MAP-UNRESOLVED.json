@@ -3,7 +3,7 @@
   "lastPublishedMapCommit": "(see git log: the round 3 publication of 31 October 2026)",
   "source": "data/directory.json",
   "unresolvedLocationCount": 63,
-  "missingFacultyRosterCount": 4,
+  "missingFacultyRosterCount": 3,
   "unresolvedLocations": [
     {
       "id": "alfaisal-university",
@@ -755,27 +755,6 @@
       "directoryHidden": true,
       "mapLocationIds": [],
       "mapLocationKind": "unresolved"
-    },
-    {
-      "id": "university-of-illinois-at-urbana-champaign__the-grainger-college-of-engineering__industrial-and-systems-engineering-and-electrical-engineerin",
-      "institution": "University of Illinois at Urbana-Champaign",
-      "school": "The Grainger College of Engineering",
-      "department": "Industrial and Systems Engineering and Electrical Engineering",
-      "type": "University",
-      "sources": [
-        "seed"
-      ],
-      "mapLocationIds": [
-        "illinois-industrial-enterprise-transportation"
-      ],
-      "mapLocationKind": "school",
-      "mapInstitutionNames": [
-        "University of Illinois at Urbana-Champaign"
-      ],
-      "mapSearchTerms": [
-        "The Grainger College of Engineering"
-      ],
-      "country": "United States"
     }
   ]
 }
