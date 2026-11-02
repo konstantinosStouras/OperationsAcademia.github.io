@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-01T11:12:42.113Z",
- "members": 435,
+ "generated": "2026-11-02T01:55:01.997Z",
+ "members": 436,
  "k": 3,
  "affiliation": {
-  "listed": 353,
+  "listed": 354,
   "other": 48,
   "none": 34
  },
@@ -126,6 +126,11 @@
     "members": 4
    },
    {
+    "name": "University of Illinois at Urbana-Champaign",
+    "country": "United States",
+    "members": 4
+   },
+   {
     "name": "University of Mannheim",
     "country": "Germany",
     "members": 4
@@ -204,11 +209,6 @@
     "name": "Stanford University",
     "country": "United States",
     "members": 3
-   },
-   {
-    "name": "University of California, Los Angeles (UCLA)",
-    "country": "United States",
-    "members": 3
    }
   ],
   "rest": 169
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 219
+    "members": 220
    },
    {
     "name": "Canada",
