@@ -123,6 +123,10 @@ Recorded so later agents do not repeat them. The agents' full logs with every UR
 - **Single campus but no official page names an administration building**: Alfaisal University (fallback pin stands), Özyeğin University (campus-map URLs 404).
 - **Still open department rows**: NYU Shanghai (official hosts unreachable), SUFE SIME (own building known, no map point; the OSM block dump shows every SUFE academic footprint unnamed), Woxsen (no named academic building), SRM (site refused; several campuses), Bellarmine IS&AI (no official source), Columbia hiring topic and INSEAD HRG (no department).
 
+## How to read the unresolved inventory
+
+Of the unresolved rows, 51 are institution-only rows of universities that are already on the map through their school cards (for example Harvard, Columbia, Berkeley, UIUC, NUS, UCL); by the owner's rule of 2 November 2026 they get no card of their own and stay listed here only because the row itself carries no location. The genuine gaps are the institution-only rows of universities with no card at all (Alfaisal, CUNY, Universidad de los Andes, West Florida, UNSW; HEC Paris and TBS Education are on the map under their schools' official spellings) and the department rows listed in the research log.
+
 ## Full unresolved location inventory
 
 The following list is the complete snapshot. Empty school or department values are shown as —. Retain row IDs exactly when assigning research or matching proposals.
