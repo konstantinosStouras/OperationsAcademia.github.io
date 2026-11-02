@@ -64,6 +64,13 @@
        2026-11-02), so the two directory cards and the map search fold into
        one. The University of Navarra seed card keeps IESE as its school. */
     'IESE': 'IESE Business School',
+    /* The site's Universidad de los Andes is the Chilean one (owner,
+       2026-11-02). The reviewed map evidence names it with its country, so
+       that spelling folds into the directory's bare name and the two read as
+       one university; alumni rows that name the Bogota university by the same
+       bare words are left as they are rather than relabelled. */
+    'Universidad de los Andes (Chile)': 'Universidad de los Andes',
+    'Universidad de los Andes, Chile': 'Universidad de los Andes',
     'Ozyegin Universitesi': 'Özyeğin University',
     'NUS': 'National University of Singapore',
     'CUHK': 'The Chinese University of Hong Kong',
