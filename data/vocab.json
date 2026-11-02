@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-31T22:48:15.299Z",
+ "generated": "2026-11-02T16:59:32.018Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -479,6 +479,10 @@
   },
   {
    "v": "Florida State University",
+   "n": 2
+  },
+  {
+   "v": "Georgia Gwinnett College",
    "n": 2
   },
   {
@@ -1143,10 +1147,6 @@
   },
   {
    "v": "Georgia College and State University",
-   "n": 1
-  },
-  {
-   "v": "Georgia Gwinnett College",
    "n": 1
   },
   {
@@ -3907,7 +3907,7 @@
  "units": [
   {
    "v": "Supply Chain Management",
-   "n": 59
+   "n": 60
   },
   {
    "v": "OM",
