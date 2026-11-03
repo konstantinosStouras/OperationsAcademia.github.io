@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-03T01:54:08.988Z",
+ "generated": "2026-11-03T09:28:20.062Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -10,12 +10,6 @@
   {
    "source": "usage",
    "days": 79,
-   "from": "",
-   "to": ""
-  },
-  {
-   "source": "ga4",
-   "days": 1158,
    "from": "",
    "to": ""
   }
@@ -6202,9 +6196,9 @@
    138
   ],
   "2026-11-03": [
-   3,
-   4,
-   4
+   18,
+   37,
+   37
   ]
  },
  "pages": [
@@ -9638,7 +9632,7 @@
    "to": "2026-11-03",
    "metric": "visits",
    "zone": "UTC",
-   "total": 18050,
+   "total": 18083,
    "items": [
     {
      "name": "00",
@@ -9650,31 +9644,31 @@
     },
     {
      "name": "02",
-     "value": 690
+     "value": 694
     },
     {
      "name": "03",
-     "value": 603
+     "value": 606
     },
     {
      "name": "04",
-     "value": 580
+     "value": 587
     },
     {
      "name": "05",
-     "value": 578
+     "value": 579
     },
     {
      "name": "06",
-     "value": 501
+     "value": 504
     },
     {
      "name": "07",
-     "value": 524
+     "value": 535
     },
     {
      "name": "08",
-     "value": 452
+     "value": 456
     },
     {
      "name": "09",
@@ -10199,7 +10193,7 @@
   "source": "usage",
   "from": "2026-08-17",
   "to": "2026-11-03",
-  "sessions": 18050,
+  "sessions": 18083,
   "avgSessionSec": 459,
   "viewsPerSession": 1
  },
@@ -10672,8 +10666,8 @@
     "days": 30,
     "from": "2026-10-05",
     "to": "2026-11-03",
-    "seen": 4491,
-    "resolved": 1359,
+    "seen": 4509,
+    "resolved": 1371,
     "academic": 74,
     "placed": 833,
     "all": [
@@ -10963,8 +10957,8 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-11-03",
-    "seen": 8498,
-    "resolved": 2537,
+    "seen": 8516,
+    "resolved": 2549,
     "academic": 116,
     "placed": 1117,
     "all": [
@@ -11298,8 +11292,8 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-11-03",
-    "seen": 8498,
-    "resolved": 2537,
+    "seen": 8516,
+    "resolved": 2549,
     "academic": 116,
     "placed": 1117,
     "all": [
@@ -11633,8 +11627,8 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-11-03",
-    "seen": 8498,
-    "resolved": 2537,
+    "seen": 8516,
+    "resolved": 2549,
     "academic": 116,
     "placed": 1117,
     "all": [
@@ -11966,123 +11960,123 @@
    }
   },
   "recentDays": 7,
-  "seen": 8498,
-  "resolved": 2537,
+  "seen": 8516,
+  "resolved": 2549,
   "academic": 116,
   "placed": 1117
  },
  "totals": {
-  "visitors": 48356,
-  "sessions": 68678,
-  "pageviews": 141942,
+  "visitors": 48371,
+  "sessions": 68711,
+  "pageviews": 141975,
   "days": 1237,
   "universities": 81
  },
  "breakdownWindows": {
   "30": {
    "hours": {
-    "source": "ga4",
+    "source": "usage",
     "from": "2026-10-05",
     "to": "2026-11-03",
     "metric": "visits",
-    "zone": "property",
-    "total": 3508,
+    "zone": "UTC",
+    "total": 8894,
     "items": [
      {
       "name": "00",
-      "value": 175
+      "value": 377
      },
      {
       "name": "01",
-      "value": 151
+      "value": 393
      },
      {
       "name": "02",
-      "value": 113
+      "value": 322
      },
      {
       "name": "03",
-      "value": 154
+      "value": 288
      },
      {
       "name": "04",
-      "value": 154
+      "value": 261
      },
      {
       "name": "05",
-      "value": 145
+      "value": 269
      },
      {
       "name": "06",
-      "value": 122
+      "value": 237
      },
      {
       "name": "07",
-      "value": 114
+      "value": 217
      },
      {
       "name": "08",
-      "value": 98
+      "value": 211
      },
      {
       "name": "09",
-      "value": 101
+      "value": 1202
      },
      {
       "name": "10",
-      "value": 115
+      "value": 250
      },
      {
       "name": "11",
-      "value": 100
+      "value": 207
      },
      {
       "name": "12",
-      "value": 80
+      "value": 243
      },
      {
       "name": "13",
-      "value": 95
+      "value": 346
      },
      {
       "name": "14",
-      "value": 103
+      "value": 468
      },
      {
       "name": "15",
-      "value": 137
+      "value": 475
      },
      {
       "name": "16",
-      "value": 201
+      "value": 388
      },
      {
       "name": "17",
-      "value": 228
+      "value": 336
      },
      {
       "name": "18",
-      "value": 221
+      "value": 364
      },
      {
       "name": "19",
-      "value": 164
+      "value": 470
      },
      {
       "name": "20",
-      "value": 154
+      "value": 506
      },
      {
       "name": "21",
-      "value": 189
+      "value": 429
      },
      {
       "name": "22",
-      "value": 179
+      "value": 332
      },
      {
       "name": "23",
-      "value": 215
+      "value": 303
      }
     ]
    },
@@ -12445,108 +12439,108 @@
   },
   "90": {
    "hours": {
-    "source": "ga4",
-    "from": "2026-08-06",
+    "source": "usage",
+    "from": "2026-08-17",
     "to": "2026-11-03",
     "metric": "visits",
-    "zone": "property",
-    "total": 7062,
+    "zone": "UTC",
+    "total": 18083,
     "items": [
      {
       "name": "00",
-      "value": 381
+      "value": 728
      },
      {
       "name": "01",
-      "value": 312
+      "value": 706
      },
      {
       "name": "02",
-      "value": 240
+      "value": 694
      },
      {
       "name": "03",
-      "value": 297
+      "value": 606
      },
      {
       "name": "04",
-      "value": 271
+      "value": 587
      },
      {
       "name": "05",
-      "value": 280
+      "value": 579
      },
      {
       "name": "06",
-      "value": 232
+      "value": 504
      },
      {
       "name": "07",
-      "value": 243
+      "value": 535
      },
      {
       "name": "08",
-      "value": 204
+      "value": 456
      },
      {
       "name": "09",
-      "value": 212
+      "value": 1536
      },
      {
       "name": "10",
-      "value": 207
+      "value": 503
      },
      {
       "name": "11",
-      "value": 191
+      "value": 478
      },
      {
       "name": "12",
-      "value": 220
+      "value": 578
      },
      {
       "name": "13",
-      "value": 175
+      "value": 780
      },
      {
       "name": "14",
-      "value": 209
+      "value": 935
      },
      {
       "name": "15",
-      "value": 281
+      "value": 961
      },
      {
       "name": "16",
-      "value": 420
+      "value": 933
      },
      {
       "name": "17",
-      "value": 433
+      "value": 849
      },
      {
       "name": "18",
-      "value": 397
+      "value": 819
      },
      {
       "name": "19",
-      "value": 348
+      "value": 991
      },
      {
       "name": "20",
-      "value": 352
+      "value": 1010
      },
      {
       "name": "21",
-      "value": 389
+      "value": 907
      },
      {
       "name": "22",
-      "value": 356
+      "value": 733
      },
      {
       "name": "23",
-      "value": 412
+      "value": 675
      }
     ]
    },
@@ -13009,108 +13003,108 @@
   },
   "365": {
    "hours": {
-    "source": "ga4",
-    "from": "2025-11-04",
+    "source": "usage",
+    "from": "2026-08-17",
     "to": "2026-11-03",
     "metric": "visits",
-    "zone": "property",
-    "total": 15323,
+    "zone": "UTC",
+    "total": 18083,
     "items": [
      {
       "name": "00",
-      "value": 795
+      "value": 728
      },
      {
       "name": "01",
-      "value": 630
+      "value": 706
      },
      {
       "name": "02",
-      "value": 592
+      "value": 694
      },
      {
       "name": "03",
-      "value": 639
+      "value": 606
      },
      {
       "name": "04",
-      "value": 592
+      "value": 587
      },
      {
       "name": "05",
-      "value": 650
+      "value": 579
      },
      {
       "name": "06",
-      "value": 584
+      "value": 504
      },
      {
       "name": "07",
-      "value": 523
+      "value": 535
      },
      {
       "name": "08",
-      "value": 434
+      "value": 456
      },
      {
       "name": "09",
-      "value": 418
+      "value": 1536
      },
      {
       "name": "10",
-      "value": 422
+      "value": 503
      },
      {
       "name": "11",
-      "value": 402
+      "value": 478
      },
      {
       "name": "12",
-      "value": 404
+      "value": 578
      },
      {
       "name": "13",
-      "value": 363
+      "value": 780
      },
      {
       "name": "14",
-      "value": 433
+      "value": 935
      },
      {
       "name": "15",
-      "value": 583
+      "value": 961
      },
      {
       "name": "16",
-      "value": 802
+      "value": 933
      },
      {
       "name": "17",
-      "value": 918
+      "value": 849
      },
      {
       "name": "18",
-      "value": 870
+      "value": 819
      },
      {
       "name": "19",
-      "value": 767
-     },
-     {
-      "name": "20",
-      "value": 750
-     },
-     {
-      "name": "21",
-      "value": 934
-     },
-     {
-      "name": "22",
       "value": 991
      },
      {
+      "name": "20",
+      "value": 1010
+     },
+     {
+      "name": "21",
+      "value": 907
+     },
+     {
+      "name": "22",
+      "value": 733
+     },
+     {
       "name": "23",
-      "value": 827
+      "value": 675
      }
     ]
    },
@@ -13737,108 +13731,108 @@
   },
   "all": {
    "hours": {
-    "source": "ga4",
-    "from": "2023-06-16",
+    "source": "usage",
+    "from": "2026-08-17",
     "to": "2026-11-03",
     "metric": "visits",
-    "zone": "property",
-    "total": 58539,
+    "zone": "UTC",
+    "total": 18083,
     "items": [
      {
       "name": "00",
-      "value": 2764
+      "value": 728
      },
      {
       "name": "01",
-      "value": 2455
+      "value": 706
      },
      {
       "name": "02",
-      "value": 2158
+      "value": 694
      },
      {
       "name": "03",
-      "value": 2134
+      "value": 606
      },
      {
       "name": "04",
-      "value": 2212
+      "value": 587
      },
      {
       "name": "05",
-      "value": 2218
+      "value": 579
      },
      {
       "name": "06",
-      "value": 2030
+      "value": 504
      },
      {
       "name": "07",
-      "value": 1760
+      "value": 535
      },
      {
       "name": "08",
-      "value": 1868
+      "value": 456
      },
      {
       "name": "09",
-      "value": 1917
+      "value": 1536
      },
      {
       "name": "10",
-      "value": 1983
+      "value": 503
      },
      {
       "name": "11",
-      "value": 1946
+      "value": 478
      },
      {
       "name": "12",
-      "value": 1786
+      "value": 578
      },
      {
       "name": "13",
-      "value": 1748
+      "value": 780
      },
      {
       "name": "14",
-      "value": 1953
+      "value": 935
      },
      {
       "name": "15",
-      "value": 2457
+      "value": 961
      },
      {
       "name": "16",
-      "value": 2977
+      "value": 933
      },
      {
       "name": "17",
-      "value": 3261
+      "value": 849
      },
      {
       "name": "18",
-      "value": 3287
+      "value": 819
      },
      {
       "name": "19",
-      "value": 2918
+      "value": 991
      },
      {
       "name": "20",
-      "value": 2959
+      "value": 1010
      },
      {
       "name": "21",
-      "value": 3332
+      "value": 907
      },
      {
       "name": "22",
-      "value": 3422
+      "value": 733
      },
      {
       "name": "23",
-      "value": 2994
+      "value": 675
      }
     ]
    },
@@ -14742,36 +14736,36 @@
  },
  "engagementWindows": {
   "30": {
-   "source": "ga4",
+   "source": "usage",
    "from": "2026-10-05",
    "to": "2026-11-03",
-   "sessions": 3266,
-   "avgSessionSec": 275,
-   "viewsPerSession": 2.59
+   "sessions": 8894,
+   "avgSessionSec": 444,
+   "viewsPerSession": 1
   },
   "90": {
-   "source": "ga4",
-   "from": "2026-08-06",
+   "source": "usage",
+   "from": "2026-08-17",
    "to": "2026-11-03",
-   "sessions": 6683,
-   "avgSessionSec": 220,
-   "viewsPerSession": 2.33
+   "sessions": 18083,
+   "avgSessionSec": 459,
+   "viewsPerSession": 1
   },
   "365": {
-   "source": "ga4",
-   "from": "2025-11-04",
+   "source": "usage",
+   "from": "2026-08-17",
    "to": "2026-11-03",
-   "sessions": 14519,
-   "avgSessionSec": 141,
-   "viewsPerSession": 2.32
+   "sessions": 18083,
+   "avgSessionSec": 459,
+   "viewsPerSession": 1
   },
   "all": {
-   "source": "ga4",
-   "from": "2023-06-16",
+   "source": "usage",
+   "from": "2026-08-17",
    "to": "2026-11-03",
-   "sessions": 56969,
-   "avgSessionSec": 100,
-   "viewsPerSession": 2.43
+   "sessions": 18083,
+   "avgSessionSec": 459,
+   "viewsPerSession": 1
   }
  },
  "range": {
