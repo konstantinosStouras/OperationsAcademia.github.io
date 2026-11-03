@@ -13873,34 +13873,6 @@
   "school": "College of Technology Management",
   "department": "Institute of Technology Management",
   "type": "University",
-  "sources": [
-   "seed"
-  ],
-  "mapLocationIds": [
-   "nthu-technology-management-tsmc-building"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "National Tsing Hua University"
-  ],
-  "mapSearchTerms": [
-   "College of Technology Management",
-   "Institute of Technology Management"
-  ],
-  "country": "Taiwan",
-  "mapDepartmentLinks": {
-   "nthu-technology-management-tsmc-building": {
-    "facultyUrl": "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/"
-   }
-  },
-  "facultyUrl": "https://www.tm.nthu.edu.tw/University/%E5%B8%AB%E8%B3%87%E9%99%A3%E5%AE%B9/"
- },
- {
-  "id": "national-tsing-hua-university__institute-of-technology-management__institute-of-technology-management",
-  "institution": "National Tsing Hua University",
-  "school": "Institute of Technology Management",
-  "department": "Institute of Technology Management",
-  "type": "University",
   "country": "Taiwan",
   "characteristics": [
    "Research seminars",
@@ -13913,16 +13885,25 @@
   ],
   "n": 1,
   "lastPosted": "2026-10-28",
+  "sourceRowIds": [
+   "national-tsing-hua-university____institute-of-technology-management"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Institute of Technology Management"
+   }
+  ],
   "mapLocationIds": [
    "nthu-technology-management-tsmc-building"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "National Tsing Hua University"
-  ],
   "mapSearchTerms": [
    "College of Technology Management",
    "Institute of Technology Management"
+  ],
+  "mapInstitutionNames": [
+   "National Tsing Hua University"
   ],
   "mapDepartmentLinks": {
    "nthu-technology-management-tsmc-building": {

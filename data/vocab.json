@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-02T17:21:13.756Z",
+ "generated": "2026-11-03T07:54:47.035Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -3161,10 +3161,6 @@
   },
   {
    "v": "Institute of Artificial Intelligence and Brain Sciences",
-   "n": 1
-  },
-  {
-   "v": "Institute of Technology Management",
    "n": 1
   },
   {
@@ -9614,14 +9610,12 @@
    }
   },
   "National Tsing Hua University": {
-   "schools": [
-    "Institute of Technology Management"
-   ],
+   "schools": [],
    "units": [
     "Institute of Technology Management"
    ],
    "bySchool": {
-    "Institute of Technology Management": [
+    "": [
      "Institute of Technology Management"
     ]
    }
@@ -15343,9 +15337,6 @@
   ],
   "Institute of Artificial Intelligence and Brain Sciences": [
    "Data Science"
-  ],
-  "Institute of Technology Management": [
-   "Institute of Technology Management"
   ],
   "International Business School Suzhou": [
    "Intelligent Operations and Marketing"
