@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-03T01:20:29.451Z",
- "members": 438,
+ "generated": "2026-11-03T21:43:55.178Z",
+ "members": 439,
  "k": 3,
  "affiliation": {
-  "listed": 356,
+  "listed": 357,
   "other": 48,
   "none": 34
  },
@@ -136,6 +136,11 @@
     "members": 4
    },
    {
+    "name": "University of Maryland",
+    "country": "United States",
+    "members": 4
+   },
+   {
     "name": "University of Pennsylvania",
     "country": "United States",
     "members": 4
@@ -204,11 +209,6 @@
     "name": "New York University",
     "country": "United States",
     "members": 3
-   },
-   {
-    "name": "Stanford University",
-    "country": "United States",
-    "members": 3
    }
   ],
   "rest": 170
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 222
+    "members": 223
    },
    {
     "name": "Canada",
