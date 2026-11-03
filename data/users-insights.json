@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-02T18:49:00.561Z",
- "members": 437,
+ "generated": "2026-11-03T01:20:29.451Z",
+ "members": 438,
  "k": 3,
  "affiliation": {
-  "listed": 355,
+  "listed": 356,
   "other": 48,
   "none": 34
  },
@@ -61,6 +61,11 @@
     "members": 5
    },
    {
+    "name": "Ohio State University",
+    "country": "United States",
+    "members": 5
+   },
+   {
     "name": "University of Massachusetts Amherst",
     "country": "United States",
     "members": 5
@@ -98,11 +103,6 @@
    {
     "name": "London Business School",
     "country": "United Kingdom",
-    "members": 4
-   },
-   {
-    "name": "Ohio State University",
-    "country": "United States",
     "members": 4
    },
    {
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 221
+    "members": 222
    },
    {
     "name": "Canada",
