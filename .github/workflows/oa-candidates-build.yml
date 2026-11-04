@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: master
+          ref: ${{ github.ref_name }}
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
@@ -54,7 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           node _scraper/selftest.mjs --publishing
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
+          if [ "${{ inputs.dry_run }}" = "true" ] || [ "${{ github.ref_name }}" != "master" ]; then
             node _scraper/build-all.mjs --candidates-only --dry-run
             exit 0
           fi
@@ -76,3 +76,5 @@ jobs:
           done
           echo 'Candidate publication failed after three fresh rebuilds.'
           exit 1
+      - name: Audit candidate submissions against the published private snapshot
+        run: node _scraper/audit-candidate-publication.mjs

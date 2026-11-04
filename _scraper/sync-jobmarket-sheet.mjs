@@ -47,6 +47,7 @@
    --------------------------------------------------------------------------- */
 
 import { isMain } from './_main.mjs';
+import { carrySheetLinks } from './sheet-link-carry.mjs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -641,6 +642,12 @@ async function main() {
          last one went out as eight phantom edits. */
       const tabReads = [].concat(...results.map((x) => x.tabReads || []));
       const carriedBack = carryUnreadColumns(cleared.rows, known, tabReads);
+      const linksBack = carrySheetLinks(carriedBack.rows, known);
+      carriedBack.rows = linksBack.rows;
+      for (const item of linksBack.carried) {
+        warn(`${item.id}: retained ${item.fields.join(', ')} from the previous read; ` +
+             'the workbook supplied no usable replacement. Clear a link explicitly in the posting editor.');
+      }
       if (carriedBack.carried.length) {
         const tabsHit = [...new Set(carriedBack.carried.map((c) => c.tab))].join('", "');
         warn(`tab "${tabsHit}": read without its header (columns inferred) — ` +

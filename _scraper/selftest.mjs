@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import './publication-status-test.cjs';
+import './sheet-link-carry-test.mjs';
+import './candidate-publication-audit-test.mjs';
 /* ---------------------------------------------------------------------------
    Operations Academia — offline checks for the job pipeline.
 
