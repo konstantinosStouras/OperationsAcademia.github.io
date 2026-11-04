@@ -6780,7 +6780,7 @@
    2027
   ],
   "posted": "2026-09-23",
-  "institution": "University of California Riverside",
+  "institution": "University of California, Riverside",
   "department": "A. Gary Anderson Graduate School of Management, Operations and Supply Chain Management",
   "school": "A. Gary Anderson Graduate School of Management",
   "unit": "Operations and Supply Chain Management",
@@ -6796,11 +6796,11 @@
   "countries": [
    "United States"
   ],
-  "adUrl": "",
+  "adUrl": "https://aprecruit.ucr.edu/JPF02343",
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://aprecruit.ucr.edu/JPF02343",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20California%20Riverside",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20California%2C%20Riverside",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -13017,7 +13017,7 @@
   "countries": [
    "United States"
   ],
-  "adUrl": "",
+  "adUrl": "https://trinity.wd1.myworkdayjobs.com/en-US/Trinity_University/job/Assistant-Professor-of-Business-Analytics_JR101582",
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
@@ -13026,7 +13026,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-09-14T07:18:12Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": ""
  },
  {
   "id": "2027-carnegie-mellon-university-20260722",

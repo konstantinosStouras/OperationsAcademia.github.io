@@ -3195,11 +3195,6 @@
   "department": "IS"
  },
  {
-  "institution": "University of California Riverside",
-  "school": "A. Gary Anderson Graduate School of Management",
-  "department": "Operations and Supply Chain Management"
- },
- {
   "institution": "University of California, Berkeley",
   "school": "",
   "department": ""
@@ -3248,6 +3243,11 @@
   "institution": "University of California, Los Angeles (UCLA)",
   "school": "Anderson School of Management",
   "department": "Decision, Operations and Technology Management"
+ },
+ {
+  "institution": "University of California, Riverside",
+  "school": "A. Gary Anderson Graduate School of Management",
+  "department": "Operations and Supply Chain Management"
  },
  {
   "institution": "University of Cambridge",
