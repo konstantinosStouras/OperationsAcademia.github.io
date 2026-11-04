@@ -54,7 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           node _scraper/selftest.mjs --publishing
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
+          if [ "${{ inputs.dry_run }}" = "true" ] || [ "${{ github.ref_name }}" != "master" ]; then
             node _scraper/build-all.mjs --candidates-only --dry-run
             exit 0
           fi
