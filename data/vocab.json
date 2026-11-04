@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-04T12:36:12.524Z",
+ "generated": "2026-11-04T12:39:37.204Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1098,6 +1098,10 @@
    "n": 1
   },
   {
+   "v": "Erasmus University Rotterdam",
+   "n": 1
+  },
+  {
    "v": "ESMT Berlin",
    "n": 1
   },
@@ -2147,10 +2151,6 @@
   },
   {
    "v": "Emory University",
-   "n": 0
-  },
-  {
-   "v": "Erasmus University Rotterdam",
    "n": 0
   },
   {
@@ -3324,6 +3324,10 @@
    "n": 1
   },
   {
+   "v": "Rotterdam School of Management",
+   "n": 1
+  },
+  {
    "v": "Sabanci Business School",
    "n": 1
   },
@@ -3780,10 +3784,6 @@
    "n": 0
   },
   {
-   "v": "Rotterdam School of Management",
-   "n": 0
-  },
-  {
    "v": "Rutgers Business School",
    "n": 0
   },
@@ -3978,11 +3978,11 @@
    "n": 8
   },
   {
-   "v": "Information Systems",
-   "n": 7
+   "v": "Technology and Operations Management",
+   "n": 8
   },
   {
-   "v": "Technology and Operations Management",
+   "v": "Information Systems",
    "n": 7
   },
   {

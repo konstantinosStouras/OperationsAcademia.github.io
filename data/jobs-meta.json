@@ -1,14 +1,14 @@
 {
- "generated": "2026-11-04T12:36:12.524Z",
- "count": 914,
+ "generated": "2026-11-04T12:39:37.204Z",
+ "count": 915,
  "years": {
   "2026": 496,
-  "2027": 417,
+  "2027": 418,
   "2028": 1
  },
  "types": {
   "University": 456,
-  "Business School": 421
+  "Business School": 422
  },
  "levels": {
   "Assistant Professor": 381,
@@ -16,7 +16,7 @@
   "Non-tenure track (teaching) position": 59,
   "Post-Doc": 22,
   "Visiting Faculty (various levels)": 16,
-  "PhD": 1,
+  "PhD": 2,
   "RA or Pre-doc": 1
  },
  "countries": {
@@ -34,8 +34,8 @@
   "Turkey": 7,
   "United Arab Emirates": 7,
   "Australia": 6,
+  "Netherlands": 5,
   "Belgium": 4,
-  "Netherlands": 4,
   "Portugal": 4,
   "Saudi Arabia": 4,
   "Denmark": 3,
@@ -63,13 +63,13 @@
   "Uzbekistan": 1
  },
  "characteristics": {
-  "Research seminars": 111,
-  "MBA": 110,
-  "Undergrad": 108,
-  "Masters": 107,
-  "PhD": 94,
-  "Exec Ed": 86
+  "Research seminars": 112,
+  "MBA": 111,
+  "Undergrad": 109,
+  "Masters": 108,
+  "PhD": 95,
+  "Exec Ed": 87
  },
  "featured": 1,
- "newestPosted": "2026-11-03"
+ "newestPosted": "2026-11-04"
 }

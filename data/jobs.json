@@ -42,6 +42,48 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-erasmus-university-rotterdam-20261104",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-04",
+  "institution": "Erasmus University Rotterdam",
+  "department": "Rotterdam School of Management, Technology and Operations Management",
+  "school": "Rotterdam School of Management",
+  "unit": "Technology and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "PhD"
+  ],
+  "applyBy": "January 15, 2027",
+  "applyByDate": "2027-01-15",
+  "comments": "Fully funded PhD position in Information Systems and Artificial Intelligence.",
+  "country": "Netherlands",
+  "countries": [
+   "Netherlands"
+  ],
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.rsm.nl/about-rsm/work-with-us/phd-in-information-systems-and-artificial-intelligence/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Erasmus%20University%20Rotterdam",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-11-04T12:39:18Z",
+  "ref": "OA-JOB-261104-KF4H",
+  "owner": "b634c4738dcb2337",
+  "applicationStatus": ""
+ },
+ {
   "id": "2027-suny-oneonta-20261103",
   "year": 2027,
   "years": [
