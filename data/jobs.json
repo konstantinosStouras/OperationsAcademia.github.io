@@ -3097,7 +3097,7 @@
    "Assistant Professor",
    "Other Ranks"
   ],
-  "applyBy": "Until filled",
+  "applyBy": "Until filled.",
   "applyByDate": "",
   "comments": "",
   "country": "Mexico",
@@ -3113,7 +3113,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-12T08:56:13Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": "Expired"
  },
  {
   "id": "2027-university-of-florida-20261011",
@@ -5763,7 +5764,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-09T07:40:56Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": "Expired"
  },
  {
   "id": "2027-university-of-tampa-20260930",
