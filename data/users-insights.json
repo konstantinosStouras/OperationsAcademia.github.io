@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-04T12:32:58.897Z",
- "members": 442,
+ "generated": "2026-11-04T21:58:58.701Z",
+ "members": 443,
  "k": 3,
  "affiliation": {
-  "listed": 360,
+  "listed": 361,
   "other": 48,
   "none": 34
  },
@@ -62,6 +62,11 @@
    },
    {
     "name": "Ohio State University",
+    "country": "United States",
+    "members": 5
+   },
+   {
+    "name": "University of Illinois at Urbana-Champaign",
     "country": "United States",
     "members": 5
    },
@@ -127,11 +132,6 @@
    },
    {
     "name": "University of California, Berkeley",
-    "country": "United States",
-    "members": 4
-   },
-   {
-    "name": "University of Illinois at Urbana-Champaign",
     "country": "United States",
     "members": 4
    },
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 225
+    "members": 226
    },
    {
     "name": "Canada",
