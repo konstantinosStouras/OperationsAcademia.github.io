@@ -84,6 +84,51 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-university-of-utah-20261104",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-04",
+  "institution": "University of Utah",
+  "department": "David Eccles School of Business, Operations and Information Systems",
+  "school": "David Eccles School of Business",
+  "unit": "Operations and Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled. Open until filled",
+  "applyByDate": "",
+  "reviewDate": "2027-01-10",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://utah.peopleadmin.com/postings/211389",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Utah",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-11-04T16:48:46Z",
+  "ref": "OA-JOB-261104-9GXC",
+  "owner": "9dc2e2f63dad3951",
+  "applicationStatus": ""
+ },
+ {
   "id": "2027-suny-oneonta-20261103",
   "year": 2027,
   "years": [

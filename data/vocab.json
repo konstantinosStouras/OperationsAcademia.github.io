@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-04T12:39:37.204Z",
+ "generated": "2026-11-04T16:49:09.964Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -62,6 +62,10 @@
    "n": 6
   },
   {
+   "v": "University of Utah",
+   "n": 6
+  },
+  {
    "v": "University of Virginia",
    "n": 6
   },
@@ -95,10 +99,6 @@
   },
   {
    "v": "University of Tennessee - Knoxville",
-   "n": 5
-  },
-  {
-   "v": "University of Utah",
    "n": 5
   },
   {
@@ -2596,6 +2596,10 @@
    "n": 3
   },
   {
+   "v": "David Eccles School of Business",
+   "n": 3
+  },
+  {
    "v": "Donald G. Costello College of Business",
    "n": 3
   },
@@ -2673,10 +2677,6 @@
   },
   {
    "v": "Curtis L. Carlson School of Management",
-   "n": 2
-  },
-  {
-   "v": "David Eccles School of Business",
    "n": 2
   },
   {
@@ -4038,6 +4038,10 @@
    "n": 4
   },
   {
+   "v": "Operations and Information Systems",
+   "n": 4
+  },
+  {
    "v": "SCM/Logistics",
    "n": 4
   },
@@ -4091,10 +4095,6 @@
   },
   {
    "v": "Operations and Information Management",
-   "n": 3
-  },
-  {
-   "v": "Operations and Information Systems",
    "n": 3
   },
   {
