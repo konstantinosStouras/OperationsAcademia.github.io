@@ -1,0 +1,26 @@
+name: OA publication — audit candidate submissions
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: oa-jobs-data-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+      - name: Compare submissions against the private published snapshot
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node _scraper/audit-candidate-publication.mjs
+      - name: Verify signed-in website receives the complete snapshot
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node _scraper/candidate-live-check.mjs
