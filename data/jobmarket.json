@@ -25330,5 +25330,72 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-30T19:38:41Z",
   "owner": ""
+ },
+ {
+  "id": "2027-suny-oneonta-20261103",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-03",
+  "institution": "SUNY Oneonta",
+  "department": "Supply Chain Management",
+  "school": "",
+  "unit": "Supply Chain Management",
+  "type": "",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "rolling",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://oneonta.interviewexchange.com/jobofferdetails.jsp?JOBID=206307",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=SUNY%20Oneonta",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-04T12:34:39Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-basel-20261103",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-03",
+  "institution": "University of Basel",
+  "department": "Information Systems",
+  "school": "",
+  "unit": "Information Systems",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 30, 2026",
+  "applyByDate": "2026-11-30",
+  "comments": "",
+  "country": "Switzerland",
+  "countries": [
+   "Switzerland"
+  ],
+  "adUrl": "https://jobs.unibas.ch/offene-stellen/open-rank-professorship-in-information-systems/520791e6-dbf3-421b-9434-473bc15b7c6a",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Basel",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-04T12:34:51Z",
+  "owner": ""
  }
 ]
