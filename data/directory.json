@@ -20227,6 +20227,16 @@
   "facultyUrl": "https://tas.sunykorea.ac.kr/tas/html/sub02/0201.html"
  },
  {
+  "id": "suny-oneonta____supply-chain-management",
+  "institution": "SUNY Oneonta",
+  "department": "Supply Chain Management",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "syracuse-university__whitman-school-of-management__supply-chain-management",
   "institution": "Syracuse University",
   "school": "Whitman School of Management",
@@ -24439,6 +24449,17 @@
    "University of Auckland Business School",
    "Information Systems and Operations Management"
   ]
+ },
+ {
+  "id": "university-of-basel____information-systems",
+  "institution": "University of Basel",
+  "department": "Information Systems",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-bath____om",
