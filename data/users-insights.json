@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-03T21:43:55.178Z",
- "members": 439,
+ "generated": "2026-11-04T08:09:38.168Z",
+ "members": 441,
  "k": 3,
  "affiliation": {
-  "listed": 357,
+  "listed": 359,
   "other": 48,
   "none": 34
  },
@@ -67,6 +67,11 @@
    },
    {
     "name": "University of Massachusetts Amherst",
+    "country": "United States",
+    "members": 5
+   },
+   {
+    "name": "University of Southern California",
     "country": "United States",
     "members": 5
    },
@@ -146,11 +151,6 @@
     "members": 4
    },
    {
-    "name": "University of Southern California",
-    "country": "United States",
-    "members": 4
-   },
-   {
     "name": "University of Utah",
     "country": "United States",
     "members": 4
@@ -211,14 +211,14 @@
     "members": 3
    }
   ],
-  "rest": 170
+  "rest": 171
  },
  "countries": {
   "count": 18,
   "shown": [
    {
     "name": "United States",
-    "members": 223
+    "members": 225
    },
    {
     "name": "Canada",
