@@ -11653,7 +11653,7 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "Rolling - start 2026-09-11",
+  "applyBy": "Until filled. Rolling - start 2026-09-11",
   "applyByDate": "",
   "reviewDate": "2026-09-11",
   "comments": "",
@@ -11670,7 +11670,8 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-10-09T07:41:02Z",
-  "owner": ""
+  "owner": "",
+  "applicationStatus": "Expired"
  },
  {
   "id": "2027-worcester-state-university-20260810",
@@ -12055,7 +12056,7 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-05T00:00:00Z",
   "owner": "",
-  "applicationStatus": ""
+  "applicationStatus": "Expired"
  },
  {
   "id": "2027-university-of-kansas-20260805",
