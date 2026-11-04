@@ -20230,9 +20230,13 @@
   "id": "suny-oneonta____supply-chain-management",
   "institution": "SUNY Oneonta",
   "department": "Supply Chain Management",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-03",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -24455,9 +24459,13 @@
   "institution": "University of Basel",
   "department": "Information Systems",
   "type": "University",
+  "country": "Switzerland",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-03",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },

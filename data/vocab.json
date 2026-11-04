@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-04T12:03:06.794Z",
+ "generated": "2026-11-04T12:36:12.524Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1594,6 +1594,10 @@
    "n": 1
   },
   {
+   "v": "SUNY Oneonta",
+   "n": 1
+  },
+  {
    "v": "Syracuse University",
    "n": 1
   },
@@ -1727,6 +1731,10 @@
   },
   {
    "v": "University of Auckland",
+   "n": 1
+  },
+  {
+   "v": "University of Basel",
    "n": 1
   },
   {
@@ -3903,7 +3911,7 @@
  "units": [
   {
    "v": "Supply Chain Management",
-   "n": 60
+   "n": 61
   },
   {
    "v": "OM",
@@ -3970,15 +3978,15 @@
    "n": 8
   },
   {
+   "v": "Information Systems",
+   "n": 7
+  },
+  {
    "v": "Technology and Operations Management",
    "n": 7
   },
   {
    "v": "Business",
-   "n": 6
-  },
-  {
-   "v": "Information Systems",
    "n": 6
   },
   {
@@ -11205,6 +11213,17 @@
     ]
    }
   },
+  "SUNY Oneonta": {
+   "schools": [],
+   "units": [
+    "Supply Chain Management"
+   ],
+   "bySchool": {
+    "": [
+     "Supply Chain Management"
+    ]
+   }
+  },
   "Syracuse University": {
    "schools": [
     "Whitman School of Management"
@@ -12114,6 +12133,17 @@
     ],
     "Business School": [
      "Information Systems and Operations Management"
+    ]
+   }
+  },
+  "University of Basel": {
+   "schools": [],
+   "units": [
+    "Information Systems"
+   ],
+   "bySchool": {
+    "": [
+     "Information Systems"
     ]
    }
   },
