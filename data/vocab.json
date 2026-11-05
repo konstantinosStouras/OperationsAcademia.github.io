@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-05T17:35:00.591Z",
+ "generated": "2026-11-05T17:38:19.176Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -823,6 +823,10 @@
   },
   {
    "v": "Western University",
+   "n": 2
+  },
+  {
+   "v": "York University",
    "n": 2
   },
   {
@@ -2058,10 +2062,6 @@
    "n": 1
   },
   {
-   "v": "York University",
-   "n": 1
-  },
-  {
    "v": "Youngstown State University",
    "n": 1
   },
@@ -2828,6 +2828,10 @@
    "n": 2
   },
   {
+   "v": "Schulich School of Business",
+   "n": 2
+  },
+  {
    "v": "Stephen M. Ross School of Business",
    "n": 2
   },
@@ -3421,10 +3425,6 @@
   },
   {
    "v": "School of Mathematical and Statistical Sciences",
-   "n": 1
-  },
-  {
-   "v": "Schulich School of Business",
    "n": 1
   },
   {
@@ -4287,6 +4287,10 @@
   },
   {
    "v": "Operations Management and Business Analytics",
+   "n": 2
+  },
+  {
+   "v": "Operations Management and Information Systems",
    "n": 2
   },
   {
@@ -5327,10 +5331,6 @@
   },
   {
    "v": "Operations Management / Supply Chain Management / Project Management",
-   "n": 1
-  },
-  {
-   "v": "Operations Management and Information Systems",
    "n": 1
   },
   {
