@@ -25430,5 +25430,38 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-11-05T03:50:20Z",
   "owner": ""
+ },
+ {
+  "id": "2027-grenoble-ecole-de-management-20261104",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-04",
+  "institution": "Grenoble Ecole de Management",
+  "department": "Supply Chain Management",
+  "school": "",
+  "unit": "Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "January 30, 2027",
+  "applyByDate": "2027-01-30",
+  "comments": "",
+  "country": "France",
+  "countries": [
+   "France"
+  ],
+  "adUrl": "https://akadeus.com/announcement/9939?utm_source=chatgpt.com",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Grenoble%20Ecole%20de%20Management",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-05T03:50:59Z",
+  "owner": ""
  }
 ]
