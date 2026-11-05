@@ -25397,5 +25397,38 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-11-04T12:34:51Z",
   "owner": ""
+ },
+ {
+  "id": "2027-escp-business-school-20261104",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-04",
+  "institution": "ESCP Business School",
+  "department": "Operations and Supply Chain Management",
+  "school": "",
+  "unit": "Operations and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 1, 2026",
+  "applyByDate": "2026-12-01",
+  "comments": "",
+  "country": "France",
+  "countries": [
+   "France"
+  ],
+  "adUrl": "https://apply.eu1.interfolio.com/118214",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=ESCP%20Business%20School",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-05T03:50:20Z",
+  "owner": ""
  }
 ]
