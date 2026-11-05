@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-05T17:37:48.160Z",
- "members": 444,
+ "generated": "2026-11-05T22:50:00.356Z",
+ "members": 445,
  "k": 3,
  "affiliation": {
-  "listed": 363,
+  "listed": 364,
   "other": 48,
   "none": 33
  },
@@ -56,6 +56,11 @@
     "members": 6
    },
    {
+    "name": "Duke University",
+    "country": "United States",
+    "members": 5
+   },
+   {
     "name": "McGill University",
     "country": "Canada",
     "members": 5
@@ -88,11 +93,6 @@
    {
     "name": "Carnegie Mellon University",
     "country": "",
-    "members": 4
-   },
-   {
-    "name": "Duke University",
-    "country": "United States",
     "members": 4
    },
    {
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 226
+    "members": 227
    },
    {
     "name": "Canada",
