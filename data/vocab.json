@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-05T03:51:52.797Z",
+ "generated": "2026-11-05T17:35:00.591Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -2058,6 +2058,10 @@
    "n": 1
   },
   {
+   "v": "York University",
+   "n": 1
+  },
+  {
    "v": "Youngstown State University",
    "n": 1
   },
@@ -2535,10 +2539,6 @@
   },
   {
    "v": "WU Vienna",
-   "n": 0
-  },
-  {
-   "v": "York University",
    "n": 0
   }
  ],
@@ -3424,6 +3424,10 @@
    "n": 1
   },
   {
+   "v": "Schulich School of Business",
+   "n": 1
+  },
+  {
    "v": "Scott College of Business",
    "n": 1
   },
@@ -3849,10 +3853,6 @@
   },
   {
    "v": "School of Science and Engineering",
-   "n": 0
-  },
-  {
-   "v": "Schulich School of Business",
    "n": 0
   },
   {
@@ -5330,6 +5330,10 @@
    "n": 1
   },
   {
+   "v": "Operations Management and Information Systems",
+   "n": 1
+  },
+  {
    "v": "Operations Management, Logistics and Supply Chain Management",
    "n": 1
   },
@@ -5911,10 +5915,6 @@
   },
   {
    "v": "Operations Group of the Division of Strategy, Entrepreneurship, and Operations",
-   "n": 0
-  },
-  {
-   "v": "Operations Management and Information Systems",
    "n": 0
   },
   {

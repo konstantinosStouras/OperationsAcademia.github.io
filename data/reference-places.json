@@ -910,6 +910,11 @@
   "department": "Technology and Operations Management"
  },
  {
+  "institution": "ESCP Business School, Paris campus",
+  "school": "",
+  "department": "Operations and Supply Chain Management"
+ },
+ {
   "institution": "ESCP Business School",
   "school": "",
   "department": "Operations and Supply Chain Management"
@@ -4433,6 +4438,11 @@
   "institution": "Yeshiva University",
   "school": "",
   "department": "Data Analytics"
+ },
+ {
+  "institution": "York University",
+  "school": "Schulich School of Business",
+  "department": "Operations Management and Information Systems"
  },
  {
   "institution": "Youngstown State University",

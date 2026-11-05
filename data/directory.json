@@ -6805,6 +6805,17 @@
   "mapLocationKind": "unresolved"
  },
  {
+  "id": "escp-business-school-paris-campus____operations-and-supply-chain-management",
+  "institution": "ESCP Business School, Paris campus",
+  "department": "Operations and Supply Chain Management",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "esmt-berlin____innovation-and-entrepreneurship",
   "institution": "ESMT Berlin",
   "department": "Innovation and Entrepreneurship",
@@ -34702,8 +34713,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2024-09-20",
+  "n": 2,
+  "lastPosted": "2026-11-05",
   "mapLocationIds": [
    "york-schulich-operations-information-systems"
   ],
