@@ -125,6 +125,7 @@
   "Emory University",
   "Endicott College",
   "Erasmus University Rotterdam",
+  "ESCP Business School",
   "ESMT Berlin",
   "ESSEC",
   "ETH Zurich",
@@ -153,6 +154,7 @@
   "Georgia State University",
   "Ghent University",
   "Grand Valley State University",
+  "Grenoble Ecole de Management",
   "Hamad Bin Khalifa University",
   "Hanken School of Economics",
   "Harvard University",
@@ -1695,6 +1697,10 @@
   [
    "Neeley School of Business (Texas Christian Univ)",
    "Texas Christian University"
+  ],
+  [
+   "New York University (Tandon)",
+   "New York University"
   ],
   [
    "Northwestern",

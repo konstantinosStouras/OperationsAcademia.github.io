@@ -6790,6 +6790,17 @@
   ]
  },
  {
+  "id": "escp-business-school____operations-and-supply-chain-management",
+  "institution": "ESCP Business School",
+  "department": "Operations and Supply Chain Management",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "esmt-berlin____innovation-and-entrepreneurship",
   "institution": "ESMT Berlin",
   "department": "Innovation and Entrepreneurship",
@@ -8580,6 +8591,16 @@
    }
   },
   "facultyUrl": "https://www.gvsu.edu/seidman/form/6e5d5f89-fb66-4eb5-9eb2-50e1ccf7aed6/response?question_12671=Management"
+ },
+ {
+  "id": "grenoble-ecole-de-management____supply-chain-management",
+  "institution": "Grenoble Ecole de Management",
+  "department": "Supply Chain Management",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "hamad-bin-khalifa-university__college-of-science-and-engineering__engineering-management-and-decision-sciences",
@@ -14772,6 +14793,17 @@
    }
   },
   "facultyUrl": "https://shanghai.nyu.edu/academics/faculty-directory?field_discipline_target_id=436"
+ },
+ {
+  "id": "new-york-university-tandon____decision-analytics-for-complex-systems",
+  "institution": "New York University (Tandon)",
+  "department": "Decision Analytics for Complex Systems",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "newcastle-university____information-systems-and-operations-subject-group-operations-",

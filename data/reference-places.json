@@ -910,6 +910,11 @@
   "department": "Technology and Operations Management"
  },
  {
+  "institution": "ESCP Business School",
+  "school": "",
+  "department": "Operations and Supply Chain Management"
+ },
+ {
   "institution": "ESMT Berlin",
   "school": "",
   "department": "Innovation and Entrepreneurship"
@@ -1158,6 +1163,11 @@
   "institution": "Grand Valley State University",
   "school": "",
   "department": "Management"
+ },
+ {
+  "institution": "Grenoble Ecole de Management",
+  "school": "",
+  "department": "Supply Chain Management"
  },
  {
   "institution": "Hainan Bielefeld University of Applied Sciences",
@@ -1953,6 +1963,11 @@
   "institution": "New York Institute of Technology",
   "school": "",
   "department": "MS/MIS/Stat"
+ },
+ {
+  "institution": "New York University (Tandon)",
+  "school": "",
+  "department": "Decision Analytics for Complex Systems"
  },
  {
   "institution": "New York University Abu Dhabi",
