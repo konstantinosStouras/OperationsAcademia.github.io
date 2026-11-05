@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-04T16:49:09.964Z",
+ "generated": "2026-11-05T03:51:52.797Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1102,6 +1102,10 @@
    "n": 1
   },
   {
+   "v": "ESCP Business School",
+   "n": 1
+  },
+  {
    "v": "ESMT Berlin",
    "n": 1
   },
@@ -1171,6 +1175,10 @@
   },
   {
    "v": "Goldey-Beacom College",
+   "n": 1
+  },
+  {
+   "v": "Grenoble Ecole de Management",
    "n": 1
   },
   {
@@ -1391,6 +1399,10 @@
   },
   {
    "v": "New York University",
+   "n": 1
+  },
+  {
+   "v": "New York University (Tandon)",
    "n": 1
   },
   {
@@ -3911,7 +3923,7 @@
  "units": [
   {
    "v": "Supply Chain Management",
-   "n": 61
+   "n": 62
   },
   {
    "v": "OM",
@@ -3970,11 +3982,11 @@
    "n": 9
   },
   {
-   "v": "Decision Sciences",
-   "n": 8
+   "v": "Operations and Supply Chain Management",
+   "n": 9
   },
   {
-   "v": "Operations and Supply Chain Management",
+   "v": "Decision Sciences",
    "n": 8
   },
   {
@@ -4631,6 +4643,10 @@
   },
   {
    "v": "data-driven decision-making, optimization under uncertainty",
+   "n": 1
+  },
+  {
+   "v": "Decision Analytics for Complex Systems",
    "n": 1
   },
   {
@@ -7836,6 +7852,17 @@
     ]
    }
   },
+  "ESCP Business School": {
+   "schools": [],
+   "units": [
+    "Operations and Supply Chain Management"
+   ],
+   "bySchool": {
+    "": [
+     "Operations and Supply Chain Management"
+    ]
+   }
+  },
   "ESMT Berlin": {
    "schools": [],
    "units": [
@@ -8302,6 +8329,17 @@
    "bySchool": {
     "": [
      "Management"
+    ]
+   }
+  },
+  "Grenoble Ecole de Management": {
+   "schools": [],
+   "units": [
+    "Supply Chain Management"
+   ],
+   "bySchool": {
+    "": [
+     "Supply Chain Management"
     ]
    }
   },
@@ -9764,6 +9802,17 @@
      "Information, Operations and Management Sciences",
      "OM and AI",
      "Technology, Operations and Statistics"
+    ]
+   }
+  },
+  "New York University (Tandon)": {
+   "schools": [],
+   "units": [
+    "Decision Analytics for Complex Systems"
+   ],
+   "bySchool": {
+    "": [
+     "Decision Analytics for Complex Systems"
     ]
    }
   },

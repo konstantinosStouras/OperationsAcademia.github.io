@@ -6794,9 +6794,13 @@
   "institution": "ESCP Business School",
   "department": "Operations and Supply Chain Management",
   "type": "Business School",
+  "country": "France",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-04",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -8596,9 +8600,14 @@
   "id": "grenoble-ecole-de-management____supply-chain-management",
   "institution": "Grenoble Ecole de Management",
   "department": "Supply Chain Management",
+  "type": "Business School",
+  "country": "France",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-04",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -14799,9 +14808,13 @@
   "institution": "New York University (Tandon)",
   "department": "Decision Analytics for Complex Systems",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-04",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
