@@ -1,11 +1,11 @@
 {
- "generated": "2026-11-04T21:58:58.701Z",
- "members": 443,
+ "generated": "2026-11-05T17:37:48.160Z",
+ "members": 444,
  "k": 3,
  "affiliation": {
-  "listed": 361,
+  "listed": 363,
   "other": 48,
-  "none": 34
+  "none": 33
  },
  "universities": {
   "count": 158,
@@ -181,6 +181,11 @@
     "members": 3
    },
    {
+    "name": "ESSEC",
+    "country": "France",
+    "members": 3
+   },
+   {
     "name": "Fudan University",
     "country": "China",
     "members": 3
@@ -204,14 +209,9 @@
     "name": "INSEAD",
     "country": "France",
     "members": 3
-   },
-   {
-    "name": "New York University",
-    "country": "United States",
-    "members": 3
    }
   ],
-  "rest": 172
+  "rest": 174
  },
  "countries": {
   "count": 18,
@@ -242,18 +242,18 @@
    },
    {
     "name": "France",
-    "members": 8
+    "members": 9
    },
    {
     "name": "Germany",
     "members": 7
    },
    {
-    "name": "Oman",
-    "members": 4
+    "name": "Spain",
+    "members": 5
    },
    {
-    "name": "Spain",
+    "name": "Oman",
     "members": 4
    },
    {
@@ -262,6 +262,6 @@
    }
   ],
   "rest": 9,
-  "unknown": 103
+  "unknown": 102
  }
 }
