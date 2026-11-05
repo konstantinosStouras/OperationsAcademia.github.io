@@ -1260,6 +1260,21 @@
   "department": "Supply Chain Management"
  },
  {
+  "institution": "Higher Colleges of Technology",
+  "school": "",
+  "department": "Business Analytics"
+ },
+ {
+  "institution": "Higher Colleges of Technology",
+  "school": "",
+  "department": "Logistics and Supply Chain Management"
+ },
+ {
+  "institution": "Higher Colleges of Technology",
+  "school": "",
+  "department": "Project Management"
+ },
+ {
   "institution": "HKUST(GZ)",
   "school": "",
   "department": "DS and Analytics Thrust"
@@ -1663,6 +1678,11 @@
   "institution": "Lousiana Tech Univ",
   "school": "",
   "department": "Supply Chain Management"
+ },
+ {
+  "institution": "MacEwan University",
+  "school": "",
+  "department": "Business Analytics"
  },
  {
   "institution": "MacEwan University",
@@ -2118,6 +2138,11 @@
   "institution": "Nova School of Business and Economics",
   "school": "",
   "department": "Management of Information Systems"
+ },
+ {
+  "institution": "Nova School of Business and Economics",
+  "school": "",
+  "department": "Operations Management / Business Analytics"
  },
  {
   "institution": "NOVA School of Business and Economics",

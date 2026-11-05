@@ -9146,6 +9146,39 @@
   "facultyUrl": "https://www.highpoint.edu/businessadministration/staff/"
  },
  {
+  "id": "higher-colleges-of-technology____business-analytics",
+  "institution": "Higher Colleges of Technology",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "higher-colleges-of-technology____logistics-and-supply-chain-management",
+  "institution": "Higher Colleges of Technology",
+  "department": "Logistics and Supply Chain Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "higher-colleges-of-technology____project-management",
+  "institution": "Higher Colleges of Technology",
+  "department": "Project Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "hkust____ds-and-analytics-thrust",
   "institution": "HKUST(GZ)",
   "department": "DS and Analytics Thrust",
@@ -12389,6 +12422,17 @@
    }
   },
   "facultyUrl": "https://www.maastrichtuniversity.nl/research/mscm/faculty-and-staff"
+ },
+ {
+  "id": "macewan-university____business-analytics",
+  "institution": "MacEwan University",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "macewan-university____management-science",
@@ -15749,6 +15793,17 @@
   "facultyDirectoryHint": "Select Operations, Technology and Innovation Management in Area, click Apply, and use the alphabet to browse the full roster.",
   "deptUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",
   "deptUrlInherited": true
+ },
+ {
+  "id": "nova-school-of-business-and-economics____operations-management-business-analytics",
+  "institution": "Nova School of Business and Economics",
+  "department": "Operations Management / Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "nova-school-of-business-and-economics__school-of-business-and-economics__operations-technology-and-innovation-management",
