@@ -25463,5 +25463,39 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-11-05T03:50:59Z",
   "owner": ""
+ },
+ {
+  "id": "2027-new-york-university-tandon-20261104",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-04",
+  "institution": "New York University (Tandon)",
+  "department": "Decision Analytics for Complex Systems",
+  "school": "",
+  "unit": "Decision Analytics for Complex Systems",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://apply.interfolio.com/177410",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=New%20York%20University%20(Tandon)",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-05T03:51:40Z",
+  "owner": ""
  }
 ]
