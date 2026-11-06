@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-06T02:53:33.016Z",
- "members": 447,
+ "generated": "2026-11-06T09:58:45.256Z",
+ "members": 449,
  "k": 3,
  "affiliation": {
-  "listed": 366,
+  "listed": 368,
   "other": 48,
   "none": 33
  },
@@ -36,6 +36,11 @@
     "members": 7
    },
    {
+    "name": "McGill University",
+    "country": "Canada",
+    "members": 7
+   },
+   {
     "name": "Georgia Institute of Technology",
     "country": "United States",
     "members": 6
@@ -58,11 +63,6 @@
    {
     "name": "Duke University",
     "country": "United States",
-    "members": 5
-   },
-   {
-    "name": "McGill University",
-    "country": "Canada",
     "members": 5
    },
    {
@@ -222,7 +222,7 @@
    },
    {
     "name": "Canada",
-    "members": 26
+    "members": 28
    },
    {
     "name": "Singapore",
