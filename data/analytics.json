@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-06T11:42:10.487Z",
+ "generated": "2026-11-06T12:18:40.093Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -6218,15 +6218,15 @@
   ],
   "2026-11-06": [
    37,
-   85,
-   85
+   92,
+   92
   ]
  },
  "pages": [
   {
    "path": "/jobs.html",
    "title": "",
-   "views": 7814,
+   "views": 7816,
    "avgSec": 610
   },
   {
@@ -6238,8 +6238,8 @@
   {
    "path": "/candidates.html",
    "title": "",
-   "views": 1487,
-   "avgSec": 492
+   "views": 1492,
+   "avgSec": 490
   },
   {
    "path": "/post-a-job.html",
@@ -6504,19 +6504,19 @@
   "source": "usage+ga4",
   "from": "2026-08-09",
   "to": "2026-11-06",
-  "views": 19249
+  "views": 19256
  },
  "pagesWindows": {
   "30": {
    "days": 30,
    "from": "2026-10-08",
    "to": "2026-11-06",
-   "views": 8676,
+   "views": 8683,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 3354,
+     "views": 3356,
      "avgSec": 613
     },
     {
@@ -6528,8 +6528,8 @@
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 1420,
-     "avgSec": 515
+     "views": 1425,
+     "avgSec": 513
     },
     {
      "path": "/post-a-job.html",
@@ -6664,12 +6664,12 @@
    "days": 90,
    "from": "2026-08-09",
    "to": "2026-11-06",
-   "views": 19249,
+   "views": 19256,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 7814,
+     "views": 7816,
      "avgSec": 610
     },
     {
@@ -6681,8 +6681,8 @@
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 1487,
-     "avgSec": 492
+     "views": 1492,
+     "avgSec": 490
     },
     {
      "path": "/post-a-job.html",
@@ -6949,12 +6949,12 @@
    "days": 365,
    "from": "2025-11-07",
    "to": "2026-11-06",
-   "views": 37107,
+   "views": 37114,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 14162,
+     "views": 14164,
      "avgSec": 337
     },
     {
@@ -6966,7 +6966,7 @@
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 3974,
+     "views": 3979,
      "avgSec": 184
     },
     {
@@ -7930,12 +7930,12 @@
    "days": 0,
    "from": "2023-06-16",
    "to": "2026-11-06",
-   "views": 142472,
+   "views": 142479,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 49446,
+     "views": 49448,
      "avgSec": 96
     },
     {
@@ -7947,7 +7947,7 @@
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 21597,
+     "views": 21602,
      "avgSec": 34
     },
     {
@@ -9647,7 +9647,7 @@
    "to": "2026-11-06",
    "metric": "visits",
    "zone": "UTC",
-   "total": 18638,
+   "total": 18645,
    "items": [
     {
      "name": "00",
@@ -9695,11 +9695,11 @@
     },
     {
      "name": "11",
-     "value": 489
+     "value": 491
     },
     {
      "name": "12",
-     "value": 629
+     "value": 634
     },
     {
      "name": "13",
@@ -10212,8 +10212,8 @@
   "source": "usage",
   "from": "2026-08-17",
   "to": "2026-11-06",
-  "sessions": 18638,
-  "avgSessionSec": 454,
+  "sessions": 18645,
+  "avgSessionSec": 453,
   "viewsPerSession": 1
  },
  "universities": {
@@ -10223,7 +10223,7 @@
   "all": [
    {
     "name": "Indiana University Bloomington",
-    "visits": 316
+    "visits": 317
    },
    {
     "name": "Columbia University",
@@ -10557,7 +10557,7 @@
    },
    {
     "name": "Indiana University Bloomington",
-    "visits": 7
+    "visits": 8
    },
    {
     "name": "Columbia University",
@@ -10637,14 +10637,14 @@
     "days": 30,
     "from": "2026-10-08",
     "to": "2026-11-06",
-    "seen": 4394,
-    "resolved": 1345,
+    "seen": 4400,
+    "resolved": 1350,
     "academic": 76,
-    "placed": 812,
+    "placed": 813,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 259
+      "visits": 260
      },
      {
       "name": "Columbia University",
@@ -10924,14 +10924,14 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-11-06",
-    "seen": 8839,
-    "resolved": 2665,
+    "seen": 8845,
+    "resolved": 2670,
     "academic": 121,
-    "placed": 1156,
+    "placed": 1157,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 316
+      "visits": 317
      },
      {
       "name": "Columbia University",
@@ -11263,14 +11263,14 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-11-06",
-    "seen": 8839,
-    "resolved": 2665,
+    "seen": 8845,
+    "resolved": 2670,
     "academic": 121,
-    "placed": 1156,
+    "placed": 1157,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 316
+      "visits": 317
      },
      {
       "name": "Columbia University",
@@ -11602,14 +11602,14 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-11-06",
-    "seen": 8839,
-    "resolved": 2665,
+    "seen": 8845,
+    "resolved": 2670,
     "academic": 121,
-    "placed": 1156,
+    "placed": 1157,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 316
+      "visits": 317
      },
      {
       "name": "Columbia University",
@@ -11939,15 +11939,15 @@
    }
   },
   "recentDays": 7,
-  "seen": 8839,
-  "resolved": 2665,
+  "seen": 8845,
+  "resolved": 2670,
   "academic": 121,
-  "placed": 1156
+  "placed": 1157
  },
  "totals": {
   "visitors": 48588,
-  "sessions": 69266,
-  "pageviews": 142530,
+  "sessions": 69273,
+  "pageviews": 142537,
   "days": 1240,
   "universities": 82
  },
