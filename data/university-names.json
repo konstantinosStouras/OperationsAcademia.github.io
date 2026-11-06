@@ -21,6 +21,8 @@
   "American University of Phnom Penh",
   "American University of Sharjah",
   "Appalachian State University",
+  "Aquinas College",
+  "Arcadia University",
   "Arizona State University",
   "Arkansas Tech University",
   "Aschaffenburg University of Applied Sciences",
@@ -207,6 +209,7 @@
   "Lincoln Memorial University",
   "Lingnan University",
   "London Business School",
+  "London School of Economics and Political Science",
   "Longwood University",
   "Louisiana Tech University",
   "Loyola University Chicago",
@@ -237,6 +240,7 @@
   "Morgan State University",
   "Morningside University",
   "Murray State University",
+  "Nankai Business School",
   "Nanyang Technological University",
   "National Chiao Tung University",
   "National Tsing Hua University",
@@ -476,6 +480,7 @@
   "University of Oregon",
   "University of Oxford",
   "University of Pennsylvania",
+  "University of Pikeville",
   "University of Pittsburgh",
   "University of Portland",
   "University of Puget Sound",
@@ -523,7 +528,7 @@
   "University of Wisconsin-Madison",
   "University of Wisconsin-Milwaukee",
   "University of Wisconsin-Stout",
-  "University of Wisconsin-Whitewater",
+  "University of Wisconsin - Whitewater",
   "University of Zurich",
   "UT San Antonio",
   "Utah Tech University",
@@ -577,7 +582,6 @@
   "Sungkyunkwan University",
   "University of Queensland",
   "University of Windsor",
-  "University of Wisconsin-Whitewater",
   "Wichita State University",
   "Worcester Polytechnic Institute"
  ],
@@ -957,10 +961,6 @@
   [
    "Heller School for Social Policy and Management",
    "Brandeis University"
-  ],
-  [
-   "HKU Business School",
-   "University of Hong Kong"
   ],
   [
    "HKUST School of Business and Management",
@@ -1631,6 +1631,10 @@
   [
    "Harvard Kennedy School",
    "Harvard University"
+  ],
+  [
+   "HKU Business School",
+   "University of Hong Kong"
   ],
   [
    "HKUST(GZ)",

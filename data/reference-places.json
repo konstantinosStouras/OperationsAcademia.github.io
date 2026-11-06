@@ -150,6 +150,16 @@
   "department": "CIS"
  },
  {
+  "institution": "Aquinas College",
+  "school": "",
+  "department": "Operations Management"
+ },
+ {
+  "institution": "Arcadia University",
+  "school": "",
+  "department": "AI and Business Strategy"
+ },
+ {
   "institution": "Arizona State University",
   "school": "",
   "department": ""
@@ -1020,6 +1030,16 @@
   "department": "BA/DS"
  },
  {
+  "institution": "Florida Polytechnic University",
+  "school": "",
+  "department": "Business Analytics (Fintech)"
+ },
+ {
+  "institution": "Florida Polytechnic University",
+  "school": "",
+  "department": "Business Analytics (Operations and Engineering Management)"
+ },
+ {
   "institution": "Florida State University",
   "school": "",
   "department": "IS/Analytics"
@@ -1190,6 +1210,11 @@
   "department": "Finance and Economics"
  },
  {
+  "institution": "Hanken School of Economics",
+  "school": "",
+  "department": "Sustainable and Resilient Freight Transport Systems"
+ },
+ {
   "institution": "Harris-Stowe State University",
   "school": "Anheuser-Busch School of Business",
   "department": "Management Information Systems"
@@ -1273,6 +1298,11 @@
   "institution": "Higher Colleges of Technology",
   "school": "",
   "department": "Project Management"
+ },
+ {
+  "institution": "HKU Business School",
+  "school": "",
+  "department": "Statistics, Business Analytics, AI, Data Science"
  },
  {
   "institution": "HKUST(GZ)",
@@ -1846,6 +1876,11 @@
  },
  {
   "institution": "MIT",
+  "school": "",
+  "department": "Center for Transportation and Logistics"
+ },
+ {
+  "institution": "MIT",
   "school": "Laboratory for Information and Decision Systems",
   "department": "AI/ML/DS/Stats"
  },
@@ -1888,6 +1923,11 @@
   "institution": "Murray State University",
   "school": "Arthur J. Bauernfeind College of Business",
   "department": "Management, Marketing and Business Administration"
+ },
+ {
+  "institution": "Nankai Business School",
+  "school": "",
+  "department": "Data Science, Artificial Intelligence, Management"
  },
  {
   "institution": "Nanyang Technological University",
@@ -2028,6 +2068,11 @@
   "institution": "New York University",
   "school": "Leonard N. Stern School of Business",
   "department": "Technology, Operations and Statistics"
+ },
+ {
+  "institution": "New York University",
+  "school": "Leonard N. Stern School of Business",
+  "department": "Technology, Operations, and Statistics (Statistics Group)"
  },
  {
   "institution": "Newcastle University",
@@ -2303,6 +2348,11 @@
   "institution": "PSU Behrend",
   "school": "",
   "department": "Project and SCM"
+ },
+ {
+  "institution": "Purdue University Fort Wayne",
+  "school": "",
+  "department": "Management Information Systems and Business Analytics"
  },
  {
   "institution": "Purdue University Fort Wayne",
@@ -2938,6 +2988,16 @@
   "institution": "The Hong Kong University of Science and Technology",
   "school": "HKUST School of Business and Management",
   "department": "Information Systems, Business Statistics and Operations Management"
+ },
+ {
+  "institution": "The London School of Economics and Political Science",
+  "school": "",
+  "department": "Management (Information Systems and Innovation)"
+ },
+ {
+  "institution": "The London School of Economics and Political Science",
+  "school": "",
+  "department": "Statistics, Data Science, Machine learning"
  },
  {
   "institution": "The Ohio State University",
@@ -3875,6 +3935,11 @@
   "department": "Operations, Information and Decisions"
  },
  {
+  "institution": "University of Pikeville",
+  "school": "",
+  "department": "Business Administration (Prefer OM)"
+ },
+ {
   "institution": "University of Pittsburgh",
   "school": "",
   "department": "Industrial Engineering"
@@ -4213,6 +4278,11 @@
   "institution": "University of Wisconsin - Madison",
   "school": "Wisconsin School of Business",
   "department": "Operations and Information Management"
+ },
+ {
+  "institution": "University of Wisconsin - Whitewater",
+  "school": "",
+  "department": "Information Technology and Supply Chain Management"
  },
  {
   "institution": "University of Wisconsin-Madison",

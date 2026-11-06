@@ -935,6 +935,28 @@
   "facultyUrl": "https://cis.appstate.edu/directory"
  },
  {
+  "id": "aquinas-college____operations-management",
+  "institution": "Aquinas College",
+  "department": "Operations Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "arcadia-university____ai-and-business-strategy",
+  "institution": "Arcadia University",
+  "department": "AI and Business Strategy",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "arizona-state-university",
   "institution": "Arizona State University",
   "type": "University",
@@ -7525,6 +7547,28 @@
   "facultyDirectoryHint": "Data Science; Business Analytics; Data Science; Business Analytics. Select each of these three Department categories to see the combined department; choose 100 per page if needed."
  },
  {
+  "id": "florida-polytechnic-university____business-analytics-fintech",
+  "institution": "Florida Polytechnic University",
+  "department": "Business Analytics (Fintech)",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "florida-polytechnic-university____business-analytics-operations-and-engineering-management",
+  "institution": "Florida Polytechnic University",
+  "department": "Business Analytics (Operations and Engineering Management)",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "florida-state-university____is-analytics",
   "institution": "Florida State University",
   "department": "IS/Analytics",
@@ -8686,6 +8730,17 @@
   "facultyUrl": "https://www.hanken.fi/en/departments-centres/department-finance-and-economics/contact"
  },
  {
+  "id": "hanken-school-of-economics____sustainable-and-resilient-freight-transport-systems",
+  "institution": "Hanken School of Economics",
+  "department": "Sustainable and Resilient Freight Transport Systems",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "harvard-business-school____om",
   "institution": "Harvard Business School",
   "department": "OM",
@@ -9172,6 +9227,17 @@
   "institution": "Higher Colleges of Technology",
   "department": "Project Management",
   "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "hku-business-school____statistics-business-analytics-ai-data-science",
+  "institution": "HKU Business School",
+  "department": "Statistics, Business Analytics, AI, Data Science",
+  "type": "Business School",
   "sources": [
    "seed"
   ],
@@ -13440,6 +13506,16 @@
   ]
  },
  {
+  "id": "mit____center-for-transportation-and-logistics",
+  "institution": "MIT",
+  "department": "Center for Transportation and Logistics",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "mit__laboratory-for-information-and-decision-systems__ai-ml-ds-stats",
   "institution": "MIT",
   "school": "Laboratory for Information and Decision Systems",
@@ -13805,6 +13881,17 @@
    }
   },
   "facultyUrl": "https://www.murraystate.edu/academics/CollegesDepartments/CollegeOfBusiness/Programs/ManagementMarketingAndBusinessAdministration/FacultyStaff.aspx"
+ },
+ {
+  "id": "nankai-business-school____data-science-artificial-intelligence-management",
+  "institution": "Nankai Business School",
+  "department": "Data Science, Artificial Intelligence, Management",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "nanyang-technological-university",
@@ -14680,6 +14767,27 @@
    }
   },
   "facultyUrl": "https://www.stern.nyu.edu/experience-stern/about/departments-centers-initiatives/academic-departments/tops/faculty-staff/full-time-faculty"
+ },
+ {
+  "id": "new-york-university__leonard-n-stern-school-of-business__technology-operations-and-statistics-statistics-group",
+  "institution": "New York University",
+  "school": "Leonard N. Stern School of Business",
+  "department": "Technology, Operations, and Statistics (Statistics Group)",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [
+   "new-york-stern-technology-kaufman"
+  ],
+  "mapLocationKind": "school",
+  "mapInstitutionNames": [
+   "New York University"
+  ],
+  "mapSearchTerms": [
+   "Leonard N. Stern School of Business"
+  ],
+  "country": "United States"
  },
  {
   "id": "new-york-university-abu-dhabi____is",
@@ -17257,6 +17365,17 @@
    "Mitch Daniels School of Business",
    "Department of Supply Chain and Operations Management"
   ]
+ },
+ {
+  "id": "purdue-university-fort-wayne____management-information-systems-and-business-analytics",
+  "institution": "Purdue University Fort Wayne",
+  "department": "Management Information Systems and Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "purdue-university-fort-wayne____mis-and-ba",
@@ -22084,6 +22203,28 @@
    "School of Engineering",
    "Industrial Engineering and Logistics Management"
   ]
+ },
+ {
+  "id": "london-school-of-economics-and-political-science____management-information-systems-and-innovation",
+  "institution": "The London School of Economics and Political Science",
+  "department": "Management (Information Systems and Innovation)",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "london-school-of-economics-and-political-science____statistics-data-science-machine-learning",
+  "institution": "The London School of Economics and Political Science",
+  "department": "Statistics, Data Science, Machine learning",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "ohio-state-university",
@@ -30041,6 +30182,17 @@
   ]
  },
  {
+  "id": "university-of-pikeville____business-administration-prefer-om",
+  "institution": "University of Pikeville",
+  "department": "Business Administration (Prefer OM)",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "university-of-pittsburgh____industrial-engineering",
   "institution": "University of Pittsburgh",
   "department": "Industrial Engineering",
@@ -32720,20 +32872,15 @@
   "facultyUrl": "https://www.uwstout.edu/directory?department_name%5B%5D=Operations%20%26%20Management%20Department"
  },
  {
-  "id": "university-of-wisconsin-whitewater",
-  "institution": "University of Wisconsin-Whitewater",
+  "id": "university-of-wisconsin-whitewater____information-technology-and-supply-chain-management",
+  "institution": "University of Wisconsin - Whitewater",
+  "department": "Information Technology and Supply Chain Management",
   "type": "University",
   "sources": [
-   "members"
+   "seed"
   ],
-  "mapLocationIds": [
-   "location-706-university-level-administration"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "University of Wisconsin-Whitewater"
-  ],
-  "mapSearchTerms": []
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-zurich__department-of-business-administration__business-analytics-and-operations",
