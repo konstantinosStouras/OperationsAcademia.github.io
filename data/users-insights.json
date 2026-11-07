@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-07T19:23:26.378Z",
- "members": 453,
+ "generated": "2026-11-07T22:50:15.647Z",
+ "members": 455,
  "k": 3,
  "affiliation": {
-  "listed": 371,
+  "listed": 373,
   "other": 49,
   "none": 33
  },
@@ -211,14 +211,14 @@
     "members": 3
    }
   ],
-  "rest": 178
+  "rest": 180
  },
  "countries": {
   "count": 18,
   "shown": [
    {
     "name": "United States",
-    "members": 229
+    "members": 230
    },
    {
     "name": "Canada",
@@ -230,7 +230,7 @@
    },
    {
     "name": "Hong Kong",
-    "members": 14
+    "members": 15
    },
    {
     "name": "China",
