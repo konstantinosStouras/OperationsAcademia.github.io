@@ -1,14 +1,14 @@
 {
- "generated": "2026-11-07T08:40:57.595Z",
+ "generated": "2026-11-07T15:08:25.502Z",
  "members": 452,
  "k": 3,
  "affiliation": {
-  "listed": 368,
-  "other": 51,
+  "listed": 370,
+  "other": 49,
   "none": 33
  },
  "universities": {
-  "count": 160,
+  "count": 162,
   "shown": [
    {
     "name": "National University of Singapore",
@@ -211,7 +211,7 @@
     "members": 3
    }
   ],
-  "rest": 176
+  "rest": 178
  },
  "countries": {
   "count": 18,
