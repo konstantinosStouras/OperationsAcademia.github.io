@@ -2194,6 +2194,10 @@
    "n": 0
   },
   {
+   "v": "Julius-Maximilians-Universität Würzburg",
+   "n": 0
+  },
+  {
    "v": "Kedge Business School",
    "n": 0
   },
@@ -2358,6 +2362,10 @@
    "n": 0
   },
   {
+   "v": "University of Antwerp",
+   "n": 0
+  },
+  {
    "v": "University of Arkansas at Fayetteville",
    "n": 0
   },
@@ -2491,10 +2499,6 @@
   },
   {
    "v": "University of Wisconsin-Milwaukee",
-   "n": 0
-  },
-  {
-   "v": "University of Wisconsin-Whitewater",
    "n": 0
   },
   {
@@ -8915,6 +8919,11 @@
     ]
    }
   },
+  "Julius-Maximilians-Universität Würzburg": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
   "KAIST": {
    "schools": [
     "College of Business"
@@ -12127,6 +12136,11 @@
     ]
    }
   },
+  "University of Antwerp": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
   "University of Arizona": {
    "schools": [],
    "units": [
@@ -14226,11 +14240,6 @@
      "OM"
     ]
    }
-  },
-  "University of Wisconsin-Whitewater": {
-   "schools": [],
-   "units": [],
-   "bySchool": {}
   },
   "University of Zurich": {
    "schools": [

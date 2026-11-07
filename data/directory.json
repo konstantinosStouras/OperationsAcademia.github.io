@@ -11161,6 +11161,16 @@
   "facultyUrl": "https://www.jbs.cam.ac.uk/faculty-research/subject-groups/organisational-theory-information-systems/members/?area=3183&subject=Organisational+Theory+%26+Information+Systems"
  },
  {
+  "id": "julius-maximilians-universitat-wurzburg",
+  "institution": "Julius-Maximilians-Universität Würzburg",
+  "type": "University",
+  "sources": [
+   "members"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "kaist",
   "institution": "KAIST",
   "sources": [
@@ -24536,6 +24546,16 @@
    }
   },
   "facultyUrl": "https://abs.uva.nl/content/sections/business-analytics/staff/staff.html"
+ },
+ {
+  "id": "university-of-antwerp",
+  "institution": "University of Antwerp",
+  "type": "University",
+  "sources": [
+   "members"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-arizona____mis",
