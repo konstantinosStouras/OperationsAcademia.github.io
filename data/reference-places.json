@@ -2726,6 +2726,11 @@
  },
  {
   "institution": "Stanford University",
+  "school": "",
+  "department": "Smart Manufacturing"
+ },
+ {
+  "institution": "Stanford University",
   "school": "School of Engineering",
   "department": "Management Science and Engineering"
  },
@@ -3298,6 +3303,11 @@
   "institution": "University of British Columbia",
   "school": "Sauder School of Business",
   "department": "Transportation Operations"
+ },
+ {
+  "institution": "University of Calgary",
+  "school": "Haskayne School of Business",
+  "department": "Operations and Supply Chain Management"
  },
  {
   "institution": "University of California Riverside",
@@ -4533,6 +4543,16 @@
   "institution": "Yeshiva University",
   "school": "",
   "department": "Data Analytics"
+ },
+ {
+  "institution": "York University",
+  "school": "",
+  "department": "Healthcare Operations Management"
+ },
+ {
+  "institution": "York University",
+  "school": "",
+  "department": "Sustainable and Climate-resilient Operations"
  },
  {
   "institution": "York University",

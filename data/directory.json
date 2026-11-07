@@ -20050,6 +20050,17 @@
   "facultyUrl": "https://hai.stanford.edu/about/people"
  },
  {
+  "id": "stanford-university____smart-manufacturing",
+  "institution": "Stanford University",
+  "department": "Smart Manufacturing",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "stanford-university__department-of-management-science-and-engineering-ms-e",
   "institution": "Stanford University",
   "school": "Department of Management Science and Engineering (MS&E)",
@@ -34913,6 +34924,28 @@
    }
   },
   "facultyUrl": "https://www.yu.edu/syms/ug/information-decision-sciences/faculty"
+ },
+ {
+  "id": "york-university____healthcare-operations-management",
+  "institution": "York University",
+  "department": "Healthcare Operations Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "york-university____sustainable-and-climate-resilient-operations",
+  "institution": "York University",
+  "department": "Sustainable and Climate-resilient Operations",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "york-university__schulich-school-of-business__operations-management-and-information-systems",
