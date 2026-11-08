@@ -25667,6 +25667,174 @@
   "owner": ""
  },
  {
+  "id": "2027-hku-business-school-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "The University of Hong Kong",
+  "department": "Faculty of Business and Economics (HKU Business School), Information and Innovation Management",
+  "school": "Faculty of Business and Economics (HKU Business School)",
+  "unit": "Information and Innovation Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "June 30, 2027",
+  "applyByDate": "2027-06-30",
+  "comments": "Statistics Group: joint appointment with the School of Computing and Data Science, with tenure home in HKU Business School. Research spans statistics, AI, data science and business analytics. Review continues until June 30, 2027, or until filled.",
+  "country": "Hong Kong",
+  "countries": [
+   "Hong Kong"
+  ],
+  "adUrl": "https://jobs.hku.hk/en/job/536106/tenuretrack-professorassociate-professorassistant-professor-in-hku-business-school-and-the-school-of-computing-and-data-science",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20University%20of%20Hong%20Kong",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:16:23Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-mit-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "Massachusetts Institute of Technology",
+  "department": "School of Engineering, Center for Transportation and Logistics",
+  "school": "School of Engineering",
+  "unit": "Center for Transportation and Logistics",
+  "type": "University",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Postdoctoral Associate in the Humanitarian Supply Chain Lab, Center for Transportation and Logistics. Full-time research position; job number 26165.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.peopleclick.com/careerscp/client_mit/external/jobDetails/jobDetail.html?jobPostId=35039&localeCode=en-us",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Massachusetts%20Institute%20of%20Technology",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:16:05Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-nankai-business-school-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "Nankai University",
+  "department": "Nankai Business School, Data Science, Artificial Intelligence, Management",
+  "school": "Nankai Business School",
+  "unit": "Data Science, Artificial Intelligence, Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Post-Doc"
+  ],
+  "applyBy": "November 30, 2026",
+  "applyByDate": "2026-11-30",
+  "comments": "Recruitment includes Assistant Professor, Associate/Full Professor, chaired positions and Postdoctoral Fellow. Fields include management, data science and AI + management. Apply by November 30, 2026, 24:00 Beijing time; normally eligible to start before July 1, 2027.",
+  "country": "China",
+  "countries": [
+   "China"
+  ],
+  "adUrl": "https://eng.iacmr.org/job-openingnankai-business-school-is-looking-for-global-talents/",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Nankai%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:16:01Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-new-york-university-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "New York University",
+  "department": "Leonard N. Stern School of Business, Technology, Operations, and Statistics (Statistics Group)",
+  "school": "Leonard N. Stern School of Business",
+  "unit": "Technology, Operations, and Statistics (Statistics Group)",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 15, 2026",
+  "applyByDate": "2026-11-15",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.stern.nyu.edu/experience-stern/about/departments-centers-initiatives/academic-departments/tops/faculty-staff/position-openings/statistics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=New%20York%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:15:56Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-purdue-university-fort-wayne-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "Purdue University Fort Wayne",
+  "department": "Richard T. Doermer School of Business, Management and Marketing",
+  "school": "Richard T. Doermer School of Business",
+  "unit": "Management and Marketing",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Tenure-track Assistant Professor of Management Information Systems and Business Analytics, beginning August 2027. Review begins immediately and continues until filled.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179606306&Title=Assistant%20Professor%20of%20Management%20Information%20Systems%20and%20Business%20Analytics",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Purdue%20University%20Fort%20Wayne",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:15:50Z",
+  "owner": ""
+ },
+ {
   "id": "2027-the-london-school-of-economics-and-political-sci-20261106",
   "year": 2027,
   "years": [
