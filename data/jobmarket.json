@@ -25499,6 +25499,105 @@
   "owner": ""
  },
  {
+  "id": "2027-higher-colleges-of-technology-20261105",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-05",
+  "institution": "Higher Colleges of Technology",
+  "department": "Faculty of Business, Business Analytics",
+  "school": "Faculty of Business",
+  "unit": "Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "December 30, 2026",
+  "applyByDate": "2026-12-30",
+  "comments": "Full-time teaching-focused Faculty - Business position, with applied research and service duties. The advert does not specify Assistant/Associate/Full Professor ranks or tenure status. Applications close December 30, 2026.",
+  "country": "United Arab Emirates",
+  "countries": [
+   "United Arab Emirates"
+  ],
+  "adUrl": "https://iaavey.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs/preview/120",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Higher%20Colleges%20of%20Technology",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:14:50Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-higher-colleges-of-technology-20261105-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-05",
+  "institution": "Higher Colleges of Technology",
+  "department": "Faculty of Business, Project Management",
+  "school": "Faculty of Business",
+  "unit": "Project Management",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "December 30, 2026",
+  "applyByDate": "2026-12-30",
+  "comments": "Full-time teaching-focused Faculty - Business position, with applied research and service duties. The advert does not specify Assistant/Associate/Full Professor ranks or tenure status. Applications close December 30, 2026.",
+  "country": "United Arab Emirates",
+  "countries": [
+   "United Arab Emirates"
+  ],
+  "adUrl": "https://iaavey.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs/preview/125",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Higher%20Colleges%20of%20Technology",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:14:44Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-higher-colleges-of-technology-20261105-3",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-05",
+  "institution": "Higher Colleges of Technology",
+  "department": "Faculty of Business, Logistics and Supply Chain Management",
+  "school": "Faculty of Business",
+  "unit": "Logistics and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "December 30, 2026",
+  "applyByDate": "2026-12-30",
+  "comments": "Full-time teaching-focused Faculty - Business position, with applied research and service duties. The advert does not specify Assistant/Associate/Full Professor ranks or tenure status. Applications close December 30, 2026.",
+  "country": "United Arab Emirates",
+  "countries": [
+   "United Arab Emirates"
+  ],
+  "adUrl": "https://iaavey.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/123",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Higher%20Colleges%20of%20Technology",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:14:38Z",
+  "owner": ""
+ },
+ {
   "id": "2027-macewan-university-20261105",
   "year": 2027,
   "years": [
@@ -25565,6 +25664,40 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-11-08T02:14:28Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-university-of-wisconsin-whitewater-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "University of Wisconsin-Whitewater",
+  "department": "College of Business and Economics, Information Technology and Supply Chain Management",
+  "school": "College of Business and Economics",
+  "unit": "Information Technology and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-12-04",
+  "comments": "Tenure-track Assistant Professor, starting August 2027. Teaching emphasis: cybersecurity, AI in business, information technology and business analytics. Applications received by December 4, 2026 receive full consideration; later applications may be considered.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179608543&Title=Assistant%20Professor%20%28Tenure%2DTrack%29%20%2D%20Information%20Technology%20and%20Supply%20Chain%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Wisconsin-Whitewater",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:14:57Z",
   "owner": ""
  }
 ]
