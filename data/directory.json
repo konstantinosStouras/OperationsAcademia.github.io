@@ -16279,17 +16279,6 @@
   "facultyUrl": "https://ise.osu.edu/directory/faculty"
  },
  {
-  "id": "oklahoma-baptist-university____data-analytics",
-  "institution": "Oklahoma Baptist University",
-  "department": "Data Analytics",
-  "type": "University",
-  "sources": [
-   "seed"
-  ],
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
- },
- {
   "id": "oklahoma-state-university____mis",
   "institution": "Oklahoma State University",
   "department": "MIS",
