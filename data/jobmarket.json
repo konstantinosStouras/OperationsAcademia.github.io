@@ -25497,5 +25497,74 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-11-05T03:51:40Z",
   "owner": ""
+ },
+ {
+  "id": "2027-macewan-university-20261105",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-05",
+  "institution": "MacEwan University",
+  "department": "Triffo School of Business, Decision Sciences",
+  "school": "Triffo School of Business",
+  "unit": "Decision Sciences",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2027-01-01",
+  "comments": "Tenure-track Assistant Professor in Business Analytics, commencing July 1, 2027, subject to budgetary approval. Review begins January 1, 2027 and continues until a suitable candidate is found.",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://www.macewan.ca/about-macewan/careers/opportunities/postings/?competition=26.10.273&utm_source",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=MacEwan%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:14:32Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-nova-school-of-business-and-economics-20261105",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-05",
+  "institution": "Nova School of Business and Economics",
+  "department": "Operations, Technology and Innovation Management",
+  "school": "",
+  "unit": "Operations, Technology and Innovation Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 15, 2026",
+  "applyByDate": "2026-11-15",
+  "reviewDate": "2026-10-01",
+  "comments": "Assistant, Associate or Full Professor in Operations Management, Decision Sciences or Business Analytics, starting September 1, 2027. Priority date October 1, 2026; final deadline November 15, 2026. Replaced the certificate-error Akadeus link with the official school advertisement.",
+  "country": "Portugal",
+  "countries": [
+   "Portugal"
+  ],
+  "adUrl": "https://www.novasbe.unl.pt/Portals/0/Job%20Market/Position%20Announcement%20-%20OPM%202026.pdf",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Nova%20School%20of%20Business%20and%20Economics",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:14:28Z",
+  "owner": ""
  }
 ]
