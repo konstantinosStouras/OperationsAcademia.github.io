@@ -26279,5 +26279,38 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-11-08T13:13:08Z",
   "owner": ""
+ },
+ {
+  "id": "2027-york-university-20261107",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-07",
+  "institution": "York University",
+  "department": "Schulich School of Business, Operations Management and Information Systems",
+  "school": "Schulich School of Business",
+  "unit": "Operations Management and Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "February 1, 2027",
+  "applyByDate": "2027-02-01",
+  "comments": "Postdoctoral position in Healthcare Operations Management.",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://connect.informs.org/msom/discussion/postdoc-position-in-healthcare-operations-management-at-schulich-school-of-business#bmd8afc69a-1347-4700-aeb4-297cc9399fac",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=York%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T13:13:32Z",
+  "owner": ""
  }
 ]
