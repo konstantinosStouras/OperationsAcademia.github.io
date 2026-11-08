@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-08T02:26:37.585Z",
+ "generated": "2026-11-08T13:15:30.934Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -167,6 +167,10 @@
   },
   {
    "v": "Virginia Tech",
+   "n": 4
+  },
+  {
+   "v": "York University",
    "n": 4
   },
   {
@@ -851,10 +855,6 @@
   },
   {
    "v": "Western University",
-   "n": 2
-  },
-  {
-   "v": "York University",
    "n": 2
   },
   {
@@ -1782,6 +1782,10 @@
    "n": 1
   },
   {
+   "v": "University of Calgary",
+   "n": 1
+  },
+  {
    "v": "University of California, Davis",
    "n": 1
   },
@@ -2402,10 +2406,6 @@
    "n": 0
   },
   {
-   "v": "University of Calgary",
-   "n": 0
-  },
-  {
    "v": "University of California San Diego",
    "n": 0
   },
@@ -2644,6 +2644,10 @@
    "n": 4
   },
   {
+   "v": "Schulich School of Business",
+   "n": 4
+  },
+  {
    "v": "College of Business and Economics",
    "n": 3
   },
@@ -2865,10 +2869,6 @@
   },
   {
    "v": "School of Operations Research and Information Engineering (ORIE)",
-   "n": 2
-  },
-  {
-   "v": "Schulich School of Business",
    "n": 2
   },
   {
@@ -3205,6 +3205,10 @@
   },
   {
    "v": "Harvard Medical School",
+   "n": 1
+  },
+  {
+   "v": "Haskayne School of Business",
    "n": 1
   },
   {
@@ -3704,10 +3708,6 @@
    "n": 0
   },
   {
-   "v": "Haskayne School of Business",
-   "n": 0
-  },
-  {
    "v": "Hebrew University Business School",
    "n": 0
   },
@@ -4042,15 +4042,15 @@
    "n": 10
   },
   {
+   "v": "Operations and Supply Chain Management",
+   "n": 10
+  },
+  {
    "v": "Data Analytics",
    "n": 9
   },
   {
    "v": "Decision Sciences",
-   "n": 9
-  },
-  {
-   "v": "Operations and Supply Chain Management",
    "n": 9
   },
   {
@@ -4119,6 +4119,10 @@
   },
   {
    "v": "Operations and Business Analytics",
+   "n": 4
+  },
+  {
+   "v": "Operations Management and Information Systems",
    "n": 4
   },
   {
@@ -4367,10 +4371,6 @@
   },
   {
    "v": "Operations Management and Business Analytics",
-   "n": 2
-  },
-  {
-   "v": "Operations Management and Information Systems",
    "n": 2
   },
   {
