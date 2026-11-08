@@ -26312,5 +26312,38 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-11-08T13:13:32Z",
   "owner": ""
+ },
+ {
+  "id": "2027-york-university-20261107-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-07",
+  "institution": "York University",
+  "department": "Schulich School of Business, Operations Management and Information Systems",
+  "school": "Schulich School of Business",
+  "unit": "Operations Management and Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "February 1, 2027",
+  "applyByDate": "2027-02-01",
+  "comments": "Postdoctoral position in Sustainable and Climate-resilient Operations.",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://connect.informs.org/msom/discussion/postdoc-position-in-sustainable-and-climate-resilient-operations-at-schulich-school-of-business#bm8e0a7f02-bd97-408c-b700-bf2cf95cd436",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=York%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T13:14:01Z",
+  "owner": ""
  }
 ]
