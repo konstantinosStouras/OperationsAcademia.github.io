@@ -939,9 +939,13 @@
   "institution": "Aquinas College",
   "department": "Business Administration (Management)",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -20214,9 +20218,13 @@
   "school": "School of Engineering",
   "department": "Smart Manufacturing",
   "type": "University",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-07",
   "mapLocationIds": [
    "stanford-management-science-engineering-huang"
   ],
@@ -20226,8 +20234,7 @@
   ],
   "mapSearchTerms": [
    "School of Engineering"
-  ],
-  "country": "United States"
+  ]
  },
  {
   "id": "stanford-university__stanford-graduate-school-of-business__operations-information-and-technology-oit-area",

@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-08T02:16:49.636Z",
+ "generated": "2026-11-08T02:17:25.243Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -311,6 +311,10 @@
   },
   {
    "v": "Shanghai Jiao Tong University",
+   "n": 3
+  },
+  {
+   "v": "Stanford University",
    "n": 3
   },
   {
@@ -658,10 +662,6 @@
    "n": 2
   },
   {
-   "v": "Stanford University",
-   "n": 2
-  },
-  {
    "v": "Stockholm School of Economics (SSE)",
    "n": 2
   },
@@ -903,6 +903,10 @@
   },
   {
    "v": "Appalachian State University",
+   "n": 1
+  },
+  {
+   "v": "Aquinas College",
    "n": 1
   },
   {
@@ -2596,6 +2600,10 @@
    "n": 7
   },
   {
+   "v": "School of Engineering",
+   "n": 6
+  },
+  {
    "v": "School of Management",
    "n": 6
   },
@@ -2613,10 +2621,6 @@
   },
   {
    "v": "Gies College of Business",
-   "n": 5
-  },
-  {
-   "v": "School of Engineering",
    "n": 5
   },
   {
@@ -4534,6 +4538,10 @@
    "n": 1
   },
   {
+   "v": "Business Administration (Management)",
+   "n": 1
+  },
+  {
    "v": "Business Analytics and AI",
    "n": 1
   },
@@ -5610,6 +5618,10 @@
    "n": 1
   },
   {
+   "v": "Smart Manufacturing",
+   "n": 1
+  },
+  {
    "v": "Sport Management",
    "n": 1
   },
@@ -6348,6 +6360,17 @@
    "bySchool": {
     "": [
      "CIS"
+    ]
+   }
+  },
+  "Aquinas College": {
+   "schools": [],
+   "units": [
+    "Business Administration (Management)"
+   ],
+   "bySchool": {
+    "": [
+     "Business Administration (Management)"
     ]
    }
   },
@@ -11312,11 +11335,13 @@
    ],
    "units": [
     "Management Science and Engineering",
-    "Operations, Information, and Technology (OIT) area"
+    "Operations, Information, and Technology (OIT) area",
+    "Smart Manufacturing"
    ],
    "bySchool": {
     "School of Engineering": [
-     "Management Science and Engineering"
+     "Management Science and Engineering",
+     "Smart Manufacturing"
     ],
     "Stanford Graduate School of Business": [
      "Operations, Information, and Technology (OIT) area"
@@ -16047,7 +16072,8 @@
    "Industrial and Systems Engineering",
    "Industrial and Systems Engineering and Electrical Engineering",
    "Industrial Engineering and Industrial Management",
-   "Management Science and Engineering"
+   "Management Science and Engineering",
+   "Smart Manufacturing"
   ],
   "School of Engineering and Applied Science": [
    "Operations Research and Financial Engineering"

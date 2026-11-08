@@ -42,6 +42,76 @@
   "applicationStatus": ""
  },
  {
+  "id": "2027-stanford-university-20261107",
+  "year": 2027,
+  "years": [
+   2027,
+   2028
+  ],
+  "posted": "2026-11-07",
+  "institution": "Stanford University",
+  "department": "School of Engineering, Smart Manufacturing",
+  "school": "School of Engineering",
+  "unit": "Smart Manufacturing",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "October 1, 2027",
+  "applyByDate": "2027-10-01",
+  "reviewDate": "2026-11-01",
+  "comments": "Open-rank search in Smart Manufacturing. The home department will be determined during the search. Review begins November 1, 2026; the official Stanford portal lists October 1, 2027 as the closing date.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://facultypositions.stanford.edu/jobs/open-rank-faculty-position-in-smart-manufacturing-stanford-university-california-united-states",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://connect.informs.org/msom/discussion/faculty-position-in-manufacturing-at-stanford-university-1",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Stanford%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:17:21Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-aquinas-college-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "Aquinas College",
+  "department": "Business Administration (Management)",
+  "school": "",
+  "unit": "Business Administration (Management)",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "One-year visiting appointment (renewable annually) or tenure-track position, starting fall 2027. Teaching includes management, ethics, organizational behavior, HR and operations management. Review is ongoing until filled.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179609451&Title=Assistant%20Professor%20of%20Business%20Administration%20%28Management%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Aquinas%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:17:00Z",
+  "owner": ""
+ },
+ {
   "id": "2027-arcadia-university-20261106",
   "year": 2027,
   "years": [

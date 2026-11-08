@@ -1,6 +1,19 @@
 {
- "generated": "2026-10-17T18:28:21.485Z",
+ "generated": "2026-11-08T02:17:25.243Z",
  "postings": [
+  {
+   "id": "2027-stanford-university-20261107",
+   "ref": "",
+   "institution": "Stanford University",
+   "department": "School of Engineering, Smart Manufacturing",
+   "posted": "2026-11-07",
+   "applyByDate": "2027-10-01",
+   "reviewDate": "2026-11-01",
+   "stored": 2027,
+   "should": 2028,
+   "from": "final",
+   "current": true
+  },
   {
    "id": "2026-mcgill-university-20260728",
    "ref": "",
