@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-08T02:17:25.243Z",
+ "generated": "2026-11-08T02:26:37.585Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1363,6 +1363,10 @@
   },
   {
    "v": "Mercy University",
+   "n": 1
+  },
+  {
+   "v": "Middle Tennessee State University",
    "n": 1
   },
   {
@@ -3252,6 +3256,10 @@
    "n": 1
   },
   {
+   "v": "Jennings A. Jones College of Business",
+   "n": 1
+  },
+  {
    "v": "Jesse H. Jones School of Business",
    "n": 1
   },
@@ -4058,15 +4066,15 @@
    "n": 6
   },
   {
+   "v": "Information Systems and Analytics",
+   "n": 6
+  },
+  {
    "v": "AI",
    "n": 5
   },
   {
    "v": "Industrial Engineering and Operations Research",
-   "n": 5
-  },
-  {
-   "v": "Information Systems and Analytics",
    "n": 5
   },
   {
@@ -9622,6 +9630,19 @@
     "": [
      "Management",
      "Supply Chain Management"
+    ]
+   }
+  },
+  "Middle Tennessee State University": {
+   "schools": [
+    "Jennings A. Jones College of Business"
+   ],
+   "units": [
+    "Information Systems and Analytics"
+   ],
+   "bySchool": {
+    "Jennings A. Jones College of Business": [
+     "Information Systems and Analytics"
     ]
    }
   },
@@ -15672,6 +15693,9 @@
   ],
   "James Worth Bagley College of Engineering": [
    "Industrial and Systems Engineering"
+  ],
+  "Jennings A. Jones College of Business": [
+   "Information Systems and Analytics"
   ],
   "Jesse H. Jones Graduate School of Business": [
    "Operations Management"

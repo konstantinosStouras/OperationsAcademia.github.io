@@ -13413,13 +13413,18 @@
   "facultyUrl": "https://www.mga.edu/directory/departments.php?dept=Department+of+Management+and+Marketing"
  },
  {
-  "id": "middle-tennessee-state-university____information-systems-and-analytics-cybersecurity",
+  "id": "middle-tennessee-state-university__jennings-a-jones-college-of-business__information-systems-and-analytics",
   "institution": "Middle Tennessee State University",
-  "department": "Information Systems and Analytics (cybersecurity)",
-  "type": "University",
+  "school": "Jennings A. Jones College of Business",
+  "department": "Information Systems and Analytics",
+  "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-07",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
