@@ -152,11 +152,11 @@
  {
   "institution": "Aquinas College",
   "school": "",
-  "department": "Operations Management"
+  "department": "Business Administration (Management)"
  },
  {
   "institution": "Arcadia University",
-  "school": "",
+  "school": "School of Global Business",
   "department": "AI and Business Strategy"
  },
  {
@@ -920,9 +920,9 @@
   "department": "Technology and Operations Management"
  },
  {
-  "institution": "ESCP Business School, Paris campus",
+  "institution": "ESCP Business School",
   "school": "",
-  "department": "Operations and Supply Chain Management"
+  "department": "Information and Operations Management"
  },
  {
   "institution": "ESCP Business School",
@@ -1032,12 +1032,7 @@
  {
   "institution": "Florida Polytechnic University",
   "school": "",
-  "department": "Business Analytics (Fintech)"
- },
- {
-  "institution": "Florida Polytechnic University",
-  "school": "",
-  "department": "Business Analytics (Operations and Engineering Management)"
+  "department": "Data Science and Business Analytics"
  },
  {
   "institution": "Florida State University",
@@ -1212,7 +1207,7 @@
  {
   "institution": "Hanken School of Economics",
   "school": "",
-  "department": "Sustainable and Resilient Freight Transport Systems"
+  "department": "Supply Chain Management and Social Responsibility"
  },
  {
   "institution": "Harris-Stowe State University",
@@ -1286,23 +1281,18 @@
  },
  {
   "institution": "Higher Colleges of Technology",
-  "school": "",
+  "school": "Faculty of Business",
   "department": "Business Analytics"
  },
  {
   "institution": "Higher Colleges of Technology",
-  "school": "",
+  "school": "Faculty of Business",
   "department": "Logistics and Supply Chain Management"
  },
  {
   "institution": "Higher Colleges of Technology",
-  "school": "",
+  "school": "Faculty of Business",
   "department": "Project Management"
- },
- {
-  "institution": "HKU Business School",
-  "school": "",
-  "department": "Statistics, Business Analytics, AI, Data Science"
  },
  {
   "institution": "HKUST(GZ)",
@@ -1695,6 +1685,16 @@
   "department": "OM"
  },
  {
+  "institution": "London School of Economics",
+  "school": "",
+  "department": "Management"
+ },
+ {
+  "institution": "London School of Economics",
+  "school": "",
+  "department": "Statistics"
+ },
+ {
   "institution": "Lone Star College System",
   "school": "",
   "department": "Business"
@@ -1712,17 +1712,17 @@
  {
   "institution": "MacEwan University",
   "school": "",
-  "department": "Business Analytics"
- },
- {
-  "institution": "MacEwan University",
-  "school": "",
   "department": "Management Science"
  },
  {
   "institution": "MacEwan University",
   "school": "",
   "department": "SCM/Logistics"
+ },
+ {
+  "institution": "MacEwan University",
+  "school": "Triffo School of Business",
+  "department": "Decision Sciences"
  },
  {
   "institution": "Maine Maritime Academy",
@@ -1876,11 +1876,6 @@
  },
  {
   "institution": "MIT",
-  "school": "",
-  "department": "Center for Transportation and Logistics"
- },
- {
-  "institution": "MIT",
   "school": "Laboratory for Information and Decision Systems",
   "department": "AI/ML/DS/Stats"
  },
@@ -1925,8 +1920,8 @@
   "department": "Management, Marketing and Business Administration"
  },
  {
-  "institution": "Nankai Business School",
-  "school": "",
+  "institution": "Nankai University",
+  "school": "Nankai Business School",
   "department": "Data Science, Artificial Intelligence, Management"
  },
  {
@@ -2187,7 +2182,7 @@
  {
   "institution": "Nova School of Business and Economics",
   "school": "",
-  "department": "Operations Management / Business Analytics"
+  "department": "Operations, Technology and Innovation Management"
  },
  {
   "institution": "NOVA School of Business and Economics",
@@ -2352,12 +2347,12 @@
  {
   "institution": "Purdue University Fort Wayne",
   "school": "",
-  "department": "Management Information Systems and Business Analytics"
+  "department": "MIS and BA"
  },
  {
   "institution": "Purdue University Fort Wayne",
-  "school": "",
-  "department": "MIS and BA"
+  "school": "Richard T. Doermer School of Business",
+  "department": "Management and Marketing"
  },
  {
   "institution": "Purdue University",
@@ -2726,13 +2721,13 @@
  },
  {
   "institution": "Stanford University",
-  "school": "",
-  "department": "Smart Manufacturing"
+  "school": "School of Engineering",
+  "department": "Management Science and Engineering"
  },
  {
   "institution": "Stanford University",
   "school": "School of Engineering",
-  "department": "Management Science and Engineering"
+  "department": "Smart Manufacturing"
  },
  {
   "institution": "Stanford University",
@@ -2995,16 +2990,6 @@
   "department": "Information Systems, Business Statistics and Operations Management"
  },
  {
-  "institution": "The London School of Economics and Political Science",
-  "school": "",
-  "department": "Management (Information Systems and Innovation)"
- },
- {
-  "institution": "The London School of Economics and Political Science",
-  "school": "",
-  "department": "Statistics, Data Science, Machine learning"
- },
- {
   "institution": "The Ohio State University",
   "school": "",
   "department": ""
@@ -3023,6 +3008,11 @@
   "institution": "The University of Hong Kong",
   "school": "",
   "department": ""
+ },
+ {
+  "institution": "The University of Hong Kong",
+  "school": "Faculty of Business and Economics (HKU Business School)",
+  "department": "Information and Innovation Management"
  },
  {
   "institution": "The University of Memphis",
@@ -3946,8 +3936,8 @@
  },
  {
   "institution": "University of Pikeville",
-  "school": "",
-  "department": "Business Administration (Prefer OM)"
+  "school": "Coleman College of Business",
+  "department": "Business Administration"
  },
  {
   "institution": "University of Pittsburgh",
@@ -4290,11 +4280,6 @@
   "department": "Operations and Information Management"
  },
  {
-  "institution": "University of Wisconsin - Whitewater",
-  "school": "",
-  "department": "Information Technology and Supply Chain Management"
- },
- {
   "institution": "University of Wisconsin-Madison",
   "school": "",
   "department": ""
@@ -4303,6 +4288,11 @@
   "institution": "University of Wisconsin-Stout",
   "school": "",
   "department": "OM"
+ },
+ {
+  "institution": "University of Wisconsin-Whitewater",
+  "school": "College of Business and Economics",
+  "department": "Information Technology and Supply Chain Management"
  },
  {
   "institution": "UNSW Sydney",
@@ -4543,16 +4533,6 @@
   "institution": "Yeshiva University",
   "school": "",
   "department": "Data Analytics"
- },
- {
-  "institution": "York University",
-  "school": "",
-  "department": "Healthcare Operations Management"
- },
- {
-  "institution": "York University",
-  "school": "",
-  "department": "Sustainable and Climate-resilient Operations"
  },
  {
   "institution": "York University",

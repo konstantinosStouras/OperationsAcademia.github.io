@@ -128,7 +128,6 @@
   "Endicott College",
   "Erasmus University Rotterdam",
   "ESCP Business School",
-  "ESCP Business School, Paris campus",
   "ESMT Berlin",
   "ESSEC",
   "ETH Zurich",
@@ -210,7 +209,7 @@
   "Lincoln Memorial University",
   "Lingnan University",
   "London Business School",
-  "London School of Economics and Political Science",
+  "London School of Economics",
   "Longwood University",
   "Louisiana Tech University",
   "Loyola University Chicago",
@@ -241,7 +240,7 @@
   "Morgan State University",
   "Morningside University",
   "Murray State University",
-  "Nankai Business School",
+  "Nankai University",
   "Nanyang Technological University",
   "National Chiao Tung University",
   "National Tsing Hua University",
@@ -530,7 +529,7 @@
   "University of Wisconsin-Madison",
   "University of Wisconsin-Milwaukee",
   "University of Wisconsin-Stout",
-  "University of Wisconsin - Whitewater",
+  "University of Wisconsin-Whitewater",
   "University of Zurich",
   "UT San Antonio",
   "Utah Tech University",
@@ -689,6 +688,10 @@
   [
    "Cockrell School of Engineering",
    "University of Texas at Austin"
+  ],
+  [
+   "Coleman College of Business",
+   "University of Pikeville"
   ],
   [
    "College of Business and Digital Innovation",
@@ -967,6 +970,10 @@
    "Brandeis University"
   ],
   [
+   "HKU Business School",
+   "University of Hong Kong"
+  ],
+  [
    "HKUST School of Business and Management",
    "Hong Kong University of Science and Technology"
   ],
@@ -1227,6 +1234,10 @@
    "Monash University"
   ],
   [
+   "Nankai Business School",
+   "Nankai University"
+  ],
+  [
    "Nanyang Business School",
    "Nanyang Technological University"
   ],
@@ -1309,6 +1320,10 @@
   [
    "Raymond J. Harbert College of Business",
    "Auburn University"
+  ],
+  [
+   "Richard T. Doermer School of Business",
+   "Purdue University Fort Wayne"
   ],
   [
    "Robert B. Willumstad School of Business",
@@ -1453,6 +1468,10 @@
   [
    "Toulouse Business School",
    "University of Toulouse"
+  ],
+  [
+   "Triffo School of Business",
+   "MacEwan University"
   ],
   [
    "Tuck School of Business",
@@ -1635,10 +1654,6 @@
   [
    "Harvard Kennedy School",
    "Harvard University"
-  ],
-  [
-   "HKU Business School",
-   "University of Hong Kong"
   ],
   [
    "HKUST(GZ)",
