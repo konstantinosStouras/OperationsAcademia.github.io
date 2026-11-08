@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-08T08:16:24.114Z",
- "members": 455,
+ "generated": "2026-11-08T11:13:12.097Z",
+ "members": 456,
  "k": 3,
  "affiliation": {
-  "listed": 373,
+  "listed": 374,
   "other": 49,
   "none": 33
  },
@@ -96,6 +96,11 @@
     "members": 4
    },
    {
+    "name": "ESSEC",
+    "country": "France",
+    "members": 4
+   },
+   {
     "name": "George Washington University",
     "country": "United States",
     "members": 4
@@ -181,11 +186,6 @@
     "members": 3
    },
    {
-    "name": "ESSEC",
-    "country": "France",
-    "members": 3
-   },
-   {
     "name": "Fudan University",
     "country": "China",
     "members": 3
@@ -237,12 +237,12 @@
     "members": 13
    },
    {
-    "name": "United Kingdom",
+    "name": "France",
     "members": 10
    },
    {
-    "name": "France",
-    "members": 9
+    "name": "United Kingdom",
+    "members": 10
    },
    {
     "name": "Germany",
