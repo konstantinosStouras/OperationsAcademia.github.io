@@ -1,45 +1,45 @@
 {
- "generated": "2026-11-05T17:43:05.258Z",
- "count": 921,
+ "generated": "2026-11-08T02:16:49.636Z",
+ "count": 941,
  "years": {
   "2026": 496,
-  "2027": 424,
+  "2027": 444,
   "2028": 1
  },
  "types": {
-  "University": 457,
-  "Business School": 427
+  "University": 462,
+  "Business School": 442
  },
  "levels": {
-  "Assistant Professor": 384,
-  "Other Ranks": 209,
-  "Non-tenure track (teaching) position": 60,
-  "Post-Doc": 24,
+  "Assistant Professor": 397,
+  "Other Ranks": 216,
+  "Non-tenure track (teaching) position": 67,
+  "Post-Doc": 27,
   "Visiting Faculty (various levels)": 16,
   "PhD": 2,
   "RA or Pre-doc": 1
  },
  "countries": {
-  "United States": 653,
-  "China": 38,
-  "United Kingdom": 37,
-  "Canada": 22,
-  "Hong Kong": 21,
-  "France": 18,
+  "United States": 662,
+  "China": 39,
+  "United Kingdom": 39,
+  "Canada": 23,
+  "Hong Kong": 22,
+  "France": 19,
   "Singapore": 16,
   "Spain": 12,
+  "United Arab Emirates": 10,
   "Germany": 9,
   "India": 8,
   "South Korea": 7,
   "Turkey": 7,
-  "United Arab Emirates": 7,
   "Australia": 6,
   "Netherlands": 5,
+  "Portugal": 5,
   "Belgium": 4,
-  "Portugal": 4,
+  "Finland": 4,
   "Saudi Arabia": 4,
   "Denmark": 3,
-  "Finland": 3,
   "Ireland": 3,
   "Lebanon": 3,
   "Mexico": 3,
@@ -71,5 +71,5 @@
   "Exec Ed": 90
  },
  "featured": 1,
- "newestPosted": "2026-11-05"
+ "newestPosted": "2026-11-06"
 }

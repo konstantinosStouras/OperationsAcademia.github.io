@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-05T17:38:19.176Z",
+ "generated": "2026-11-08T02:16:49.636Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -42,6 +42,10 @@
    "n": 7
   },
   {
+   "v": "University of Utah",
+   "n": 7
+  },
+  {
    "v": "Ohio State University",
    "n": 6
   },
@@ -54,15 +58,15 @@
    "n": 6
   },
   {
+   "v": "University of Hong Kong",
+   "n": 6
+  },
+  {
    "v": "University of Illinois at Urbana-Champaign",
    "n": 6
   },
   {
    "v": "University of Michigan",
-   "n": 6
-  },
-  {
-   "v": "University of Utah",
    "n": 6
   },
   {
@@ -87,10 +91,6 @@
   },
   {
    "v": "SKEMA Business School",
-   "n": 5
-  },
-  {
-   "v": "University of Hong Kong",
    "n": 5
   },
   {
@@ -206,6 +206,10 @@
    "n": 3
   },
   {
+   "v": "Florida Polytechnic University",
+   "n": 3
+  },
+  {
    "v": "George Mason University",
    "n": 3
   },
@@ -215,6 +219,10 @@
   },
   {
    "v": "Georgetown University",
+   "n": 3
+  },
+  {
+   "v": "Higher Colleges of Technology",
    "n": 3
   },
   {
@@ -246,6 +254,14 @@
    "n": 3
   },
   {
+   "v": "MacEwan University",
+   "n": 3
+  },
+  {
+   "v": "Massachusetts Institute of Technology",
+   "n": 3
+  },
+  {
    "v": "Miami University",
    "n": 3
   },
@@ -255,6 +271,10 @@
   },
   {
    "v": "Northwestern University",
+   "n": 3
+  },
+  {
+   "v": "Nova School of Business and Economics",
    "n": 3
   },
   {
@@ -458,6 +478,10 @@
    "n": 2
   },
   {
+   "v": "ESCP Business School",
+   "n": 2
+  },
+  {
    "v": "Fairmont State University",
    "n": 2
   },
@@ -495,6 +519,10 @@
   },
   {
    "v": "Grand Valley State University",
+   "n": 2
+  },
+  {
+   "v": "Hanken School of Economics",
    "n": 2
   },
   {
@@ -554,11 +582,7 @@
    "n": 2
   },
   {
-   "v": "MacEwan University",
-   "n": 2
-  },
-  {
-   "v": "Massachusetts Institute of Technology",
+   "v": "London School of Economics",
    "n": 2
   },
   {
@@ -586,15 +610,15 @@
    "n": 2
   },
   {
+   "v": "New York University",
+   "n": 2
+  },
+  {
    "v": "North Carolina Agricultural and Technical State University",
    "n": 2
   },
   {
    "v": "Northern State University",
-   "n": 2
-  },
-  {
-   "v": "NOVA School of Business and Economics",
    "n": 2
   },
   {
@@ -611,6 +635,10 @@
   },
   {
    "v": "Peking University",
+   "n": 2
+  },
+  {
+   "v": "Purdue University Fort Wayne",
    "n": 2
   },
   {
@@ -878,6 +906,10 @@
    "n": 1
   },
   {
+   "v": "Arcadia University",
+   "n": 1
+  },
+  {
    "v": "Arkansas Tech University",
    "n": 1
   },
@@ -1106,10 +1138,6 @@
    "n": 1
   },
   {
-   "v": "ESCP Business School",
-   "n": 1
-  },
-  {
    "v": "ESMT Berlin",
    "n": 1
   },
@@ -1135,10 +1163,6 @@
   },
   {
    "v": "Florida International University",
-   "n": 1
-  },
-  {
-   "v": "Florida Polytechnic University",
    "n": 1
   },
   {
@@ -1191,10 +1215,6 @@
   },
   {
    "v": "Hamad Bin Khalifa University",
-   "n": 1
-  },
-  {
-   "v": "Hanken School of Economics",
    "n": 1
   },
   {
@@ -1374,6 +1394,10 @@
    "n": 1
   },
   {
+   "v": "Nankai University",
+   "n": 1
+  },
+  {
    "v": "National Tsing Hua University",
    "n": 1
   },
@@ -1399,10 +1423,6 @@
   },
   {
    "v": "New York Institute of Technology",
-   "n": 1
-  },
-  {
-   "v": "New York University",
    "n": 1
   },
   {
@@ -1475,10 +1495,6 @@
   },
   {
    "v": "PSU Behrend",
-   "n": 1
-  },
-  {
-   "v": "Purdue University Fort Wayne",
    "n": 1
   },
   {
@@ -1886,6 +1902,10 @@
    "n": 1
   },
   {
+   "v": "University of Pikeville",
+   "n": 1
+  },
+  {
    "v": "University of Rhode Island",
    "n": 1
   },
@@ -1955,6 +1975,10 @@
   },
   {
    "v": "University of Wisconsin-Stout",
+   "n": 1
+  },
+  {
+   "v": "University of Wisconsin-Whitewater",
    "n": 1
   },
   {
@@ -2568,6 +2592,10 @@
    "n": 8
   },
   {
+   "v": "Faculty of Business",
+   "n": 7
+  },
+  {
    "v": "School of Management",
    "n": 6
   },
@@ -2588,11 +2616,15 @@
    "n": 5
   },
   {
+   "v": "School of Engineering",
+   "n": 5
+  },
+  {
    "v": "C. T. Bauer College of Business",
    "n": 4
   },
   {
-   "v": "Faculty of Business",
+   "v": "David Eccles School of Business",
    "n": 4
   },
   {
@@ -2604,15 +2636,11 @@
    "n": 4
   },
   {
-   "v": "School of Engineering",
-   "n": 4
-  },
-  {
-   "v": "Darla Moore School of Business",
+   "v": "College of Business and Economics",
    "n": 3
   },
   {
-   "v": "David Eccles School of Business",
+   "v": "Darla Moore School of Business",
    "n": 3
   },
   {
@@ -2673,10 +2701,6 @@
   },
   {
    "v": "Business School",
-   "n": 2
-  },
-  {
-   "v": "College of Business and Economics",
    "n": 2
   },
   {
@@ -2753,6 +2777,10 @@
   },
   {
    "v": "Leavey School of Business",
+   "n": 2
+  },
+  {
+   "v": "Leonard N. Stern School of Business",
    "n": 2
   },
   {
@@ -2940,6 +2968,10 @@
    "n": 1
   },
   {
+   "v": "Coleman College of Business",
+   "n": 1
+  },
+  {
    "v": "College of Arts and Sciences",
    "n": 1
   },
@@ -3069,6 +3101,10 @@
   },
   {
    "v": "Faculty of Business and Economics",
+   "n": 1
+  },
+  {
+   "v": "Faculty of Business and Economics (HKU Business School)",
    "n": 1
   },
   {
@@ -3236,10 +3272,6 @@
    "n": 1
   },
   {
-   "v": "Leonard N. Stern School of Business",
-   "n": 1
-  },
-  {
    "v": "Loeb-Sullivan School of International Business and Logistics",
    "n": 1
   },
@@ -3308,6 +3340,10 @@
    "n": 1
   },
   {
+   "v": "Nankai Business School",
+   "n": 1
+  },
+  {
    "v": "Neeley School of Business",
    "n": 1
   },
@@ -3329,6 +3365,10 @@
   },
   {
    "v": "Questrom School of Business",
+   "n": 1
+  },
+  {
+   "v": "Richard T. Doermer School of Business",
    "n": 1
   },
   {
@@ -3416,6 +3456,10 @@
    "n": 1
   },
   {
+   "v": "School of Global Business",
+   "n": 1
+  },
+  {
    "v": "School of Industrial Engineering",
    "n": 1
   },
@@ -3465,6 +3509,10 @@
   },
   {
    "v": "Tilburg School of Economics and Management",
+   "n": 1
+  },
+  {
+   "v": "Triffo School of Business",
    "n": 1
   },
   {
@@ -3943,19 +3991,19 @@
   },
   {
    "v": "Management",
-   "n": 17
+   "n": 18
   },
   {
    "v": "Operations Management",
    "n": 17
   },
   {
-   "v": "Management Science",
+   "v": "Business Analytics",
    "n": 15
   },
   {
-   "v": "Business Analytics",
-   "n": 14
+   "v": "Management Science",
+   "n": 15
   },
   {
    "v": "MIS",
@@ -3966,12 +4014,12 @@
    "n": 13
   },
   {
-   "v": "Information Systems and Operations Management",
+   "v": "Business Administration",
    "n": 11
   },
   {
-   "v": "Business Administration",
-   "n": 10
+   "v": "Information Systems and Operations Management",
+   "n": 11
   },
   {
    "v": "Industrial and Systems Engineering",
@@ -3986,12 +4034,12 @@
    "n": 9
   },
   {
-   "v": "Operations and Supply Chain Management",
+   "v": "Decision Sciences",
    "n": 9
   },
   {
-   "v": "Decision Sciences",
-   "n": 8
+   "v": "Operations and Supply Chain Management",
+   "n": 9
   },
   {
    "v": "Technology and Operations Management",
@@ -4026,6 +4074,10 @@
    "n": 5
   },
   {
+   "v": "Operations and Information Systems",
+   "n": 5
+  },
+  {
    "v": "Business Analytics and Information Systems",
    "n": 4
   },
@@ -4046,15 +4098,15 @@
    "n": 4
   },
   {
+   "v": "Logistics and Supply Chain Management",
+   "n": 4
+  },
+  {
    "v": "Operations",
    "n": 4
   },
   {
    "v": "Operations and Business Analytics",
-   "n": 4
-  },
-  {
-   "v": "Operations and Information Systems",
    "n": 4
   },
   {
@@ -4102,7 +4154,7 @@
    "n": 3
   },
   {
-   "v": "Logistics and Supply Chain Management",
+   "v": "Management and Marketing",
    "n": 3
   },
   {
@@ -4162,6 +4214,10 @@
    "n": 2
   },
   {
+   "v": "Center for Transportation and Logistics",
+   "n": 2
+  },
+  {
    "v": "CIS",
    "n": 2
   },
@@ -4171,6 +4227,10 @@
   },
   {
    "v": "Data Science",
+   "n": 2
+  },
+  {
+   "v": "Data Science and Business Analytics",
    "n": 2
   },
   {
@@ -4218,6 +4278,14 @@
    "n": 2
   },
   {
+   "v": "Information and Innovation Management",
+   "n": 2
+  },
+  {
+   "v": "Information and Operations Management",
+   "n": 2
+  },
+  {
    "v": "Information and Technology Management",
    "n": 2
   },
@@ -4239,10 +4307,6 @@
   },
   {
    "v": "IT Management",
-   "n": 2
-  },
-  {
-   "v": "Management and Marketing",
    "n": 2
   },
   {
@@ -4302,11 +4366,19 @@
    "n": 2
   },
   {
+   "v": "Operations, Technology and Innovation Management",
+   "n": 2
+  },
+  {
    "v": "OR",
    "n": 2
   },
   {
    "v": "Production and OM",
+   "n": 2
+  },
+  {
+   "v": "Project Management",
    "n": 2
   },
   {
@@ -4319,6 +4391,10 @@
   },
   {
    "v": "SCM/OM",
+   "n": 2
+  },
+  {
+   "v": "Statistics",
    "n": 2
   },
   {
@@ -4363,6 +4439,10 @@
   },
   {
    "v": "AI and Analytics",
+   "n": 1
+  },
+  {
+   "v": "AI and Business Strategy",
    "n": 1
   },
   {
@@ -4582,10 +4662,6 @@
    "n": 1
   },
   {
-   "v": "Center for Transportation and Logistics",
-   "n": 1
-  },
-  {
    "v": "Chair of Production Management",
    "n": 1
   },
@@ -4647,6 +4723,10 @@
   },
   {
    "v": "Data Science and Decision Intelligence",
+   "n": 1
+  },
+  {
+   "v": "Data Science, Artificial Intelligence, Management",
    "n": 1
   },
   {
@@ -4858,14 +4938,6 @@
    "n": 1
   },
   {
-   "v": "Information and Innovation Management",
-   "n": 1
-  },
-  {
-   "v": "Information and Operations Management",
-   "n": 1
-  },
-  {
    "v": "Information Management and Business Analytics",
    "n": 1
   },
@@ -4919,6 +4991,10 @@
   },
   {
    "v": "Information Technology",
+   "n": 1
+  },
+  {
+   "v": "Information Technology and Supply Chain Management",
    "n": 1
   },
   {
@@ -5366,10 +5442,6 @@
    "n": 1
   },
   {
-   "v": "Operations, Technology and Innovation Management",
-   "n": 1
-  },
-  {
    "v": "Optimisation for Decision Support in Disaster Response",
    "n": 1
   },
@@ -5435,10 +5507,6 @@
   },
   {
    "v": "Project and SCM",
-   "n": 1
-  },
-  {
-   "v": "Project Management",
    "n": 1
   },
   {
@@ -5558,10 +5626,6 @@
    "n": 1
   },
   {
-   "v": "Statistics",
-   "n": 1
-  },
-  {
    "v": "Statistics and Data Science",
    "n": 1
   },
@@ -5602,6 +5666,10 @@
    "n": 1
   },
   {
+   "v": "Supply Chain Management and Social Responsibility",
+   "n": 1
+  },
+  {
    "v": "Supply Chain Management, Operations Management",
    "n": 1
   },
@@ -5635,6 +5703,10 @@
   },
   {
    "v": "Technology, Operations, and Statistics",
+   "n": 1
+  },
+  {
+   "v": "Technology, Operations, and Statistics (Statistics Group)",
    "n": 1
   },
   {
@@ -6276,6 +6348,19 @@
    "bySchool": {
     "": [
      "CIS"
+    ]
+   }
+  },
+  "Arcadia University": {
+   "schools": [
+    "School of Global Business"
+   ],
+   "units": [
+    "AI and Business Strategy"
+   ],
+   "bySchool": {
+    "School of Global Business": [
+     "AI and Business Strategy"
     ]
    }
   },
@@ -7859,10 +7944,12 @@
   "ESCP Business School": {
    "schools": [],
    "units": [
+    "Information and Operations Management",
     "Operations and Supply Chain Management"
    ],
    "bySchool": {
     "": [
+     "Information and Operations Management",
      "Operations and Supply Chain Management"
     ]
    }
@@ -8056,11 +8143,13 @@
   "Florida Polytechnic University": {
    "schools": [],
    "units": [
-    "BA/DS"
+    "BA/DS",
+    "Data Science and Business Analytics"
    ],
    "bySchool": {
     "": [
-     "BA/DS"
+     "BA/DS",
+     "Data Science and Business Analytics"
     ]
    }
   },
@@ -8374,11 +8463,13 @@
   "Hanken School of Economics": {
    "schools": [],
    "units": [
-    "Finance and Economics"
+    "Finance and Economics",
+    "Supply Chain Management and Social Responsibility"
    ],
    "bySchool": {
     "": [
-     "Finance and Economics"
+     "Finance and Economics",
+     "Supply Chain Management and Social Responsibility"
     ]
    }
   },
@@ -8491,6 +8582,23 @@
    "bySchool": {
     "Earl N. Phillips School of Business": [
      "Supply Chain Management"
+    ]
+   }
+  },
+  "Higher Colleges of Technology": {
+   "schools": [
+    "Faculty of Business"
+   ],
+   "units": [
+    "Business Analytics",
+    "Logistics and Supply Chain Management",
+    "Project Management"
+   ],
+   "bySchool": {
+    "Faculty of Business": [
+     "Business Analytics",
+     "Logistics and Supply Chain Management",
+     "Project Management"
     ]
    }
   },
@@ -9219,6 +9327,19 @@
     ]
    }
   },
+  "London School of Economics": {
+   "schools": [],
+   "units": [
+    "Management",
+    "Statistics"
+   ],
+   "bySchool": {
+    "": [
+     "Management",
+     "Statistics"
+    ]
+   }
+  },
   "Lone Star College System": {
    "schools": [],
    "units": [
@@ -9281,8 +9402,11 @@
    }
   },
   "MacEwan University": {
-   "schools": [],
+   "schools": [
+    "Triffo School of Business"
+   ],
    "units": [
+    "Decision Sciences",
     "Management Science",
     "SCM/Logistics"
    ],
@@ -9290,6 +9414,9 @@
     "": [
      "Management Science",
      "SCM/Logistics"
+    ],
+    "Triffo School of Business": [
+     "Decision Sciences"
     ]
    }
   },
@@ -9636,6 +9763,19 @@
     ]
    }
   },
+  "Nankai University": {
+   "schools": [
+    "Nankai Business School"
+   ],
+   "units": [
+    "Data Science, Artificial Intelligence, Management"
+   ],
+   "bySchool": {
+    "Nankai Business School": [
+     "Data Science, Artificial Intelligence, Management"
+    ]
+   }
+  },
   "Nanyang Technological University": {
    "schools": [
     "Nanyang Business School"
@@ -9804,13 +9944,15 @@
    "units": [
     "Information, Operations and Management Sciences",
     "OM and AI",
-    "Technology, Operations and Statistics"
+    "Technology, Operations and Statistics",
+    "Technology, Operations, and Statistics (Statistics Group)"
    ],
    "bySchool": {
     "Leonard N. Stern School of Business": [
      "Information, Operations and Management Sciences",
      "OM and AI",
-     "Technology, Operations and Statistics"
+     "Technology, Operations and Statistics",
+     "Technology, Operations, and Statistics (Statistics Group)"
     ]
    }
   },
@@ -10071,7 +10213,7 @@
     ]
    }
   },
-  "NOVA School of Business and Economics": {
+  "Nova School of Business and Economics": {
    "schools": [
     "School of Business and Economics"
    ],
@@ -10404,13 +10546,19 @@
    }
   },
   "Purdue University Fort Wayne": {
-   "schools": [],
+   "schools": [
+    "Richard T. Doermer School of Business"
+   ],
    "units": [
+    "Management and Marketing",
     "MIS and BA"
    ],
    "bySchool": {
     "": [
      "MIS and BA"
+    ],
+    "Richard T. Doermer School of Business": [
+     "Management and Marketing"
     ]
    }
   },
@@ -12618,6 +12766,7 @@
   "University of Hong Kong": {
    "schools": [
     "Faculty of Business and Economics",
+    "Faculty of Business and Economics (HKU Business School)",
     "HKU Business School"
    ],
    "units": [
@@ -12632,6 +12781,9 @@
      "Data and Systems Engineering"
     ],
     "Faculty of Business and Economics": [
+     "Information and Innovation Management"
+    ],
+    "Faculty of Business and Economics (HKU Business School)": [
      "Information and Innovation Management"
     ],
     "HKU Business School": [
@@ -13528,6 +13680,19 @@
     ]
    }
   },
+  "University of Pikeville": {
+   "schools": [
+    "Coleman College of Business"
+   ],
+   "units": [
+    "Business Administration"
+   ],
+   "bySchool": {
+    "Coleman College of Business": [
+     "Business Administration"
+    ]
+   }
+  },
   "University of Pittsburgh": {
    "schools": [
     "Joseph M. Katz Graduate School of Business"
@@ -14238,6 +14403,19 @@
    "bySchool": {
     "": [
      "OM"
+    ]
+   }
+  },
+  "University of Wisconsin-Whitewater": {
+   "schools": [
+    "College of Business and Economics"
+   ],
+   "units": [
+    "Information Technology and Supply Chain Management"
+   ],
+   "bySchool": {
+    "College of Business and Economics": [
+     "Information Technology and Supply Chain Management"
     ]
    }
   },
@@ -14995,6 +15173,9 @@
   "Cockrell School of Engineering": [
    "Operations Research and Industrial Engineering"
   ],
+  "Coleman College of Business": [
+   "Business Administration"
+  ],
   "College of Administrative Sciences and Economics (CASE)": [
    "Operations Management and Information Systems"
   ],
@@ -15051,6 +15232,7 @@
   ],
   "College of Business and Economics": [
    "Accounting, Economics, Finance, and Information Systems",
+   "Information Technology and Supply Chain Management",
    "Management"
   ],
   "College of Business and Innovation": [
@@ -15249,10 +15431,13 @@
    "Management and Organizational Studies"
   ],
   "Faculty of Business": [
+   "Business Analytics",
    "Computing and Decision Sciences",
    "Fashion and Textiles",
    "Logistics and Maritime Studies",
-   "Management Information Systems"
+   "Logistics and Supply Chain Management",
+   "Management Information Systems",
+   "Project Management"
   ],
   "Faculty of Business Administration": [
    "Accounting and Information Management",
@@ -15260,6 +15445,9 @@
    "Operations Management"
   ],
   "Faculty of Business and Economics": [
+   "Information and Innovation Management"
+  ],
+  "Faculty of Business and Economics (HKU Business School)": [
    "Information and Innovation Management"
   ],
   "Faculty of Data and Decision Sciences": [
@@ -15523,7 +15711,8 @@
   "Leonard N. Stern School of Business": [
    "Information, Operations and Management Sciences",
    "OM and AI",
-   "Technology, Operations, and Statistics"
+   "Technology, Operations, and Statistics",
+   "Technology, Operations, and Statistics (Statistics Group)"
   ],
   "Loeb-Sullivan School of International Business and Logistics": [
    "International Business and Logistics"
@@ -15650,6 +15839,9 @@
   "Monash Business School": [
    "Management"
   ],
+  "Nankai Business School": [
+   "Data Science, Artificial Intelligence, Management"
+  ],
   "Nanyang Business School": [
    "Information Technology and Operations Management",
    "Informaton Technology and Operatons Management"
@@ -15722,6 +15914,9 @@
   "Raymond J. Harbert College of Business": [
    "Business Analytics and Information Systems",
    "Supply Chain Management"
+  ],
+  "Richard T. Doermer School of Business": [
+   "Management and Marketing"
   ],
   "Robert B. Willumstad School of Business": [
    "Decision Sciences and Marketing",
@@ -15860,6 +16055,9 @@
   "School of Finance": [
    "Large Language Model Research Institute"
   ],
+  "School of Global Business": [
+   "AI and Business Strategy"
+  ],
   "School of Industrial Engineering": [
    "Industrial Engineering and Innovation Sciences"
   ],
@@ -15962,6 +16160,9 @@
   ],
   "Toulouse Business School": [
    "Information, Operations and Management Sciences"
+  ],
+  "Triffo School of Business": [
+   "Decision Sciences"
   ],
   "Tuck School of Business": [
    "Operations and Management Science"

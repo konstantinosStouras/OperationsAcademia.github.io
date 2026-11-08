@@ -951,9 +951,13 @@
   "school": "School of Global Business",
   "department": "AI and Business Strategy",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -6817,9 +6821,13 @@
   "institution": "ESCP Business School",
   "department": "Information and Operations Management",
   "type": "Business School",
+  "country": "France",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-04",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -7552,9 +7560,13 @@
   "institution": "Florida Polytechnic University",
   "department": "Data Science and Business Analytics",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 2,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [
    "florida-polytechnic-data-business-barnett"
   ],
@@ -7565,7 +7577,6 @@
   "mapSearchTerms": [
    "Department of Data Science and Business Analytics"
   ],
-  "country": "United States",
   "mapDepartmentLinks": {
    "florida-polytechnic-data-business-barnett": {
     "facultyUrl": "https://floridapoly.edu/faculty/",
@@ -8741,9 +8752,13 @@
   "institution": "Hanken School of Economics",
   "department": "Supply Chain Management and Social Responsibility",
   "type": "University",
+  "country": "Finland",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -9213,9 +9228,13 @@
   "school": "Faculty of Business",
   "department": "Business Analytics",
   "type": "Business School",
+  "country": "United Arab Emirates",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-05",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -9225,9 +9244,13 @@
   "school": "Faculty of Business",
   "department": "Logistics and Supply Chain Management",
   "type": "Business School",
+  "country": "United Arab Emirates",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-05",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -9237,9 +9260,13 @@
   "school": "Faculty of Business",
   "department": "Project Management",
   "type": "Business School",
+  "country": "United Arab Emirates",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-05",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -12355,9 +12382,13 @@
   "institution": "London School of Economics",
   "department": "Management",
   "type": "University",
+  "country": "United Kingdom",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -12366,9 +12397,13 @@
   "institution": "London School of Economics",
   "department": "Statistics",
   "type": "University",
+  "country": "United Kingdom",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -12586,9 +12621,13 @@
   "school": "Triffo School of Business",
   "department": "Decision Sciences",
   "type": "Business School",
+  "country": "Canada",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-05",
   "mapLocationIds": [
    "macewan-decision-sciences-building-five"
   ],
@@ -12600,7 +12639,6 @@
    "Triffo School of Business",
    "Department of Decision Sciences"
   ],
-  "country": "Canada",
   "mapDepartmentLinks": {
    "macewan-decision-sciences-building-five": {
     "facultyUrl": "https://calendar.macewan.ca/faculties-university/business/decision-sciences/"
@@ -12739,8 +12777,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-10-06",
+  "n": 2,
+  "lastPosted": "2026-11-06",
   "sourceRowIds": [
    "massachusetts-institute-of-technology____center-for-transportation-and-logistics"
   ],
@@ -13371,6 +13409,17 @@
   "facultyUrl": "https://www.mga.edu/directory/departments.php?dept=Department+of+Management+and+Marketing"
  },
  {
+  "id": "middle-tennessee-state-university____information-systems-and-analytics-cybersecurity",
+  "institution": "Middle Tennessee State University",
+  "department": "Information Systems and Analytics (cybersecurity)",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "minnesota-state-university____mis-and-ba",
   "institution": "Minnesota State University",
   "department": "MIS and BA",
@@ -13926,9 +13975,13 @@
   "school": "Nankai Business School",
   "department": "Data Science, Artificial Intelligence, Management",
   "type": "Business School",
+  "country": "China",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -14813,9 +14866,13 @@
   "school": "Leonard N. Stern School of Business",
   "department": "Technology, Operations, and Statistics (Statistics Group)",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [
    "new-york-stern-technology-kaufman"
   ],
@@ -14825,8 +14882,7 @@
   ],
   "mapSearchTerms": [
    "Leonard N. Stern School of Business"
-  ],
-  "country": "United States"
+  ]
  },
  {
   "id": "new-york-university-abu-dhabi____is",
@@ -15962,8 +16018,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2026-09-22",
+  "n": 2,
+  "lastPosted": "2026-11-05",
   "sourceRowIds": [
    "nova-school-of-business-and-economics____operations-technology-and-innovation-management"
   ],
@@ -17430,9 +17486,13 @@
   "school": "Richard T. Doermer School of Business",
   "department": "Management and Marketing",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [
    "purdue-fort-wayne-management-doermer"
   ],
@@ -17444,7 +17504,6 @@
    "Richard T. Doermer School of Business",
    "Department of Management and Marketing"
   ],
-  "country": "United States",
   "mapDepartmentLinks": {
    "purdue-fort-wayne-management-doermer": {
     "facultyUrl": "https://www.pfw.edu/business/faculty-staff#391686"
@@ -22522,9 +22581,13 @@
   "school": "Faculty of Business and Economics (HKU Business School)",
   "department": "Information and Innovation Management",
   "type": "Business School",
+  "country": "Hong Kong",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [
    "hong-kong-business-innovation-kk-leung"
   ],
@@ -22536,7 +22599,6 @@
    "Faculty of Business and Economics (HKU Business School)",
    "Innovation and Information Management"
   ],
-  "country": "Hong Kong",
   "mapDepartmentLinks": {
    "hong-kong-business-innovation-kk-leung": {
     "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate"
@@ -30271,9 +30333,13 @@
   "school": "Coleman College of Business",
   "department": "Business Administration",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
@@ -32180,8 +32246,8 @@
    "postings",
    "seed"
   ],
-  "n": 4,
-  "lastPosted": "2026-11-04",
+  "n": 5,
+  "lastPosted": "2026-11-06",
   "lat": 40.7617224,
   "lng": -111.8435009,
   "mapLocationIds": [
@@ -32962,9 +33028,13 @@
   "school": "College of Business and Economics",
   "department": "Information Technology and Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "sources": [
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-11-06",
   "mapLocationIds": [],
   "mapLocationKind": "unresolved"
  },
