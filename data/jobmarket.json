@@ -26246,5 +26246,38 @@
   "source": "jobmarket-sheet",
   "addedAt": "2026-11-08T02:17:21Z",
   "owner": ""
+ },
+ {
+  "id": "2027-university-of-calgary-20261107",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-07",
+  "institution": "University of Calgary",
+  "department": "Haskayne School of Business, Operations and Supply Chain Management",
+  "school": "Haskayne School of Business",
+  "unit": "Operations and Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "November 15, 2026",
+  "applyByDate": "2026-11-15",
+  "comments": "Postdoctoral Fellowship in Behavioral Operations Management.",
+  "country": "Canada",
+  "countries": [
+   "Canada"
+  ],
+  "adUrl": "https://connect.informs.org/msom/discussion/postdoctoral-fellowship-in-behavioral-operations-management-haskayne-school-of-business-university-of-calgary#bm750b3fbd-01d3-40f6-b795-5b7687df39bd",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Calgary",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T13:13:08Z",
+  "owner": ""
  }
 ]
