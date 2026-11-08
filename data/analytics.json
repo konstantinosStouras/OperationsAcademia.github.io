@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-08T11:28:06.324Z",
+ "generated": "2026-11-08T12:16:08.652Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -6227,23 +6227,23 @@
    129
   ],
   "2026-11-08": [
-   27,
-   58,
-   58
+   28,
+   62,
+   62
   ]
  },
  "pages": [
   {
    "path": "/jobs.html",
    "title": "",
-   "views": 7875,
+   "views": 7877,
    "avgSec": 613
   },
   {
    "path": "/",
    "title": "",
-   "views": 5631,
-   "avgSec": 310
+   "views": 5632,
+   "avgSec": 309
   },
   {
    "path": "/candidates.html",
@@ -6260,7 +6260,7 @@
   {
    "path": "/universities.html",
    "title": "",
-   "views": 734,
+   "views": 735,
    "avgSec": 480
   },
   {
@@ -6496,25 +6496,25 @@
   "source": "usage+ga4",
   "from": "2026-08-11",
   "to": "2026-11-08",
-  "views": 19369
+  "views": 19373
  },
  "pagesWindows": {
   "30": {
    "days": 30,
    "from": "2026-10-10",
    "to": "2026-11-08",
-   "views": 8258,
+   "views": 8262,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 3159,
+     "views": 3161,
      "avgSec": 538
     },
     {
      "path": "/",
      "title": "",
-     "views": 1884,
+     "views": 1885,
      "avgSec": 177
     },
     {
@@ -6532,7 +6532,7 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 342,
+     "views": 343,
      "avgSec": 464
     },
     {
@@ -6656,19 +6656,19 @@
    "days": 90,
    "from": "2026-08-11",
    "to": "2026-11-08",
-   "views": 19369,
+   "views": 19373,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 7875,
+     "views": 7877,
      "avgSec": 613
     },
     {
      "path": "/",
      "title": "",
-     "views": 5631,
-     "avgSec": 310
+     "views": 5632,
+     "avgSec": 309
     },
     {
      "path": "/candidates.html",
@@ -6685,7 +6685,7 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 734,
+     "views": 735,
      "avgSec": 480
     },
     {
@@ -6923,18 +6923,18 @@
    "days": 365,
    "from": "2025-11-09",
    "to": "2026-11-08",
-   "views": 37114,
+   "views": 37118,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 14171,
-     "avgSec": 340
+     "views": 14173,
+     "avgSec": 341
     },
     {
      "path": "/",
      "title": "",
-     "views": 10442,
+     "views": 10443,
      "avgSec": 167
     },
     {
@@ -6952,7 +6952,7 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 1075,
+     "views": 1076,
      "avgSec": 328
     },
     {
@@ -7904,18 +7904,18 @@
    "days": 0,
    "from": "2023-06-16",
    "to": "2026-11-08",
-   "views": 142766,
+   "views": 142770,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 49564,
+     "views": 49566,
      "avgSec": 97
     },
     {
      "path": "/",
      "title": "",
-     "views": 37780,
+     "views": 37781,
      "avgSec": 46
     },
     {
@@ -7939,7 +7939,7 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 3032,
+     "views": 3033,
      "avgSec": 116
     },
     {
@@ -9621,7 +9621,7 @@
    "to": "2026-11-08",
    "metric": "visits",
    "zone": "UTC",
-   "total": 18932,
+   "total": 18936,
    "items": [
     {
      "name": "00",
@@ -9669,7 +9669,7 @@
     },
     {
      "name": "11",
-     "value": 498
+     "value": 502
     },
     {
      "name": "12",
@@ -10182,7 +10182,7 @@
   "source": "usage",
   "from": "2026-08-17",
   "to": "2026-11-08",
-  "sessions": 18932,
+  "sessions": 18936,
   "avgSessionSec": 453,
   "viewsPerSession": 1
  },
@@ -10623,8 +10623,8 @@
     "days": 30,
     "from": "2026-10-10",
     "to": "2026-11-08",
-    "seen": 4186,
-    "resolved": 1273,
+    "seen": 4191,
+    "resolved": 1277,
     "academic": 79,
     "placed": 797,
     "all": [
@@ -10898,8 +10898,8 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-11-08",
-    "seen": 8996,
-    "resolved": 2709,
+    "seen": 9001,
+    "resolved": 2713,
     "academic": 129,
     "placed": 1189,
     "all": [
@@ -11241,8 +11241,8 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-11-08",
-    "seen": 8996,
-    "resolved": 2709,
+    "seen": 9001,
+    "resolved": 2713,
     "academic": 129,
     "placed": 1189,
     "all": [
@@ -11584,8 +11584,8 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-11-08",
-    "seen": 8996,
-    "resolved": 2709,
+    "seen": 9001,
+    "resolved": 2713,
     "academic": 129,
     "placed": 1189,
     "all": [
@@ -11925,15 +11925,15 @@
    }
   },
   "recentDays": 7,
-  "seen": 8996,
-  "resolved": 2709,
+  "seen": 9001,
+  "resolved": 2713,
   "academic": 129,
   "placed": 1189
  },
  "totals": {
-  "visitors": 48697,
-  "sessions": 69560,
-  "pageviews": 142824,
+  "visitors": 48698,
+  "sessions": 69564,
+  "pageviews": 142828,
   "days": 1242,
   "universities": 83
  },
