@@ -25667,6 +25667,179 @@
   "owner": ""
  },
  {
+  "id": "2027-aquinas-college-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "Aquinas College",
+  "department": "Business Administration (Management)",
+  "school": "",
+  "unit": "Business Administration (Management)",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "One-year visiting appointment (renewable annually) or tenure-track position, starting fall 2027. Teaching includes management, ethics, organizational behavior, HR and operations management. Review is ongoing until filled.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179609451&Title=Assistant%20Professor%20of%20Business%20Administration%20%28Management%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Aquinas%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:17:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-arcadia-university-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "Arcadia University",
+  "department": "School of Global Business, AI and Business Strategy",
+  "school": "School of Global Business",
+  "unit": "AI and Business Strategy",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-16",
+  "comments": "Tenure-track Assistant Professor in AI and Business Strategy, starting August 2027. The advertisement gives conflicting priority dates: November 16 and November 30, 2026; the earlier date is shown as the suggested apply-by date. Review begins immediately.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179603619&Title=Assistant%20Professor%2C%20Tenure%20Track%2C%20AI%20and%20Business%20Strategy",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Arcadia%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:16:38Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-florida-polytechnic-university-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "Florida Polytechnic University",
+  "department": "Data Science and Business Analytics",
+  "school": "",
+  "unit": "Data Science and Business Analytics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2027-01-11",
+  "comments": "Open-rank position in Analytical Finance / Business Analytics, starting August 2027. Instructor, Assistant Professor, Associate Professor and Professor ranks are considered. Review continues until filled.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179606617&Title=Business%20Analytics%2FFinance%20Faculty%20%28Open%20Rank%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Florida%20Polytechnic%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:16:34Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-florida-polytechnic-university-20261106-2",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "Florida Polytechnic University",
+  "department": "Data Science and Business Analytics",
+  "school": "",
+  "unit": "Data Science and Business Analytics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2027-01-11",
+  "comments": "Open-rank position in Operations and Engineering Management / Business Analytics, starting August 2027. Instructor, Assistant Professor, Associate Professor and Professor ranks are considered. Review continues until filled.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179606616&Title=Business%20Analytics%2FOperations%20and%20Engineering%20Management%20Faculty%20%28Open%20Rank%29",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Florida%20Polytechnic%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:16:30Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-hanken-school-of-economics-20261106",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-11-06",
+  "institution": "Hanken School of Economics",
+  "department": "Supply Chain Management and Social Responsibility",
+  "school": "",
+  "unit": "Supply Chain Management and Social Responsibility",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "November 16, 2026",
+  "applyByDate": "2026-11-16",
+  "comments": "Eight-month postdoctoral project on sustainable and resilient Nordic freight transport systems, based in Helsinki. Start January 2027, or by February 2027 at the latest. Applications close November 16, 2026.",
+  "country": "Finland",
+  "countries": [
+   "Finland"
+  ],
+  "adUrl": "https://hanken.rekrytointi.com/paikat/index.php?jid=406&key=&o=A_RJ&rspvt=76jbkx894pkw8kwcsco408ksoock0ws",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Hanken%20School%20of%20Economics",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:16:26Z",
+  "owner": ""
+ },
+ {
   "id": "2027-hku-business-school-20261106",
   "year": 2027,
   "years": [
@@ -26002,6 +26175,42 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-11-08T02:14:57Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-stanford-university-20261107",
+  "year": 2027,
+  "years": [
+   2027,
+   2028
+  ],
+  "posted": "2026-11-07",
+  "institution": "Stanford University",
+  "department": "School of Engineering, Smart Manufacturing",
+  "school": "School of Engineering",
+  "unit": "Smart Manufacturing",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "October 1, 2027",
+  "applyByDate": "2027-10-01",
+  "reviewDate": "2026-11-01",
+  "comments": "Open-rank search in Smart Manufacturing. The home department will be determined during the search. Review begins November 1, 2026; the official Stanford portal lists October 1, 2027 as the closing date.",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://facultypositions.stanford.edu/jobs/open-rank-faculty-position-in-smart-manufacturing-stanford-university-california-united-states",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://connect.informs.org/msom/discussion/faculty-position-in-manufacturing-at-stanford-university-1",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Stanford%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-11-08T02:17:21Z",
   "owner": ""
  }
 ]
