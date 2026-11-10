@@ -33761,30 +33761,6 @@
   "facultyUrl": "https://data.science.vt.edu/about/people.html"
  },
  {
-  "id": "virginia-tech____grado-department-of-industrial-and-systems-engineering",
-  "institution": "Virginia Tech",
-  "department": "Grado Department of Industrial and Systems Engineering",
-  "country": "United States",
-  "address": "250 Perry St, Blacksburg, VA 24061, USA",
-  "facultyUrl": "https://www.ise.vt.edu/people/faculty.html",
-  "sources": [
-   "directory"
-  ],
-  "lat": 37.2316097,
-  "lng": -80.4237306,
-  "mapLocationIds": [
-   "virginia-tech-industrial-systems-durham"
-  ],
-  "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Virginia Tech"
-  ],
-  "mapSearchTerms": [
-   "College of Engineering",
-   "Grado Department of Industrial and Systems Engineering"
-  ]
- },
- {
   "id": "virginia-tech____healthcare-operations",
   "institution": "Virginia Tech",
   "department": "Healthcare Operations",
@@ -33812,6 +33788,38 @@
    }
   },
   "facultyUrl": "https://medicine.vtc.vt.edu/academics/academic-departments/interprofessionalism/faculty.html"
+ },
+ {
+  "id": "virginia-tech__college-of-engineering__grado-department-of-industrial-and-systems-engineering",
+  "institution": "Virginia Tech",
+  "school": "College of Engineering",
+  "department": "Grado Department of Industrial and Systems Engineering",
+  "country": "United States",
+  "facultyUrl": "https://www.ise.vt.edu/people/faculty.html",
+  "sources": [
+   "directory",
+   "seed"
+  ],
+  "sourceRowIds": [
+   "virginia-tech____grado-department-of-industrial-and-systems-engineering"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "Grado Department of Industrial and Systems Engineering"
+   }
+  ],
+  "mapLocationIds": [
+   "virginia-tech-industrial-systems-durham"
+  ],
+  "mapLocationKind": "exact",
+  "mapSearchTerms": [
+   "College of Engineering",
+   "Grado Department of Industrial and Systems Engineering"
+  ],
+  "mapInstitutionNames": [
+   "Virginia Tech"
+  ]
  },
  {
   "id": "virginia-tech__grado-department-of-industrial-and-systems-engineering__operations-research",

@@ -1,30 +1,30 @@
 {
- "generated": "2026-11-01T01:25:54.682Z",
- "count": 44,
+ "generated": "2026-11-10T04:20:07.145Z",
+ "count": 45,
  "years": {
-  "2027": 44
+  "2027": 45
  },
  "positions": {
-  "PhD Candidate": 26,
+  "PhD Candidate": 27,
   "Post-Doctoral Researcher": 12,
   "Assistant Professor": 4,
   "Research Scientist": 2
  },
  "researchAreas": {
-  "Machine Learning and Data Science": 20,
-  "Operations Research / Optimization": 15,
+  "Machine Learning and Data Science": 21,
+  "Operations Research / Optimization": 16,
   "Empirical Operations": 14,
   "Technology, Platforms and Marketplaces": 14,
-  "Service Operations": 11,
-  "Supply Chain Management": 10,
+  "Service Operations": 12,
+  "Supply Chain Management": 11,
   "Sustainable Operations": 10,
-  "Behavioral Operations": 8,
-  "Healthcare Operations": 8,
+  "Behavioral Operations": 9,
+  "Healthcare Operations": 9,
   "Revenue Management and Pricing": 8,
   "Innovation and New Product Development": 6,
+  "Transportation and Logistics": 3,
   "AI": 2,
   "Sequential Decision Making": 2,
-  "Transportation and Logistics": 2,
   "AI and Ethics": 1,
   "AI for Operations Research": 1,
   "AI for Social Good": 1,
@@ -38,6 +38,7 @@
   "Business Model Innovation": 1,
   "Control Theory": 1,
   "Deep Learning": 1,
+  "DRO": 1,
   "Energy Markets": 1,
   "Energy Systems": 1,
   "Energy Transition": 1,
@@ -73,27 +74,27 @@
  },
  "informsDays": {
   "Sunday": 18,
-  "Monday": 10,
+  "Monday": 11,
   "Tuesday": 5,
   "Wednesday": 1
  },
- "withCv": 40,
- "newestPosted": "2026-10-30",
+ "withCv": 41,
+ "newestPosted": "2026-11-10",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
  "heldCount": 0,
  "researchSummary": [
   {
    "label": "Machine learning",
-   "count": 20
+   "count": 21
   },
   {
    "label": "Optimization",
-   "count": 15
+   "count": 16
   },
   {
    "label": "Healthcare operations",
-   "count": 8
+   "count": 9
   }
  ]
 }

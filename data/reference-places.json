@@ -4401,6 +4401,11 @@
  },
  {
   "institution": "Virginia Tech",
+  "school": "College of Engineering",
+  "department": "Grado Department of Industrial and Systems Engineering"
+ },
+ {
+  "institution": "Virginia Tech",
   "school": "Grado Department of Industrial and Systems Engineering",
   "department": "Operations Research"
  },
