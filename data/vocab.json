@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-08T13:15:30.934Z",
+ "generated": "2026-11-10T11:43:46.144Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -243,10 +243,6 @@
   },
   {
    "v": "Indiana State University",
-   "n": 3
-  },
-  {
-   "v": "INSEAD",
    "n": 3
   },
   {
@@ -563,6 +559,10 @@
   },
   {
    "v": "Indiana University Northwest",
+   "n": 2
+  },
+  {
+   "v": "INSEAD",
    "n": 2
   },
   {
@@ -2584,11 +2584,11 @@
    "n": 25
   },
   {
-   "v": "School of Business",
-   "n": 15
+   "v": "College of Engineering",
+   "n": 14
   },
   {
-   "v": "College of Engineering",
+   "v": "School of Business",
    "n": 14
   },
   {
@@ -4054,11 +4054,11 @@
    "n": 9
   },
   {
-   "v": "Technology and Operations Management",
-   "n": 8
+   "v": "Information Systems",
+   "n": 7
   },
   {
-   "v": "Information Systems",
+   "v": "Technology and Operations Management",
    "n": 7
   },
   {
