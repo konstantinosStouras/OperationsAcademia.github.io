@@ -1,11 +1,11 @@
 {
- "generated": "2026-11-10T18:54:28.136Z",
+ "generated": "2026-11-10T23:49:22.302Z",
  "members": 461,
  "k": 3,
  "affiliation": {
-  "listed": 379,
+  "listed": 380,
   "other": 49,
-  "none": 33
+  "none": 32
  },
  "universities": {
   "count": 164,
@@ -141,6 +141,11 @@
     "members": 4
    },
    {
+    "name": "University of Chicago",
+    "country": "United States",
+    "members": 4
+   },
+   {
     "name": "University of Mannheim",
     "country": "Germany",
     "members": 4
@@ -204,11 +209,6 @@
     "name": "IE University",
     "country": "Spain",
     "members": 3
-   },
-   {
-    "name": "INSEAD",
-    "country": "France",
-    "members": 3
    }
   ],
   "rest": 184
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 237
+    "members": 238
    },
    {
     "name": "Canada",
@@ -262,6 +262,6 @@
    }
   ],
   "rest": 9,
-  "unknown": 103
+  "unknown": 102
  }
 }
