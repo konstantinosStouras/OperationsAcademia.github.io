@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-09T19:17:01.706Z",
+ "generated": "2026-11-10T02:17:31.157Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -9,7 +9,7 @@
  "sources": [
   {
    "source": "usage",
-   "days": 85,
+   "days": 86,
    "from": "",
    "to": ""
   },
@@ -6232,29 +6232,34 @@
    101
   ],
   "2026-11-09": [
-   51,
-   131,
-   131
+   67,
+   171,
+   171
+  ],
+  "2026-11-10": [
+   8,
+   14,
+   14
   ]
  },
  "pages": [
   {
    "path": "/jobs.html",
    "title": "",
-   "views": 7932,
-   "avgSec": 616
+   "views": 7920,
+   "avgSec": 618
   },
   {
    "path": "/",
    "title": "",
-   "views": 5650,
-   "avgSec": 309
+   "views": 5653,
+   "avgSec": 311
   },
   {
    "path": "/candidates.html",
    "title": "",
-   "views": 1530,
-   "avgSec": 504
+   "views": 1532,
+   "avgSec": 509
   },
   {
    "path": "/post-a-job.html",
@@ -6265,8 +6270,8 @@
   {
    "path": "/universities.html",
    "title": "",
-   "views": 743,
-   "avgSec": 475
+   "views": 742,
+   "avgSec": 476
   },
   {
    "path": "/verify-email.html",
@@ -6289,8 +6294,8 @@
   {
    "path": "/recent-faculty.html",
    "title": "",
-   "views": 240,
-   "avgSec": 282
+   "views": 239,
+   "avgSec": 284
   },
   {
    "path": "/previous-markets.html",
@@ -6301,14 +6306,14 @@
   {
    "path": "/profile-analytics.html",
    "title": "",
-   "views": 160,
-   "avgSec": 483
+   "views": 161,
+   "avgSec": 480
   },
   {
    "path": "/analytics.html",
    "title": "",
-   "views": 145,
-   "avgSec": 615
+   "views": 144,
+   "avgSec": 619
   },
   {
    "path": "/my-postings.html",
@@ -6325,8 +6330,8 @@
   {
    "path": "/survey.html",
    "title": "",
-   "views": 69,
-   "avgSec": 52
+   "views": 66,
+   "avgSec": 54
   },
   {
    "path": "/whats-new.html",
@@ -6349,20 +6354,14 @@
   {
    "path": "/messages.html",
    "title": "",
-   "views": 25,
-   "avgSec": 302
+   "views": 26,
+   "avgSec": 291
   },
   {
    "path": "/survey-faqs.html",
    "title": "",
-   "views": 19,
+   "views": 18,
    "avgSec": 3
-  },
-  {
-   "path": "/placements.html",
-   "title": "",
-   "views": 17,
-   "avgSec": 0
   },
   {
    "path": "/post-a-placement.html",
@@ -6377,16 +6376,16 @@
    "avgSec": 351
   },
   {
-   "path": "/resources-for-candidates.html",
+   "path": "/placements.html",
    "title": "",
-   "views": 12,
+   "views": 13,
    "avgSec": 0
   },
   {
-   "path": "/jobsFooterWasClicked.html",
+   "path": "/resources-for-candidates.html",
    "title": "",
    "views": 7,
-   "avgSec": 4
+   "avgSec": 0
   },
   {
    "path": "/informed_consent_statement.html",
@@ -6395,16 +6394,16 @@
    "avgSec": 2
   },
   {
-   "path": "/logoHeader.html",
+   "path": "/jobsFooterWasClicked.html",
    "title": "",
-   "views": 5,
-   "avgSec": 7
+   "views": 6,
+   "avgSec": 4
   },
   {
-   "path": "/placementsFooterWasClicked.html",
+   "path": "/logoHeader.html",
    "title": "",
-   "views": 3,
-   "avgSec": 14
+   "views": 4,
+   "avgSec": 8
   },
   {
    "path": "/Survey Slides by Kostas and Serguei.html",
@@ -6413,34 +6412,10 @@
    "avgSec": 6
   },
   {
-   "path": "/analyticsFooterWasClicked.html",
+   "path": "/placementsFooterWasClicked.html",
    "title": "",
    "views": 2,
-   "avgSec": 3
-  },
-  {
-   "path": "/candidatesFooterWasClicked.html",
-   "title": "",
-   "views": 2,
-   "avgSec": 8
-  },
-  {
-   "path": "/contact.html",
-   "title": "",
-   "views": 2,
-   "avgSec": 0
-  },
-  {
-   "path": "/faqs.html",
-   "title": "",
-   "views": 2,
-   "avgSec": 0
-  },
-  {
-   "path": "/recent-facultyFooterWasClicked.html",
-   "title": "",
-   "views": 2,
-   "avgSec": 6
+   "avgSec": 18
   },
   {
    "path": "/Athey paper - careers in Tech.html",
@@ -6455,22 +6430,40 @@
    "avgSec": 37
   },
   {
-   "path": "/Fernanda Bravo Recent Faculty.html",
-   "title": "",
-   "views": 1,
-   "avgSec": 0
-  },
-  {
    "path": "/JMbook.html",
    "title": "",
    "views": 1,
    "avgSec": 11
   },
   {
-   "path": "/Research Summaries of the 2017-2018 Candidates.html",
+   "path": "/analyticsFooterWasClicked.html",
    "title": "",
    "views": 1,
-   "avgSec": 8
+   "avgSec": 3
+  },
+  {
+   "path": "/candidatesFooterWasClicked.html",
+   "title": "",
+   "views": 1,
+   "avgSec": 5
+  },
+  {
+   "path": "/contact.html",
+   "title": "",
+   "views": 1,
+   "avgSec": 0
+  },
+  {
+   "path": "/faqs.html",
+   "title": "",
+   "views": 1,
+   "avgSec": 0
+  },
+  {
+   "path": "/recent-facultyFooterWasClicked.html",
+   "title": "",
+   "views": 1,
+   "avgSec": 4
   },
   {
    "path": "/school-only-preview.html",
@@ -6487,76 +6480,76 @@
  ],
  "pagesWindow": {
   "source": "usage+ga4",
-  "from": "2026-08-12",
-  "to": "2026-11-09",
-  "views": 19450
+  "from": "2026-08-13",
+  "to": "2026-11-10",
+  "views": 19419
  },
  "pagesWindows": {
   "30": {
    "days": 30,
-   "from": "2026-10-11",
-   "to": "2026-11-09",
-   "views": 8077,
+   "from": "2026-10-12",
+   "to": "2026-11-10",
+   "views": 7605,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 3091,
-     "avgSec": 502
+     "views": 2977,
+     "avgSec": 495
     },
     {
      "path": "/",
      "title": "",
-     "views": 1830,
-     "avgSec": 165
+     "views": 1714,
+     "avgSec": 168
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 1451,
-     "avgSec": 529
+     "views": 1302,
+     "avgSec": 535
     },
     {
      "path": "/post-a-job.html",
      "title": "",
-     "views": 523,
+     "views": 522,
      "avgSec": 78
     },
     {
      "path": "/universities.html",
      "title": "",
-     "views": 343,
-     "avgSec": 453
+     "views": 324,
+     "avgSec": 433
     },
     {
      "path": "/profile-analytics.html",
      "title": "",
-     "views": 160,
-     "avgSec": 483
+     "views": 161,
+     "avgSec": 480
     },
     {
      "path": "/verify-email.html",
      "title": "",
-     "views": 154,
-     "avgSec": 155
-    },
-    {
-     "path": "/post-a-candidate.html",
-     "title": "",
-     "views": 149,
-     "avgSec": 123
+     "views": 138,
+     "avgSec": 93
     },
     {
      "path": "/account.html",
      "title": "",
-     "views": 120,
-     "avgSec": 136
+     "views": 115,
+     "avgSec": 142
+    },
+    {
+     "path": "/post-a-candidate.html",
+     "title": "",
+     "views": 105,
+     "avgSec": 145
     },
     {
      "path": "/recent-faculty.html",
      "title": "",
-     "views": 63,
-     "avgSec": 373
+     "views": 61,
+     "avgSec": 344
     },
     {
      "path": "/previous-markets.html",
@@ -6567,14 +6560,14 @@
     {
      "path": "/alerts.html",
      "title": "",
-     "views": 27,
-     "avgSec": 150
+     "views": 26,
+     "avgSec": 155
     },
     {
      "path": "/analytics.html",
      "title": "",
-     "views": 26,
-     "avgSec": 593
+     "views": 25,
+     "avgSec": 611
     },
     {
      "path": "/my-postings.html",
@@ -6591,14 +6584,14 @@
     {
      "path": "/whats-new.html",
      "title": "",
-     "views": 18,
-     "avgSec": 692
+     "views": 16,
+     "avgSec": 329
     },
     {
      "path": "/messages.html",
      "title": "",
-     "views": 13,
-     "avgSec": 300
+     "views": 11,
+     "avgSec": 336
     },
     {
      "path": "/survey-faqs.html",
@@ -6607,16 +6600,16 @@
      "avgSec": 3
     },
     {
-     "path": "/feedback.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 206
-    },
-    {
      "path": "/post-a-placement.html",
      "title": "",
      "views": 4,
      "avgSec": 3
+    },
+    {
+     "path": "/feedback.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 253
     },
     {
      "path": "/informed_consent_statement.html",
@@ -6641,27 +6634,27 @@
   },
   "90": {
    "days": 90,
-   "from": "2026-08-12",
-   "to": "2026-11-09",
-   "views": 19450,
+   "from": "2026-08-13",
+   "to": "2026-11-10",
+   "views": 19419,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 7932,
-     "avgSec": 616
+     "views": 7920,
+     "avgSec": 618
     },
     {
      "path": "/",
      "title": "",
-     "views": 5650,
-     "avgSec": 309
+     "views": 5653,
+     "avgSec": 311
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 1530,
-     "avgSec": 504
+     "views": 1532,
+     "avgSec": 509
     },
     {
      "path": "/post-a-job.html",
@@ -6672,8 +6665,8 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 743,
-     "avgSec": 475
+     "views": 742,
+     "avgSec": 476
     },
     {
      "path": "/verify-email.html",
@@ -6696,8 +6689,8 @@
     {
      "path": "/recent-faculty.html",
      "title": "",
-     "views": 240,
-     "avgSec": 282
+     "views": 239,
+     "avgSec": 284
     },
     {
      "path": "/previous-markets.html",
@@ -6708,14 +6701,14 @@
     {
      "path": "/profile-analytics.html",
      "title": "",
-     "views": 160,
-     "avgSec": 483
+     "views": 161,
+     "avgSec": 480
     },
     {
      "path": "/analytics.html",
      "title": "",
-     "views": 145,
-     "avgSec": 615
+     "views": 144,
+     "avgSec": 619
     },
     {
      "path": "/my-postings.html",
@@ -6732,8 +6725,8 @@
     {
      "path": "/survey.html",
      "title": "",
-     "views": 69,
-     "avgSec": 52
+     "views": 66,
+     "avgSec": 54
     },
     {
      "path": "/whats-new.html",
@@ -6756,20 +6749,14 @@
     {
      "path": "/messages.html",
      "title": "",
-     "views": 25,
-     "avgSec": 302
+     "views": 26,
+     "avgSec": 291
     },
     {
      "path": "/survey-faqs.html",
      "title": "",
-     "views": 19,
+     "views": 18,
      "avgSec": 3
-    },
-    {
-     "path": "/placements.html",
-     "title": "",
-     "views": 17,
-     "avgSec": 0
     },
     {
      "path": "/post-a-placement.html",
@@ -6784,16 +6771,16 @@
      "avgSec": 351
     },
     {
-     "path": "/resources-for-candidates.html",
+     "path": "/placements.html",
      "title": "",
-     "views": 12,
+     "views": 13,
      "avgSec": 0
     },
     {
-     "path": "/jobsFooterWasClicked.html",
+     "path": "/resources-for-candidates.html",
      "title": "",
      "views": 7,
-     "avgSec": 4
+     "avgSec": 0
     },
     {
      "path": "/informed_consent_statement.html",
@@ -6802,16 +6789,16 @@
      "avgSec": 2
     },
     {
-     "path": "/logoHeader.html",
+     "path": "/jobsFooterWasClicked.html",
      "title": "",
-     "views": 5,
-     "avgSec": 7
+     "views": 6,
+     "avgSec": 4
     },
     {
-     "path": "/placementsFooterWasClicked.html",
+     "path": "/logoHeader.html",
      "title": "",
-     "views": 3,
-     "avgSec": 14
+     "views": 4,
+     "avgSec": 8
     },
     {
      "path": "/Survey Slides by Kostas and Serguei.html",
@@ -6820,34 +6807,10 @@
      "avgSec": 6
     },
     {
-     "path": "/analyticsFooterWasClicked.html",
+     "path": "/placementsFooterWasClicked.html",
      "title": "",
      "views": 2,
-     "avgSec": 3
-    },
-    {
-     "path": "/candidatesFooterWasClicked.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 8
-    },
-    {
-     "path": "/contact.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 0
-    },
-    {
-     "path": "/faqs.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 0
-    },
-    {
-     "path": "/recent-facultyFooterWasClicked.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 6
+     "avgSec": 18
     },
     {
      "path": "/Athey paper - careers in Tech.html",
@@ -6862,22 +6825,40 @@
      "avgSec": 37
     },
     {
-     "path": "/Fernanda Bravo Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
      "path": "/JMbook.html",
      "title": "",
      "views": 1,
      "avgSec": 11
     },
     {
-     "path": "/Research Summaries of the 2017-2018 Candidates.html",
+     "path": "/analyticsFooterWasClicked.html",
      "title": "",
      "views": 1,
-     "avgSec": 8
+     "avgSec": 3
+    },
+    {
+     "path": "/candidatesFooterWasClicked.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 5
+    },
+    {
+     "path": "/contact.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/faqs.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/recent-facultyFooterWasClicked.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 4
     },
     {
      "path": "/school-only-preview.html",
@@ -6896,32 +6877,32 @@
   },
   "365": {
    "days": 365,
-   "from": "2025-11-10",
-   "to": "2026-11-09",
-   "views": 37172,
+   "from": "2025-11-11",
+   "to": "2026-11-10",
+   "views": 37100,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 14221,
-     "avgSec": 343
+     "views": 14192,
+     "avgSec": 345
     },
     {
      "path": "/",
      "title": "",
-     "views": 10442,
-     "avgSec": 167
+     "views": 10424,
+     "avgSec": 168
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 3992,
-     "avgSec": 193
+     "views": 3975,
+     "avgSec": 196
     },
     {
      "path": "/placements.html",
      "title": "",
-     "views": 1605,
+     "views": 1597,
      "avgSec": 0
     },
     {
@@ -6951,19 +6932,19 @@
     {
      "path": "/survey.html",
      "title": "",
-     "views": 414,
+     "views": 412,
      "avgSec": 9
     },
     {
      "path": "/resources-for-candidates.html",
      "title": "",
-     "views": 409,
+     "views": 408,
      "avgSec": 0
     },
     {
      "path": "/recent-faculty.html",
      "title": "",
-     "views": 387,
+     "views": 388,
      "avgSec": 175
     },
     {
@@ -6993,8 +6974,8 @@
     {
      "path": "/profile-analytics.html",
      "title": "",
-     "views": 160,
-     "avgSec": 483
+     "views": 161,
+     "avgSec": 480
     },
     {
      "path": "/jobsFooterWasClicked.html",
@@ -7093,16 +7074,16 @@
      "avgSec": 12
     },
     {
+     "path": "/messages.html",
+     "title": "",
+     "views": 26,
+     "avgSec": 291
+    },
+    {
      "path": "/Survey Slides by Kostas and Serguei.html",
      "title": "",
      "views": 25,
      "avgSec": 13
-    },
-    {
-     "path": "/messages.html",
-     "title": "",
-     "views": 25,
-     "avgSec": 302
     },
     {
      "path": "/JMbook.html",
@@ -7878,25 +7859,25 @@
   "all": {
    "days": 0,
    "from": "2023-06-16",
-   "to": "2026-11-09",
-   "views": 142940,
+   "to": "2026-11-10",
+   "views": 142994,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 49655,
+     "views": 49677,
      "avgSec": 98
     },
     {
      "path": "/",
      "title": "",
-     "views": 37820,
+     "views": 37836,
      "avgSec": 46
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 21676,
+     "views": 21688,
      "avgSec": 36
     },
     {
@@ -7926,7 +7907,7 @@
     {
      "path": "/recent-faculty.html",
      "title": "",
-     "views": 1497,
+     "views": 1498,
      "avgSec": 45
     },
     {
@@ -7938,7 +7919,7 @@
     {
      "path": "/previous-markets.html",
      "title": "",
-     "views": 1174,
+     "views": 1175,
      "avgSec": 43
     },
     {
@@ -8034,8 +8015,8 @@
     {
      "path": "/profile-analytics.html",
      "title": "",
-     "views": 160,
-     "avgSec": 483
+     "views": 161,
+     "avgSec": 480
     },
     {
      "path": "/Clare Snyder Placement.html",
@@ -8238,8 +8219,8 @@
     {
      "path": "/messages.html",
      "title": "",
-     "views": 25,
-     "avgSec": 302
+     "views": 26,
+     "avgSec": 291
     },
     {
      "path": "/CS (Theory) jobs Resources.html",
@@ -9593,22 +9574,22 @@
   "hours": {
    "source": "usage",
    "from": "2026-08-17",
-   "to": "2026-11-09",
+   "to": "2026-11-10",
    "metric": "visits",
    "zone": "UTC",
-   "total": 19106,
+   "total": 19160,
    "items": [
     {
      "name": "00",
-     "value": 771
+     "value": 773
     },
     {
      "name": "01",
-     "value": 736
+     "value": 746
     },
     {
      "name": "02",
-     "value": 756
+     "value": 758
     },
     {
      "name": "03",
@@ -9676,45 +9657,45 @@
     },
     {
      "name": "19",
-     "value": 1050
+     "value": 1052
     },
     {
      "name": "20",
-     "value": 1060
+     "value": 1064
     },
     {
      "name": "21",
-     "value": 953
+     "value": 970
     },
     {
      "name": "22",
-     "value": 770
+     "value": 775
     },
     {
      "name": "23",
-     "value": 708
+     "value": 720
     }
    ]
   },
   "countries": {
    "source": "ga4",
-   "from": "2026-08-12",
-   "to": "2026-11-09",
+   "from": "2026-08-13",
+   "to": "2026-11-10",
    "metric": "visits",
    "zone": "",
-   "total": 7007,
+   "total": 6999,
    "items": [
     {
      "name": "United States",
-     "value": 4301
+     "value": 4296
     },
     {
      "name": "Canada",
-     "value": 376
+     "value": 380
     },
     {
      "name": "Singapore",
-     "value": 341
+     "value": 338
     },
     {
      "name": "Greece",
@@ -9722,11 +9703,11 @@
     },
     {
      "name": "Hong Kong",
-     "value": 318
+     "value": 317
     },
     {
      "name": "United Kingdom",
-     "value": 197
+     "value": 194
     },
     {
      "name": "Japan",
@@ -9734,7 +9715,7 @@
     },
     {
      "name": "China",
-     "value": 145
+     "value": 144
     },
     {
      "name": "South Korea",
@@ -9742,7 +9723,7 @@
     },
     {
      "name": "France",
-     "value": 89
+     "value": 88
     },
     {
      "name": "Ireland",
@@ -9754,7 +9735,7 @@
     },
     {
      "name": "India",
-     "value": 62
+     "value": 61
     },
     {
      "name": "Netherlands",
@@ -9762,11 +9743,11 @@
     },
     {
      "name": "Germany",
-     "value": 57
+     "value": 59
     },
     {
      "name": "Australia",
-     "value": 41
+     "value": 42
     },
     {
      "name": "Not recorded",
@@ -9940,19 +9921,19 @@
   },
   "devices": {
    "source": "ga4",
-   "from": "2026-08-12",
-   "to": "2026-11-09",
+   "from": "2026-08-13",
+   "to": "2026-11-10",
    "metric": "visits",
    "zone": "",
-   "total": 6977,
+   "total": 6996,
    "items": [
     {
      "name": "desktop",
-     "value": 5883
+     "value": 5903
     },
     {
      "name": "mobile",
-     "value": 1085
+     "value": 1084
     },
     {
      "name": "tablet",
@@ -9962,31 +9943,31 @@
   },
   "channels": {
    "source": "ga4",
-   "from": "2026-08-12",
-   "to": "2026-11-09",
+   "from": "2026-08-13",
+   "to": "2026-11-10",
    "metric": "visits",
    "zone": "",
-   "total": 6973,
+   "total": 6969,
    "items": [
     {
      "name": "Direct",
-     "value": 4330
+     "value": 4333
     },
     {
      "name": "Organic Search",
-     "value": 1937
+     "value": 1932
     },
     {
      "name": "Referral",
-     "value": 431
+     "value": 429
     },
     {
      "name": "AI Assistant",
-     "value": 207
+     "value": 206
     },
     {
      "name": "Unassigned",
-     "value": 36
+     "value": 37
     },
     {
      "name": "Organic Social",
@@ -9996,23 +9977,23 @@
   },
   "referrers": {
    "source": "ga4",
-   "from": "2026-08-12",
-   "to": "2026-11-09",
+   "from": "2026-08-13",
+   "to": "2026-11-10",
    "metric": "visits",
    "zone": "",
-   "total": 6690,
+   "total": 6686,
    "items": [
     {
      "name": "Typed or bookmarked",
-     "value": 4330
+     "value": 4333
     },
     {
      "name": "google",
-     "value": 1891
+     "value": 1885
     },
     {
      "name": "gemini.google.com",
-     "value": 115
+     "value": 114
     },
     {
      "name": "francesxwang.substack.com",
@@ -10028,7 +10009,7 @@
     },
     {
      "name": "Not recorded",
-     "value": 36
+     "value": 37
     },
     {
      "name": "linkedin.com",
@@ -10127,10 +10108,6 @@
      "value": 1
     },
     {
-     "name": "operationsacademia.org",
-     "value": 1
-    },
-    {
      "name": "orfe.princeton.edu",
      "value": 1
     },
@@ -10152,19 +10129,19 @@
  "engagement": {
   "source": "usage",
   "from": "2026-08-17",
-  "to": "2026-11-09",
-  "sessions": 19106,
+  "to": "2026-11-10",
+  "sessions": 19160,
   "avgSessionSec": 454,
   "viewsPerSession": 1
  },
  "universities": {
   "frozen": false,
   "from": "2026-08-30",
-  "to": "2026-11-09",
+  "to": "2026-11-10",
   "all": [
    {
     "name": "Indiana University Bloomington",
-    "visits": 337
+    "visits": 339
    },
    {
     "name": "Columbia University",
@@ -10176,7 +10153,7 @@
    },
    {
     "name": "University of Michigan at Ann Arbor",
-    "visits": 47
+    "visits": 48
    },
    {
     "name": "Cornell University",
@@ -10203,6 +10180,10 @@
     "visits": 25
    },
    {
+    "name": "Massachusetts Institute of Technology (MIT)",
+    "visits": 23
+   },
+   {
     "name": "University of North Carolina at Chapel Hill",
     "visits": 23
    },
@@ -10212,10 +10193,6 @@
    },
    {
     "name": "George Washington University",
-    "visits": 21
-   },
-   {
-    "name": "Massachusetts Institute of Technology (MIT)",
     "visits": 21
    },
    {
@@ -10247,6 +10224,10 @@
     "visits": 12
    },
    {
+    "name": "University of California, Berkeley",
+    "visits": 11
+   },
+   {
     "name": "University of Illinois at Urbana-Champaign",
     "visits": 11
    },
@@ -10272,10 +10253,6 @@
    },
    {
     "name": "University College Dublin (UCD)",
-    "visits": 9
-   },
-   {
-    "name": "University of California, Berkeley",
     "visits": 9
    },
    {
@@ -10498,7 +10475,7 @@
   "recent": [
    {
     "name": "Indiana University Bloomington",
-    "visits": 28
+    "visits": 30
    },
    {
     "name": "University of Michigan at Ann Arbor",
@@ -10537,12 +10514,16 @@
     "visits": 3
    },
    {
+    "name": "Massachusetts Institute of Technology (MIT)",
+    "visits": 2
+   },
+   {
     "name": "New York University",
     "visits": 2
    },
    {
-    "name": "DePaul University",
-    "visits": 1
+    "name": "University of California, Berkeley",
+    "visits": 2
    },
    {
     "name": "Northwestern University",
@@ -10561,15 +10542,7 @@
     "visits": 1
    },
    {
-    "name": "The Ohio State University",
-    "visits": 1
-   },
-   {
     "name": "University of British Columbia",
-    "visits": 1
-   },
-   {
-    "name": "University of Kansas",
     "visits": 1
    },
    {
@@ -10581,10 +10554,6 @@
     "visits": 1
    },
    {
-    "name": "University of North Carolina at Chapel Hill",
-    "visits": 1
-   },
-   {
     "name": "University of Oregon",
     "visits": 1
    }
@@ -10592,24 +10561,24 @@
   "windows": {
    "30": {
     "days": 30,
-    "from": "2026-10-11",
-    "to": "2026-11-09",
-    "seen": 4168,
-    "resolved": 1278,
-    "academic": 81,
-    "placed": 800,
+    "from": "2026-10-12",
+    "to": "2026-11-10",
+    "seen": 3975,
+    "resolved": 1209,
+    "academic": 82,
+    "placed": 774,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 251
+      "visits": 240
      },
      {
       "name": "Columbia University",
-      "visits": 110
+      "visits": 104
      },
      {
       "name": "University of Michigan at Ann Arbor",
-      "visits": 33
+      "visits": 34
      },
      {
       "name": "Harvard University",
@@ -10632,8 +10601,12 @@
       "visits": 17
      },
      {
+      "name": "Massachusetts Institute of Technology (MIT)",
+      "visits": 14
+     },
+     {
       "name": "National University of Singapore (NUS)",
-      "visits": 16
+      "visits": 14
      },
      {
       "name": "New York University",
@@ -10644,10 +10617,6 @@
       "visits": 14
      },
      {
-      "name": "Cornell University",
-      "visits": 13
-     },
-     {
       "name": "Simon Fraser University",
       "visits": 13
      },
@@ -10656,12 +10625,8 @@
       "visits": 13
      },
      {
-      "name": "Massachusetts Institute of Technology (MIT)",
-      "visits": 12
-     },
-     {
-      "name": "University of Maryland, College Park",
-      "visits": 12
+      "name": "Cornell University",
+      "visits": 11
      },
      {
       "name": "Duke University",
@@ -10676,11 +10641,11 @@
       "visits": 10
      },
      {
-      "name": "Yale University",
-      "visits": 10
+      "name": "University College Dublin (UCD)",
+      "visits": 9
      },
      {
-      "name": "University College Dublin (UCD)",
+      "name": "University of California, Berkeley",
       "visits": 9
      },
      {
@@ -10692,12 +10657,8 @@
       "visits": 9
      },
      {
-      "name": "The University of Texas at Austin",
-      "visits": 7
-     },
-     {
-      "name": "University of California, Berkeley",
-      "visits": 7
+      "name": "University of Maryland, College Park",
+      "visits": 8
      },
      {
       "name": "University of Kansas",
@@ -10716,6 +10677,10 @@
       "visits": 7
      },
      {
+      "name": "Yale University",
+      "visits": 7
+     },
+     {
       "name": "University of Colorado Boulder",
       "visits": 6
      },
@@ -10730,6 +10695,10 @@
      {
       "name": "University of Iowa",
       "visits": 5
+     },
+     {
+      "name": "The University of Texas at Austin",
+      "visits": 4
      },
      {
       "name": "University of Miami",
@@ -10872,15 +10841,15 @@
    "90": {
     "days": 90,
     "from": "2026-08-30",
-    "to": "2026-11-09",
-    "seen": 9114,
-    "resolved": 2752,
-    "academic": 132,
-    "placed": 1209,
+    "to": "2026-11-10",
+    "seen": 9145,
+    "resolved": 2758,
+    "academic": 135,
+    "placed": 1216,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 337
+      "visits": 339
      },
      {
       "name": "Columbia University",
@@ -10892,7 +10861,7 @@
      },
      {
       "name": "University of Michigan at Ann Arbor",
-      "visits": 47
+      "visits": 48
      },
      {
       "name": "Cornell University",
@@ -10919,6 +10888,10 @@
       "visits": 25
      },
      {
+      "name": "Massachusetts Institute of Technology (MIT)",
+      "visits": 23
+     },
+     {
       "name": "University of North Carolina at Chapel Hill",
       "visits": 23
      },
@@ -10928,10 +10901,6 @@
      },
      {
       "name": "George Washington University",
-      "visits": 21
-     },
-     {
-      "name": "Massachusetts Institute of Technology (MIT)",
       "visits": 21
      },
      {
@@ -10963,6 +10932,10 @@
       "visits": 12
      },
      {
+      "name": "University of California, Berkeley",
+      "visits": 11
+     },
+     {
       "name": "University of Illinois at Urbana-Champaign",
       "visits": 11
      },
@@ -10988,10 +10961,6 @@
      },
      {
       "name": "University College Dublin (UCD)",
-      "visits": 9
-     },
-     {
-      "name": "University of California, Berkeley",
       "visits": 9
      },
      {
@@ -11215,15 +11184,15 @@
    "365": {
     "days": 365,
     "from": "2026-08-30",
-    "to": "2026-11-09",
-    "seen": 9114,
-    "resolved": 2752,
-    "academic": 132,
-    "placed": 1209,
+    "to": "2026-11-10",
+    "seen": 9145,
+    "resolved": 2758,
+    "academic": 135,
+    "placed": 1216,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 337
+      "visits": 339
      },
      {
       "name": "Columbia University",
@@ -11235,7 +11204,7 @@
      },
      {
       "name": "University of Michigan at Ann Arbor",
-      "visits": 47
+      "visits": 48
      },
      {
       "name": "Cornell University",
@@ -11262,6 +11231,10 @@
       "visits": 25
      },
      {
+      "name": "Massachusetts Institute of Technology (MIT)",
+      "visits": 23
+     },
+     {
       "name": "University of North Carolina at Chapel Hill",
       "visits": 23
      },
@@ -11271,10 +11244,6 @@
      },
      {
       "name": "George Washington University",
-      "visits": 21
-     },
-     {
-      "name": "Massachusetts Institute of Technology (MIT)",
       "visits": 21
      },
      {
@@ -11306,6 +11275,10 @@
       "visits": 12
      },
      {
+      "name": "University of California, Berkeley",
+      "visits": 11
+     },
+     {
       "name": "University of Illinois at Urbana-Champaign",
       "visits": 11
      },
@@ -11331,10 +11304,6 @@
      },
      {
       "name": "University College Dublin (UCD)",
-      "visits": 9
-     },
-     {
-      "name": "University of California, Berkeley",
       "visits": 9
      },
      {
@@ -11558,15 +11527,15 @@
    "all": {
     "days": 0,
     "from": "2026-08-30",
-    "to": "2026-11-09",
-    "seen": 9114,
-    "resolved": 2752,
-    "academic": 132,
-    "placed": 1209,
+    "to": "2026-11-10",
+    "seen": 9145,
+    "resolved": 2758,
+    "academic": 135,
+    "placed": 1216,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 337
+      "visits": 339
      },
      {
       "name": "Columbia University",
@@ -11578,7 +11547,7 @@
      },
      {
       "name": "University of Michigan at Ann Arbor",
-      "visits": 47
+      "visits": 48
      },
      {
       "name": "Cornell University",
@@ -11605,6 +11574,10 @@
       "visits": 25
      },
      {
+      "name": "Massachusetts Institute of Technology (MIT)",
+      "visits": 23
+     },
+     {
       "name": "University of North Carolina at Chapel Hill",
       "visits": 23
      },
@@ -11614,10 +11587,6 @@
      },
      {
       "name": "George Washington University",
-      "visits": 21
-     },
-     {
-      "name": "Massachusetts Institute of Technology (MIT)",
       "visits": 21
      },
      {
@@ -11649,6 +11618,10 @@
       "visits": 12
      },
      {
+      "name": "University of California, Berkeley",
+      "visits": 11
+     },
+     {
       "name": "University of Illinois at Urbana-Champaign",
       "visits": 11
      },
@@ -11674,10 +11647,6 @@
      },
      {
       "name": "University College Dublin (UCD)",
-      "visits": 9
-     },
-     {
-      "name": "University of California, Berkeley",
       "visits": 9
      },
      {
@@ -11900,31 +11869,31 @@
    }
   },
   "recentDays": 7,
-  "seen": 9114,
-  "resolved": 2752,
-  "academic": 132,
-  "placed": 1209
+  "seen": 9145,
+  "resolved": 2758,
+  "academic": 135,
+  "placed": 1216
  },
  "totals": {
-  "visitors": 48769,
-  "sessions": 69734,
-  "pageviews": 142998,
-  "days": 1243,
+  "visitors": 48793,
+  "sessions": 69788,
+  "pageviews": 143052,
+  "days": 1244,
   "universities": 83
  },
  "breakdownWindows": {
   "30": {
    "hours": {
     "source": "ga4",
-    "from": "2026-10-11",
-    "to": "2026-11-09",
+    "from": "2026-10-12",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "property",
-    "total": 3362,
+    "total": 3226,
     "items": [
      {
       "name": "00",
-      "value": 151
+      "value": 145
      },
      {
       "name": "01",
@@ -11932,133 +11901,133 @@
      },
      {
       "name": "02",
-      "value": 107
+      "value": 103
      },
      {
       "name": "03",
-      "value": 140
+      "value": 133
      },
      {
       "name": "04",
-      "value": 161
+      "value": 156
      },
      {
       "name": "05",
-      "value": 143
+      "value": 137
      },
      {
       "name": "06",
-      "value": 126
+      "value": 120
      },
      {
       "name": "07",
-      "value": 117
+      "value": 115
      },
      {
       "name": "08",
-      "value": 98
+      "value": 96
      },
      {
       "name": "09",
-      "value": 86
-     },
-     {
-      "name": "10",
-      "value": 109
-     },
-     {
-      "name": "11",
-      "value": 97
-     },
-     {
-      "name": "12",
       "value": 81
      },
      {
+      "name": "10",
+      "value": 105
+     },
+     {
+      "name": "11",
+      "value": 92
+     },
+     {
+      "name": "12",
+      "value": 79
+     },
+     {
       "name": "13",
-      "value": 91
+      "value": 88
      },
      {
       "name": "14",
-      "value": 98
+      "value": 96
      },
      {
       "name": "15",
-      "value": 135
+      "value": 131
      },
      {
       "name": "16",
-      "value": 194
+      "value": 187
      },
      {
       "name": "17",
-      "value": 215
+      "value": 200
      },
      {
       "name": "18",
-      "value": 204
+      "value": 193
      },
      {
       "name": "19",
-      "value": 198
+      "value": 190
      },
      {
       "name": "20",
-      "value": 155
+      "value": 146
      },
      {
       "name": "21",
-      "value": 171
-     },
-     {
-      "name": "22",
       "value": 163
      },
      {
+      "name": "22",
+      "value": 152
+     },
+     {
       "name": "23",
-      "value": 188
+      "value": 184
      }
     ]
    },
    "countries": {
     "source": "ga4",
-    "from": "2026-10-11",
-    "to": "2026-11-09",
+    "from": "2026-10-12",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 3130,
+    "total": 3008,
     "items": [
      {
       "name": "United States",
-      "value": 1923
+      "value": 1841
      },
      {
       "name": "Canada",
-      "value": 200
-     },
-     {
-      "name": "Greece",
-      "value": 153
-     },
-     {
-      "name": "Hong Kong",
-      "value": 150
+      "value": 203
      },
      {
       "name": "Singapore",
-      "value": 146
+      "value": 142
+     },
+     {
+      "name": "Greece",
+      "value": 140
+     },
+     {
+      "name": "Hong Kong",
+      "value": 137
      },
      {
       "name": "South Korea",
-      "value": 115
+      "value": 114
      },
      {
       "name": "Japan",
-      "value": 78
+      "value": 77
      },
      {
       "name": "United Kingdom",
-      "value": 71
+      "value": 70
      },
      {
       "name": "China",
@@ -12074,39 +12043,39 @@
      },
      {
       "name": "Spain",
-      "value": 25
+      "value": 23
      },
      {
       "name": "India",
-      "value": 23
-     },
-     {
-      "name": "Netherlands",
-      "value": 23
-     },
-     {
-      "name": "Taiwan",
       "value": 20
      },
      {
+      "name": "Netherlands",
+      "value": 19
+     },
+     {
+      "name": "Taiwan",
+      "value": 19
+     },
+     {
       "name": "Australia",
-      "value": 16
+      "value": 15
      },
      {
       "name": "Germany",
-      "value": 11
+      "value": 13
      },
      {
       "name": "Portugal",
       "value": 9
      },
      {
-      "name": "Israel",
+      "name": "Türkiye",
       "value": 8
      },
      {
-      "name": "Türkiye",
-      "value": 8
+      "name": "Israel",
+      "value": 7
      },
      {
       "name": "Denmark",
@@ -12188,19 +12157,19 @@
    },
    "devices": {
     "source": "ga4",
-    "from": "2026-10-11",
-    "to": "2026-11-09",
+    "from": "2026-10-12",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 3120,
+    "total": 2997,
     "items": [
      {
       "name": "desktop",
-      "value": 2625
+      "value": 2541
      },
      {
       "name": "mobile",
-      "value": 492
+      "value": 453
      },
      {
       "name": "tablet",
@@ -12210,27 +12179,27 @@
    },
    "channels": {
     "source": "ga4",
-    "from": "2026-10-11",
-    "to": "2026-11-09",
+    "from": "2026-10-12",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 3125,
+    "total": 3004,
     "items": [
      {
       "name": "Direct",
-      "value": 1852
+      "value": 1783
      },
      {
       "name": "Organic Search",
-      "value": 950
+      "value": 920
      },
      {
       "name": "Referral",
-      "value": 210
+      "value": 196
      },
      {
       "name": "AI Assistant",
-      "value": 61
+      "value": 56
      },
      {
       "name": "Unassigned",
@@ -12238,33 +12207,33 @@
      },
      {
       "name": "Organic Social",
-      "value": 24
+      "value": 21
      }
     ]
    },
    "referrers": {
     "source": "ga4",
-    "from": "2026-10-11",
-    "to": "2026-11-09",
+    "from": "2026-10-12",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 3002,
+    "total": 2892,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 1852
+      "value": 1783
      },
      {
       "name": "google",
-      "value": 939
+      "value": 909
      },
      {
       "name": "francesxwang.substack.com",
-      "value": 68
+      "value": 65
      },
      {
       "name": "gemini.google.com",
-      "value": 37
+      "value": 35
      },
      {
       "name": "Not recorded",
@@ -12272,7 +12241,7 @@
      },
      {
       "name": "chatgpt.com",
-      "value": 24
+      "value": 21
      },
      {
       "name": "linkedin.com",
@@ -12289,10 +12258,6 @@
      {
       "name": "search.brave.com",
       "value": 4
-     },
-     {
-      "name": "t.co",
-      "value": 3
      },
      {
       "name": "facebook.com",
@@ -12344,23 +12309,23 @@
   "90": {
    "hours": {
     "source": "ga4",
-    "from": "2026-08-12",
-    "to": "2026-11-09",
+    "from": "2026-08-13",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "property",
-    "total": 7411,
+    "total": 7409,
     "items": [
      {
       "name": "00",
-      "value": 390
+      "value": 391
      },
      {
       "name": "01",
-      "value": 325
+      "value": 331
      },
      {
       "name": "02",
-      "value": 253
+      "value": 252
      },
      {
       "name": "03",
@@ -12372,7 +12337,7 @@
      },
      {
       "name": "05",
-      "value": 303
+      "value": 302
      },
      {
       "name": "06",
@@ -12380,19 +12345,19 @@
      },
      {
       "name": "07",
-      "value": 261
+      "value": 255
      },
      {
       "name": "08",
-      "value": 210
+      "value": 209
      },
      {
       "name": "09",
-      "value": 215
+      "value": 213
      },
      {
       "name": "10",
-      "value": 225
+      "value": 224
      },
      {
       "name": "11",
@@ -12400,7 +12365,7 @@
      },
      {
       "name": "12",
-      "value": 227
+      "value": 225
      },
      {
       "name": "13",
@@ -12408,7 +12373,7 @@
      },
      {
       "name": "14",
-      "value": 224
+      "value": 222
      },
      {
       "name": "15",
@@ -12420,15 +12385,15 @@
      },
      {
       "name": "17",
-      "value": 444
+      "value": 446
      },
      {
       "name": "18",
-      "value": 402
+      "value": 401
      },
      {
       "name": "19",
-      "value": 407
+      "value": 409
      },
      {
       "name": "20",
@@ -12436,37 +12401,37 @@
      },
      {
       "name": "21",
-      "value": 408
+      "value": 407
      },
      {
       "name": "22",
-      "value": 370
+      "value": 369
      },
      {
       "name": "23",
-      "value": 420
+      "value": 426
      }
     ]
    },
    "countries": {
     "source": "ga4",
-    "from": "2026-08-12",
-    "to": "2026-11-09",
+    "from": "2026-08-13",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 7007,
+    "total": 6999,
     "items": [
      {
       "name": "United States",
-      "value": 4301
+      "value": 4296
      },
      {
       "name": "Canada",
-      "value": 376
+      "value": 380
      },
      {
       "name": "Singapore",
-      "value": 341
+      "value": 338
      },
      {
       "name": "Greece",
@@ -12474,11 +12439,11 @@
      },
      {
       "name": "Hong Kong",
-      "value": 318
+      "value": 317
      },
      {
       "name": "United Kingdom",
-      "value": 197
+      "value": 194
      },
      {
       "name": "Japan",
@@ -12486,7 +12451,7 @@
      },
      {
       "name": "China",
-      "value": 145
+      "value": 144
      },
      {
       "name": "South Korea",
@@ -12494,7 +12459,7 @@
      },
      {
       "name": "France",
-      "value": 89
+      "value": 88
      },
      {
       "name": "Ireland",
@@ -12506,7 +12471,7 @@
      },
      {
       "name": "India",
-      "value": 62
+      "value": 61
      },
      {
       "name": "Netherlands",
@@ -12514,11 +12479,11 @@
      },
      {
       "name": "Germany",
-      "value": 57
+      "value": 59
      },
      {
       "name": "Australia",
-      "value": 41
+      "value": 42
      },
      {
       "name": "Not recorded",
@@ -12692,19 +12657,19 @@
    },
    "devices": {
     "source": "ga4",
-    "from": "2026-08-12",
-    "to": "2026-11-09",
+    "from": "2026-08-13",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 6977,
+    "total": 6996,
     "items": [
      {
       "name": "desktop",
-      "value": 5883
+      "value": 5903
      },
      {
       "name": "mobile",
-      "value": 1085
+      "value": 1084
      },
      {
       "name": "tablet",
@@ -12714,31 +12679,31 @@
    },
    "channels": {
     "source": "ga4",
-    "from": "2026-08-12",
-    "to": "2026-11-09",
+    "from": "2026-08-13",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 6973,
+    "total": 6969,
     "items": [
      {
       "name": "Direct",
-      "value": 4330
+      "value": 4333
      },
      {
       "name": "Organic Search",
-      "value": 1937
+      "value": 1932
      },
      {
       "name": "Referral",
-      "value": 431
+      "value": 429
      },
      {
       "name": "AI Assistant",
-      "value": 207
+      "value": 206
      },
      {
       "name": "Unassigned",
-      "value": 36
+      "value": 37
      },
      {
       "name": "Organic Social",
@@ -12748,23 +12713,23 @@
    },
    "referrers": {
     "source": "ga4",
-    "from": "2026-08-12",
-    "to": "2026-11-09",
+    "from": "2026-08-13",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 6690,
+    "total": 6686,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 4330
+      "value": 4333
      },
      {
       "name": "google",
-      "value": 1891
+      "value": 1885
      },
      {
       "name": "gemini.google.com",
-      "value": 115
+      "value": 114
      },
      {
       "name": "francesxwang.substack.com",
@@ -12780,7 +12745,7 @@
      },
      {
       "name": "Not recorded",
-      "value": 36
+      "value": 37
      },
      {
       "name": "linkedin.com",
@@ -12879,10 +12844,6 @@
       "value": 1
      },
      {
-      "name": "operationsacademia.org",
-      "value": 1
-     },
-     {
       "name": "orfe.princeton.edu",
       "value": 1
      },
@@ -12904,47 +12865,47 @@
   "365": {
    "hours": {
     "source": "ga4",
-    "from": "2025-11-10",
-    "to": "2026-11-09",
+    "from": "2025-11-11",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "property",
-    "total": 15407,
+    "total": 15381,
     "items": [
      {
       "name": "00",
-      "value": 791
+      "value": 789
      },
      {
       "name": "01",
-      "value": 633
+      "value": 638
      },
      {
       "name": "02",
-      "value": 590
+      "value": 586
      },
      {
       "name": "03",
-      "value": 636
+      "value": 634
      },
      {
       "name": "04",
-      "value": 609
+      "value": 607
      },
      {
       "name": "05",
-      "value": 653
+      "value": 650
      },
      {
       "name": "06",
-      "value": 583
+      "value": 581
      },
      {
       "name": "07",
-      "value": 531
+      "value": 529
      },
      {
       "name": "08",
-      "value": 440
+      "value": 439
      },
      {
       "name": "09",
@@ -12952,7 +12913,7 @@
      },
      {
       "name": "10",
-      "value": 437
+      "value": 435
      },
      {
       "name": "11",
@@ -12960,7 +12921,7 @@
      },
      {
       "name": "12",
-      "value": 413
+      "value": 412
      },
      {
       "name": "13",
@@ -12968,19 +12929,19 @@
      },
      {
       "name": "14",
-      "value": 438
+      "value": 435
      },
      {
       "name": "15",
-      "value": 582
+      "value": 581
      },
      {
       "name": "16",
-      "value": 800
+      "value": 797
      },
      {
       "name": "17",
-      "value": 916
+      "value": 913
      },
      {
       "name": "18",
@@ -12992,49 +12953,49 @@
      },
      {
       "name": "20",
-      "value": 748
+      "value": 751
      },
      {
       "name": "21",
-      "value": 918
+      "value": 917
      },
      {
       "name": "22",
-      "value": 978
+      "value": 971
      },
      {
       "name": "23",
-      "value": 826
+      "value": 831
      }
     ]
    },
    "countries": {
     "source": "ga4",
-    "from": "2025-11-10",
-    "to": "2026-11-09",
+    "from": "2025-11-11",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 14774,
+    "total": 14746,
     "items": [
      {
       "name": "United States",
-      "value": 8948
+      "value": 8925
      },
      {
       "name": "Canada",
-      "value": 833
+      "value": 834
      },
      {
       "name": "Singapore",
-      "value": 605
+      "value": 604
      },
      {
       "name": "Hong Kong",
-      "value": 548
+      "value": 549
      },
      {
       "name": "China",
-      "value": 526
+      "value": 525
      },
      {
       "name": "Greece",
@@ -13042,7 +13003,7 @@
      },
      {
       "name": "United Kingdom",
-      "value": 340
+      "value": 337
      },
      {
       "name": "India",
@@ -13050,7 +13011,7 @@
      },
      {
       "name": "Spain",
-      "value": 267
+      "value": 266
      },
      {
       "name": "France",
@@ -13062,7 +13023,7 @@
      },
      {
       "name": "Germany",
-      "value": 203
+      "value": 204
      },
      {
       "name": "Japan",
@@ -13070,15 +13031,15 @@
      },
      {
       "name": "Australia",
-      "value": 157
+      "value": 158
      },
      {
       "name": "Türkiye",
-      "value": 137
+      "value": 136
      },
      {
       "name": "Ireland",
-      "value": 110
+      "value": 109
      },
      {
       "name": "Netherlands",
@@ -13321,10 +13282,6 @@
       "value": 1
      },
      {
-      "name": "Malta",
-      "value": 1
-     },
-     {
       "name": "Mongolia",
       "value": 1
      },
@@ -13368,19 +13325,19 @@
    },
    "devices": {
     "source": "ga4",
-    "from": "2025-11-10",
-    "to": "2026-11-09",
+    "from": "2025-11-11",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 14772,
+    "total": 14771,
     "items": [
      {
       "name": "desktop",
-      "value": 12085
+      "value": 12091
      },
      {
       "name": "mobile",
-      "value": 2669
+      "value": 2662
      },
      {
       "name": "tablet",
@@ -13390,23 +13347,23 @@
    },
    "channels": {
     "source": "ga4",
-    "from": "2025-11-10",
-    "to": "2026-11-09",
+    "from": "2025-11-11",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 14683,
+    "total": 14660,
     "items": [
      {
       "name": "Direct",
-      "value": 9659
+      "value": 9638
      },
      {
       "name": "Organic Search",
-      "value": 3883
+      "value": 3884
      },
      {
       "name": "Referral",
-      "value": 718
+      "value": 719
      },
      {
       "name": "AI Assistant",
@@ -13414,29 +13371,29 @@
      },
      {
       "name": "Organic Social",
-      "value": 91
+      "value": 86
      },
      {
       "name": "Unassigned",
-      "value": 77
+      "value": 78
      }
     ]
    },
    "referrers": {
     "source": "ga4",
-    "from": "2025-11-10",
-    "to": "2026-11-09",
+    "from": "2025-11-11",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 14329,
+    "total": 14306,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 9659
+      "value": 9638
      },
      {
       "name": "google",
-      "value": 3755
+      "value": 3756
      },
      {
       "name": "gemini.google.com",
@@ -13448,7 +13405,7 @@
      },
      {
       "name": "francesxwang.substack.com",
-      "value": 111
+      "value": 112
      },
      {
       "name": "bing",
@@ -13456,7 +13413,7 @@
      },
      {
       "name": "Not recorded",
-      "value": 64
+      "value": 65
      },
      {
       "name": "en.wikipedia.org",
@@ -13464,7 +13421,7 @@
      },
      {
       "name": "linkedin.com",
-      "value": 44
+      "value": 40
      },
      {
       "name": "operationsacademia.org",
@@ -13476,7 +13433,7 @@
      },
      {
       "name": "sites.google.com",
-      "value": 24
+      "value": 23
      },
      {
       "name": "connect.informs.org",
@@ -13641,18 +13598,18 @@
    "hours": {
     "source": "ga4",
     "from": "2023-06-16",
-    "to": "2026-11-09",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "property",
-    "total": 59049,
+    "total": 59073,
     "items": [
      {
       "name": "00",
-      "value": 2778
+      "value": 2782
      },
      {
       "name": "01",
-      "value": 2474
+      "value": 2479
      },
      {
       "name": "02",
@@ -13708,7 +13665,7 @@
      },
      {
       "name": "15",
-      "value": 2472
+      "value": 2473
      },
      {
       "name": "16",
@@ -13716,11 +13673,11 @@
      },
      {
       "name": "17",
-      "value": 3278
+      "value": 3281
      },
      {
       "name": "18",
-      "value": 3304
+      "value": 3306
      },
      {
       "name": "19",
@@ -13732,7 +13689,7 @@
      },
      {
       "name": "21",
-      "value": 3356
+      "value": 3359
      },
      {
       "name": "22",
@@ -13740,17 +13697,17 @@
      },
      {
       "name": "23",
-      "value": 3011
+      "value": 3017
      }
     ]
    },
    "countries": {
     "source": "ga4",
     "from": "2023-06-16",
-    "to": "2026-11-09",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 57974,
+    "total": 57981,
     "items": [
      {
       "name": "United States",
@@ -13758,7 +13715,7 @@
      },
      {
       "name": "Canada",
-      "value": 5108
+      "value": 5110
      },
      {
       "name": "Singapore",
@@ -13766,7 +13723,7 @@
      },
      {
       "name": "Hong Kong",
-      "value": 1788
+      "value": 1789
      },
      {
       "name": "China",
@@ -13794,11 +13751,11 @@
      },
      {
       "name": "Germany",
-      "value": 716
+      "value": 718
      },
      {
       "name": "South Korea",
-      "value": 641
+      "value": 642
      },
      {
       "name": "Greece",
@@ -13814,7 +13771,7 @@
      },
      {
       "name": "Australia",
-      "value": 307
+      "value": 308
      },
      {
       "name": "Ireland",
@@ -14233,18 +14190,18 @@
    "devices": {
     "source": "ga4",
     "from": "2023-06-16",
-    "to": "2026-11-09",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 57785,
+    "total": 57825,
     "items": [
      {
       "name": "desktop",
-      "value": 46422
+      "value": 46455
      },
      {
       "name": "mobile",
-      "value": 11222
+      "value": 11229
      },
      {
       "name": "tablet",
@@ -14255,22 +14212,22 @@
    "channels": {
     "source": "ga4",
     "from": "2023-06-16",
-    "to": "2026-11-09",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 57624,
+    "total": 57651,
     "items": [
      {
       "name": "Direct",
-      "value": 35010
+      "value": 35029
      },
      {
       "name": "Organic Search",
-      "value": 17742
+      "value": 17748
      },
      {
       "name": "Referral",
-      "value": 3473
+      "value": 3474
      },
      {
       "name": "Organic Social",
@@ -14282,25 +14239,25 @@
      },
      {
       "name": "Unassigned",
-      "value": 145
+      "value": 146
      }
     ]
    },
    "referrers": {
     "source": "ga4",
     "from": "2023-06-16",
-    "to": "2026-11-09",
+    "to": "2026-11-10",
     "metric": "visits",
     "zone": "",
-    "total": 57133,
+    "total": 57160,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 35010
+      "value": 35029
      },
      {
       "name": "google",
-      "value": 17022
+      "value": 17028
      },
      {
       "name": "connect.informs.org",
@@ -14344,11 +14301,11 @@
      },
      {
       "name": "Not recorded",
-      "value": 130
+      "value": 131
      },
      {
       "name": "francesxwang.substack.com",
-      "value": 113
+      "value": 114
      },
      {
       "name": "en.m.wikipedia.org",
@@ -14645,40 +14602,40 @@
  "engagementWindows": {
   "30": {
    "source": "ga4",
-   "from": "2026-10-11",
-   "to": "2026-11-09",
-   "sessions": 3097,
-   "avgSessionSec": 295,
-   "viewsPerSession": 2.51
+   "from": "2026-10-12",
+   "to": "2026-11-10",
+   "sessions": 2959,
+   "avgSessionSec": 293,
+   "viewsPerSession": 2.49
   },
   "90": {
    "source": "ga4",
-   "from": "2026-08-12",
-   "to": "2026-11-09",
+   "from": "2026-08-13",
+   "to": "2026-11-10",
    "sessions": 6956,
-   "avgSessionSec": 230,
+   "avgSessionSec": 231,
    "viewsPerSession": 2.31
   },
   "365": {
    "source": "ga4",
-   "from": "2025-11-10",
-   "to": "2026-11-09",
-   "sessions": 14669,
+   "from": "2025-11-11",
+   "to": "2026-11-10",
+   "sessions": 14650,
    "avgSessionSec": 148,
    "viewsPerSession": 2.3
   },
   "all": {
    "source": "ga4",
    "from": "2023-06-16",
-   "to": "2026-11-09",
-   "sessions": 57598,
+   "to": "2026-11-10",
+   "sessions": 57615,
    "avgSessionSec": 102,
    "viewsPerSession": 2.42
   }
  },
  "range": {
   "from": "2023-06-16",
-  "to": "2026-11-09"
+  "to": "2026-11-10"
  },
  "recentDays": 7
 }
