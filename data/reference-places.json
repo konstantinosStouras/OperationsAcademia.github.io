@@ -595,6 +595,11 @@
   "department": "OM"
  },
  {
+  "institution": "Chinese Academy of Sciences",
+  "school": "",
+  "department": "Management Science/OR"
+ },
+ {
   "institution": "Chinese University of Hong Kong",
   "school": "",
   "department": "OM/IS"
@@ -1525,6 +1530,11 @@
   "department": "BA"
  },
  {
+  "institution": "Johns Hopkins University Data Science and AI Institute",
+  "school": "",
+  "department": "Data Science and AI"
+ },
+ {
   "institution": "Johns Hopkins University",
   "school": "Carey Business School",
   "department": "Operations Management and Business Analytics"
@@ -2406,6 +2416,11 @@
  },
  {
   "institution": "Rochester Institute of Technology",
+  "school": "",
+  "department": "Management Information Systems"
+ },
+ {
+  "institution": "Rochester Institute of Technology",
   "school": "Saunders College of Business",
   "department": "Management"
  },
@@ -2695,6 +2710,11 @@
   "department": "Business Analytics, Operations Management, Project Management"
  },
  {
+  "institution": "St Joseph’s Institute of Management",
+  "school": "",
+  "department": "Business Analytics/Production, Operations and Decision Sciences"
+ },
+ {
   "institution": "St. Cloud State University",
   "school": "",
   "department": "SCM/OM/Healthcare OM"
@@ -2855,6 +2875,11 @@
   "department": "Transportation/Logistics"
  },
  {
+  "institution": "Texas A&M University - Texarkana",
+  "school": "",
+  "department": "Engineering Management"
+ },
+ {
   "institution": "Texas A&M University-Corpus Christi",
   "school": "College of Engineering and Computer Science",
   "department": "Industrial Engineering"
@@ -2908,6 +2933,11 @@
   "institution": "Texas State University",
   "school": "",
   "department": "Analytics"
+ },
+ {
+  "institution": "Texas State University",
+  "school": "",
+  "department": "Information Systems"
  },
  {
   "institution": "Texas State University",
@@ -3582,6 +3612,11 @@
  {
   "institution": "University of Iowa",
   "school": "Tippie College of Business",
+  "department": "Business Analytics"
+ },
+ {
+  "institution": "University of Kalba",
+  "school": "",
   "department": "Business Analytics"
  },
  {

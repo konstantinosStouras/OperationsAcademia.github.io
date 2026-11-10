@@ -4123,6 +4123,17 @@
   "facultyUrl": "https://www.ceibs.edu/faculty-profiles/by-department"
  },
  {
+  "id": "chinese-academy-of-sciences____management-science-or",
+  "institution": "Chinese Academy of Sciences",
+  "department": "Management Science/OR",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "chinese-university-of-hong-kong____om-is",
   "institution": "Chinese University of Hong Kong",
   "department": "OM/IS",
@@ -11103,6 +11114,17 @@
   ]
  },
  {
+  "id": "johns-hopkins-university-data-science-and-ai-institute____data-science-and-ai",
+  "institution": "Johns Hopkins University Data Science and AI Institute",
+  "department": "Data Science and AI",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "johnson-and-wales-university__college-of-hospitality-and-business__operations-and-supply-chain-management",
   "institution": "Johnson and Wales University",
   "school": "College of Hospitality and Business",
@@ -17711,6 +17733,17 @@
   ]
  },
  {
+  "id": "rochester-institute-of-technology____management-information-systems",
+  "institution": "Rochester Institute of Technology",
+  "department": "Management Information Systems",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "rochester-institute-of-technology__saunders-college-of-business__management",
   "institution": "Rochester Institute of Technology",
   "school": "Saunders College of Business",
@@ -20070,6 +20103,17 @@
   "facultyUrl": "https://www.stjohns.edu/offices-departments/business-analytics-information-systems"
  },
  {
+  "id": "st-joseph-s-institute-of-management____business-analytics-production-operations-and-decision-scienc",
+  "institution": "St Joseph’s Institute of Management",
+  "department": "Business Analytics/Production, Operations and Decision Sciences",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "st-thomas-university__gus-machado-college-of-business__quantitative-and-statistical-analysis-supply-chain-operation",
   "institution": "St. Thomas University",
   "school": "Gus Machado College of Business",
@@ -21405,6 +21449,17 @@
   "facultyUrl": "https://www.tamucc.edu/engineering/roster.php?program=ieen"
  },
  {
+  "id": "texas-a-m-university-texarkana____engineering-management",
+  "institution": "Texas A&M University - Texarkana",
+  "department": "Engineering Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "texas-christian-university____analytics-business-is",
   "institution": "Texas Christian University",
   "department": "Analytics/Business IS",
@@ -21568,9 +21623,9 @@
   "deptUrlInherited": true
  },
  {
-  "id": "texas-state-university____is",
+  "id": "texas-state-university____information-systems",
   "institution": "Texas State University",
-  "department": "IS",
+  "department": "Information Systems",
   "type": "University",
   "country": "United States",
   "sources": [
@@ -21579,16 +21634,26 @@
   ],
   "n": 1,
   "lastPosted": "2025-06-16",
+  "sourceRowIds": [
+   "texas-state-university____is"
+  ],
+  "sourceRowAliases": [
+   {
+    "school": "",
+    "department": "IS"
+   }
+  ],
   "mapLocationIds": [
    "texas-state-information-systems-analytics-mccoy"
   ],
   "mapLocationKind": "exact",
-  "mapInstitutionNames": [
-   "Texas State University"
-  ],
   "mapSearchTerms": [
    "McCoy College of Business",
-   "Department of Information Systems and Analytics"
+   "Department of Information Systems and Analytics",
+   "IS"
+  ],
+  "mapInstitutionNames": [
+   "Texas State University"
   ],
   "mapDepartmentLinks": {
    "texas-state-information-systems-analytics-mccoy": {
@@ -27416,6 +27481,17 @@
    }
   },
   "facultyUrl": "https://tippie.uiowa.edu/about/business-analytics-department/tenured-and-tenure-track-faculty"
+ },
+ {
+  "id": "university-of-kalba____business-analytics",
+  "institution": "University of Kalba",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-kansas__school-of-business__analytics-information-and-operations-management",
