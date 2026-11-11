@@ -25,6 +25,11 @@
   "department": "Supply Chain Management"
  },
  {
+  "institution": "Aarhus University",
+  "school": "",
+  "department": "Sustainable Design and Manufacturing"
+ },
+ {
   "institution": "Abdullah Al Salem University (AASU)",
   "school": "",
   "department": "SCM/Logistics"
@@ -198,6 +203,26 @@
   "institution": "Aschaffenburg University of Applied Sciences",
   "school": "Faculty of Engineering and Computer Science",
   "department": "Digital Production Technologies"
+ },
+ {
+  "institution": "Asian Institute of Management",
+  "school": "",
+  "department": "Cybersecurity"
+ },
+ {
+  "institution": "Asian Institute of Management",
+  "school": "",
+  "department": "Data Science and AI"
+ },
+ {
+  "institution": "Asian Institute of Management",
+  "school": "",
+  "department": "Information Technology"
+ },
+ {
+  "institution": "Asian Institute of Management",
+  "school": "",
+  "department": "Operations and Supply Chain Management"
  },
  {
   "institution": "Auburn University",
@@ -1033,6 +1058,16 @@
   "institution": "Florida Polytechnic University",
   "school": "",
   "department": "BA/DS"
+ },
+ {
+  "institution": "Florida Polytechnic University",
+  "school": "",
+  "department": "Business Analytics/Operations and Engineering Management"
+ },
+ {
+  "institution": "Florida Polytechnic University",
+  "school": "",
+  "department": "Business, Economics, and Logistics and Supply Chain Management"
  },
  {
   "institution": "Florida Polytechnic University",
@@ -3725,6 +3760,11 @@
   "department": "Decision, Operations and Information Technologies"
  },
  {
+  "institution": "University of Massachusetts Dartmouth",
+  "school": "",
+  "department": "Smart manufacturing processes and systems design; AI/Machine Learning-driven manufacturing process optimization, monitoring, diagnosis, and prognostics; digital twins for manufacturing and engineered systems; advanced st"
+ },
+ {
   "institution": "University of Melbourne",
   "school": "",
   "department": "SCM/Management"
@@ -3848,6 +3888,11 @@
   "institution": "University of Nevada, Las Vegas",
   "school": "Lee Business School",
   "department": ""
+ },
+ {
+  "institution": "University of Nevada, Reno",
+  "school": "",
+  "department": "Information Systems"
  },
  {
   "institution": "University of Nevada, Reno",

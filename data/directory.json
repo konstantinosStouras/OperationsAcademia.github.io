@@ -178,6 +178,17 @@
   ]
  },
  {
+  "id": "aarhus-university____sustainable-design-and-manufacturing",
+  "institution": "Aarhus University",
+  "department": "Sustainable Design and Manufacturing",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "abdullah-al-salem-university____scm-logistics",
   "institution": "Abdullah Al Salem University (AASU)",
   "department": "SCM/Logistics",
@@ -1201,6 +1212,50 @@
    }
   },
   "facultyUrl": "https://www.th-ab.de/hochschule/organisation/organisationseinheiten/labor-fuer-produktionstechnik"
+ },
+ {
+  "id": "asian-institute-of-management____cybersecurity",
+  "institution": "Asian Institute of Management",
+  "department": "Cybersecurity",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "asian-institute-of-management____data-science-and-ai",
+  "institution": "Asian Institute of Management",
+  "department": "Data Science and AI",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "asian-institute-of-management____information-technology",
+  "institution": "Asian Institute of Management",
+  "department": "Information Technology",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "asian-institute-of-management____operations-and-supply-chain-management",
+  "institution": "Asian Institute of Management",
+  "department": "Operations and Supply Chain Management",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "auburn-university",
@@ -7569,6 +7624,28 @@
   },
   "facultyUrl": "https://floridapoly.edu/faculty/",
   "facultyDirectoryHint": "Data Science; Business Analytics; Data Science; Business Analytics. Select each of these three Department categories to see the combined department; choose 100 per page if needed."
+ },
+ {
+  "id": "florida-polytechnic-university____business-analytics-operations-and-engineering-management",
+  "institution": "Florida Polytechnic University",
+  "department": "Business Analytics/Operations and Engineering Management",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
+  "id": "florida-polytechnic-university____business-economics-and-logistics-and-supply-chain-management",
+  "institution": "Florida Polytechnic University",
+  "department": "Business, Economics, and Logistics and Supply Chain Management",
+  "type": "Business School",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "florida-polytechnic-university____data-science-and-business-analytics",
@@ -28386,6 +28463,17 @@
   ]
  },
  {
+  "id": "university-of-massachusetts-dartmouth____smart-manufacturing-processes-and-systems-design-ai-machine-",
+  "institution": "University of Massachusetts Dartmouth",
+  "department": "Smart manufacturing processes and systems design; AI/Machine Learning-driven manufacturing process optimization, monitoring, diagnosis, and prognostics; digital twins for manufacturing and engineered systems; advanced st",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "university-of-massachusetts-lowell__manning-school-of-business__operations-and-information-systems",
   "institution": "University of Massachusetts Lowell",
   "school": "Manning School of Business",
@@ -29411,6 +29499,17 @@
   "mapSearchTerms": [
    "Lee Business School"
   ]
+ },
+ {
+  "id": "university-of-nevada-reno____information-systems",
+  "institution": "University of Nevada, Reno",
+  "department": "Information Systems",
+  "type": "University",
+  "sources": [
+   "seed"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
  },
  {
   "id": "university-of-nevada-reno__college-of-business__marketing",
