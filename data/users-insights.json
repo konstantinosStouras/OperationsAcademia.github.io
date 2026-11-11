@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-10T23:49:22.302Z",
- "members": 461,
+ "generated": "2026-11-11T18:09:32.779Z",
+ "members": 462,
  "k": 3,
  "affiliation": {
-  "listed": 380,
+  "listed": 381,
   "other": 49,
   "none": 32
  },
@@ -191,6 +191,11 @@
     "members": 3
    },
    {
+    "name": "City University of Hong Kong",
+    "country": "Hong Kong",
+    "members": 3
+   },
+   {
     "name": "Fudan University",
     "country": "China",
     "members": 3
@@ -204,14 +209,9 @@
     "name": "The Hong Kong Polytechnic University",
     "country": "Hong Kong",
     "members": 3
-   },
-   {
-    "name": "IE University",
-    "country": "Spain",
-    "members": 3
    }
   ],
-  "rest": 184
+  "rest": 185
  },
  "countries": {
   "count": 18,
@@ -230,7 +230,7 @@
    },
    {
     "name": "Hong Kong",
-    "members": 15
+    "members": 16
    },
    {
     "name": "China",
