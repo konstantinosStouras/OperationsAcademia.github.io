@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-12T13:03:59.526Z",
+ "generated": "2026-11-12T13:12:11.827Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -10587,8 +10587,8 @@
     "days": 30,
     "from": "2026-10-14",
     "to": "2026-11-12",
-    "seen": 3706,
-    "resolved": 1144,
+    "seen": 3707,
+    "resolved": 1145,
     "academic": 85,
     "placed": 749,
     "all": [
@@ -10862,8 +10862,8 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-11-12",
-    "seen": 9320,
-    "resolved": 2805,
+    "seen": 9321,
+    "resolved": 2806,
     "academic": 143,
     "placed": 1263,
     "all": [
@@ -11209,8 +11209,8 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-11-12",
-    "seen": 9320,
-    "resolved": 2805,
+    "seen": 9321,
+    "resolved": 2806,
     "academic": 143,
     "placed": 1263,
     "all": [
@@ -11556,8 +11556,8 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-11-12",
-    "seen": 9320,
-    "resolved": 2805,
+    "seen": 9321,
+    "resolved": 2806,
     "academic": 143,
     "placed": 1263,
     "all": [
@@ -11901,8 +11901,8 @@
    }
   },
   "recentDays": 7,
-  "seen": 9320,
-  "resolved": 2805,
+  "seen": 9321,
+  "resolved": 2806,
   "academic": 143,
   "placed": 1263
  },
