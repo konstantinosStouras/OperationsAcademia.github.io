@@ -396,3 +396,36 @@ itself.
 
 Firestore triggers bill per invocation; this site's posting traffic is a few
 events a day against a free tier of 2 million a month. Effectively zero.
+
+
+### Account deletion and session revocation (2026-11-13)
+
+The Admin area's Delete button calls adminDeleteAccount with a UID. The backend
+checks the verified maintainer identity, protects the maintainer account, and
+atomically writes an accountBlocks record, private blockedIdentities hashes and
+a durable accountDeletions order. It then disables Auth and revokes refresh
+sessions. Firestore and Storage rules and member callables check accountBlocks,
+so an already issued ID token cannot retain member access. Identity Platform's
+guardAccountCreation and guardAccountSignIn reject blocked sign-in identities;
+Gmail dots and plus aliases share the same private email hash.
+
+Storage's Firestore lookup requires the standard
+roles/firebaserules.firestoreServiceAgent role on the existing Storage service
+agent. The owner approved this production permission on 2026-11-13. Firebase CLI
+skips this permission check with --non-interactive, so deployment success alone
+is insufficient: test a normal member upload and a blocked-session upload.
+
+The purge workflow retries every fifteen minutes. It withdraws published rows,
+removes Auth, recursively deletes owned records and uploads, removes Drive copies,
+and waits for the public rebuild and the final session grace sweep. Failed reads
+or deletes keep the order open and fail the job. Forum erasure runs inside
+purgeOnRequest, using its service account's existing secret access, after the
+worker requests the final forum sweep; no forum-secret permission is granted to
+the GitHub worker. The order is redacted only after that sweep and all other
+cleanup finish. Anonymous historical forum seasons whose keys were destroyed,
+minimal security blocks, provider backups/logs, and historical Git commits are
+not represented as erased; see privacy-policy.html.
+
+Run node --test _functions/test/account-deletion.cjs and the purge and roster
+selftests before publishing deletion changes. Verify normal and blocked users,
+not just denial cases. Do not clear production block records to resolve a retry.
