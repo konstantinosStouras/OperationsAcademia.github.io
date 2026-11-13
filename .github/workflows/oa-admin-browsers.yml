@@ -17,6 +17,27 @@ permissions:
   contents: read
 
 jobs:
+  native-safari:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install WebDriver test client
+        timeout-minutes: 3
+        run: npm install --no-save --no-audit --no-fund selenium-webdriver
+      - name: Enable native Safari on the disposable runner
+        run: sudo safaridriver --enable
+      - name: Native Safari queue actions and preserved edits
+        run: node _scraper/admin-native-safari-test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-safari-admin
+          path: test-results/native-safari-*.png
+          if-no-files-found: ignore
   admin:
     runs-on: windows-latest
     timeout-minutes: 10
