@@ -1090,7 +1090,12 @@
       showing its confirmation where it stands. */
   function retire(db, source, item) {
     var i = state[source].indexOf(item);
-    if (i >= 0) state[source].splice(i, 1);
+    if (i >= 0) {
+      state[source].splice(i, 1);
+      if (source === 'crawled' && window.OAAdminArea && OAAdminArea.setPendingCount) {
+        OAAdminArea.setPendingCount('jobs', state.crawled.length);
+      }
+    }
     renderSources(db, state.source);
     renderYears(db, state[state.source], state.year, SOURCES[state.source]);
   }
@@ -1650,6 +1655,9 @@
 
         writeDecision(db, doc, patch)
           .then(function () {
+            // The decision has saved. Update the summary before waiting for
+            // the optional edit-handle mirror or publication-status checks.
+            if (act !== 'save') retire(db, 'crawled', doc);
             /* The edit handle lands before the card says the posting is on
                the jobs page, so the page the maintainer opens next already
                has its Edit and Take down. */
@@ -1691,7 +1699,6 @@
                 ? 'Approved. Public publication is not confirmed yet; see Publication status below.'
                 : 'Rejected. It stays off the site and will not be queued again.') +
               '</p>';
-            retire(db, 'crawled', doc);
             if (act === 'approve') renderPublicationStatus(db);
           })
           .catch(function (err) {
@@ -1902,6 +1909,9 @@
            needed for collections this small; the comparator is rankBy's
            next-market-first, newest-advertisement-within-it. */
         state.crawled = r[0].sort(rankBy(SOURCES.crawled));
+        if (window.OAAdminArea && OAAdminArea.setPendingCount) {
+          OAAdminArea.setPendingCount('jobs', state.crawled.length);
+        }
         state.rejected = (r[2] || []).sort(rankBy(SOURCES.crawled));
         state.rejectedError = r[2] === null;
         setUser(r[1]);

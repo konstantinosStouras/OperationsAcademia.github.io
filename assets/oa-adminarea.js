@@ -176,6 +176,7 @@
   var countsPending = null;
   var countListeners = [];
   var countProgress = {};
+  var countRevision = {};
   function pendingCounts(onProgress) {
     if (!countsPending) countProgress = {};
     if (typeof onProgress === 'function') {
@@ -183,6 +184,14 @@
       Object.keys(countProgress).forEach(function (key) { onProgress(key, countProgress[key]); });
     }
     if (countsPending) return countsPending;
+    var revision = Object.assign({}, countRevision);
+    var keys = ['jobs', 'candidates', 'feedback', 'news', 'names', 'messages'];
+    function currentCount(key, n) {
+      // A confirmed decision is newer than a read already in flight. This
+      // applies both to late individual results and the combined response.
+      return (revision[key] || 0) !== (countRevision[key] || 0) && lastCounts && validCount(lastCounts[key])
+        ? lastCounts[key] : n;
+    }
     var request = OAFB.ready().then(function (fb) {
       var db = fb.firestore();
       var nul = function () { return null; };
@@ -200,14 +209,16 @@
            collection, so it needs no composite index. */
         countOf(db.collection(OAFB.col.messages).where('needsAdmin', '==', true))['catch'](nul)
       ].map(function (read, index) {
-        var key = ['jobs', 'candidates', 'feedback', 'news', 'names', 'messages'][index];
+        var key = keys[index];
         return read.then(function (n) {
+          n = currentCount(key, n);
           countProgress[key] = n;
           countListeners.forEach(function (notify) { notify(key, n); });
           return n;
         });
       }));
     }).then(function (r) {
+      r = r.map(function (n, index) { return currentCount(keys[index], n); });
       var total = 0, known = 0;
       for (var i = 0; i < r.length; i++) {
         if (typeof r[i] === 'number') { total += r[i]; known++; }
@@ -325,6 +336,18 @@
     else lastCounts[key] = n;
     paintTiles(lastCounts);
     openWaitingSection(key, n);
+  }
+
+  /** The owning panel knows its queue after a confirmed write. Repaint the
+      tile, cache and account badge synchronously, without another read. */
+  function setPendingCount(key, n) {
+    if (!startedFor || !OAAccounts.isAdmin() || !validCount(n) ||
+        !TILES.some(function (tile) { return tile.key === key; })) return;
+    countRevision[key] = (countRevision[key] || 0) + 1;
+    if (countsPending) countProgress[key] = n;
+    if (key === 'candidates') lastCandidateCount = n;
+    receiveCount(startedFor, key, n);
+    correctBadge(null);
   }
 
   /* -------------------------------------------------------- candidate cards */
@@ -687,16 +710,17 @@
         patch.to = String(edited.value).trim().slice(0, 200);
       }
 
-      btn.disabled = true;
+      var buttons = card.querySelectorAll('button');
+      buttons.forEach(function (button) { button.disabled = true; });
       db.collection('nameFixes').doc(id).update(patch).then(function () {
+        if (lastCounts && validCount(lastCounts.names)) {
+          setPendingCount('names', Math.max(0, lastCounts.names + (act === 'reopen' ? 1 : -1)));
+        }
         return renderNameFixes(db);
       }).then(function (pending) {
-        if (typeof pending === 'number' && lastCounts) {
-          lastCounts.names = pending;
-          correctBadge(null);
-        }
+        setPendingCount('names', pending);
       })['catch'](function (err) {
-        btn.disabled = false;
+        buttons.forEach(function (button) { button.disabled = false; });
         if (msg) {
           msg.className = 'oa-form-msg is-err';
           msg.textContent = 'Could not save that (' + ((err && err.code) || 'error') + ').';
@@ -1209,6 +1233,7 @@
   window.OAAdminArea = {
     /** The one number beside "Admin area" — shared with oa-accounts.js. */
     pendingCounts: pendingCounts,
+    setPendingCount: setPendingCount,
     /** Repaint the summary strip. oa-users.js calls it after sending or
         answering, so the "Message replies waiting" tile follows what the
         panel below it now shows. Best-effort: a refused read keeps the
