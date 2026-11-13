@@ -1093,7 +1093,9 @@
     if (i >= 0) {
       state[source].splice(i, 1);
       if (source === 'crawled' && window.OAAdminArea && OAAdminArea.setPendingCount) {
-        OAAdminArea.setPendingCount('jobs', state.crawled.length);
+        if (!OAAdminArea.setPendingItem || !OAAdminArea.setPendingItem('jobs', item.rowId, false)) {
+          OAAdminArea.setPendingCount('jobs', state.crawled.length);
+        }
       }
     }
     renderSources(db, state.source);
@@ -1488,7 +1490,7 @@
     list.appendChild(d);
   }
 
-  function render(db, docs, source) {
+  function render(db, docs, source, preserve) {
     var list = $('oa-review-list');
     var count = $('oa-review-count');
     if (count) {
@@ -1514,18 +1516,18 @@
     show(dupBtn, dupOn);
     if (bulkOn && btn) {
       btn.textContent = 'Approve all ' + docs.length + ' shown & publish';
-      btn.disabled = false;
+      if (!preserve) btn.disabled = false;
     }
     if (dupOn && dupBtn) {
-      dupBtn.disabled = false;
+      if (!preserve) dupBtn.disabled = false;
       /* Claimed on every render, like the bulk button: the tabs redraw and a
          stale handler would be holding the previous tab's `db`. */
       dupBtn.onclick = function () { checkDuplicates(db); };
     }
     var bm = $('oa-review-bulk-msg');
-    if (bm) { bm.className = 'oa-form-msg'; bm.textContent = ''; }
+    if (bm && !preserve) { bm.className = 'oa-form-msg'; bm.textContent = ''; }
 
-    unmountPickers();
+    if (!preserve) unmountPickers();
 
     if (!docs.length) {
       list.innerHTML = source === 'user'
@@ -1542,7 +1544,7 @@
       return;
     }
 
-    list.innerHTML = '';
+    if (!preserve || !list.querySelector('.oa-rv-card')) list.innerHTML = '';
     if (source === 'user') {
       renderUserCards(db, docs);
       renderTakenDown(db, list);
@@ -1550,8 +1552,16 @@
     }
     var cards = [];
     docs.forEach(function (doc, i) {
+      if (preserve) {
+        var existing = Array.prototype.filter.call(list.querySelectorAll('[data-review-id]'), function (card) {
+          return card.getAttribute('data-review-id') === doc.rowId;
+        })[0];
+        if (existing && existing.querySelector('[data-review-fields]')) { cards[i] = existing; return; }
+        if (existing) existing.remove();
+      }
       var card = document.createElement('article');
       cards[i] = card;
+      card.setAttribute('data-review-id', doc.rowId);
       card.className = 'oa-fb-card oa-rv-card';
       card.innerHTML = cardHtml(doc, i);
 
@@ -1908,7 +1918,8 @@
         /* Sorted here rather than in the query so no composite index is
            needed for collections this small; the comparator is rankBy's
            next-market-first, newest-advertisement-within-it. */
-        state.crawled = r[0].sort(rankBy(SOURCES.crawled));
+        var live = window.OAAdminArea && OAAdminArea.pendingItems && OAAdminArea.pendingItems('jobs');
+        state.crawled = (live ? Object.keys(live).map(function (id) { return live[id]; }).filter(function (d) { return d && d.rowId; }) : r[0]).sort(rankBy(SOURCES.crawled));
         if (window.OAAdminArea && OAAdminArea.setPendingCount) {
           OAAdminArea.setPendingCount('jobs', state.crawled.length);
         }
@@ -1931,6 +1942,32 @@
       if (!OAAccounts.isAdmin()) { show($('oa-review'), false); return; }
       show($('oa-review'), true);
       OAFB.ready().then(function (fb) { load(fb.firestore()); });
+    });
+    window.addEventListener('oa-admin-pending', function (event) {
+      var update = event.detail;
+      if (!OAAccounts.isAdmin() || update.key !== 'jobs') return;
+      if (!update.added.length) {
+        state.crawled = state.crawled.filter(function (doc) { return !!update.docs[doc.rowId]; });
+        return;
+      }
+      OAFB.ready().then(function (fb) {
+        if (!OAAccounts.isAdmin()) return;
+        var db = fb.firestore();
+        var fresh = Object.keys(update.docs).map(function (id) {
+          return state.crawled.filter(function (d) { return d.rowId === id; })[0] || update.docs[id];
+        }).filter(function (d) { return d && d.rowId; });
+        var wasEmpty = !state.crawled.length;
+        state.crawled = fresh.sort(rankBy(SOURCES.crawled));
+        if (wasEmpty) state.year = yearsOf(state.crawled, SOURCES.crawled)[0] || '*';
+        renderSources(db, state.source);
+        renderYears(db, state[state.source], state.year, SOURCES[state.source]);
+        if (state.source === 'crawled') {
+          // Keep existing cards and their unsaved fields mounted. New jobs
+          // join the current market; other markets appear in the year tabs.
+          var shown = state.crawled.filter(function (d) { return state.year === '*' || SOURCES.crawled.yearOf(d) === state.year; });
+          render(db, shown, 'crawled', true);
+        }
+      });
     });
   }
 

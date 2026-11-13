@@ -300,6 +300,10 @@
     // (owner, 2026-08-21); feedback.html keeps the form and no inbox.
     if (!$('oa-inbox')) return;
     var wired = false;
+    window.addEventListener('oa-admin-pending', function (event) {
+      if (!OAAccounts.isAdmin() || event.detail.key !== 'feedback' || !event.detail.added.length) return;
+      OAFB.ready().then(function (fb) { if (OAAccounts.isAdmin()) renderInbox(fb.firestore(), currentTab()); });
+    });
     OAAccounts.onChange(function () {
       if (!OAAccounts.isAdmin()) { show($('oa-inbox'), false); return; }
       show($('oa-inbox'), true);

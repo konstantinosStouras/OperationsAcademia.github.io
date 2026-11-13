@@ -177,6 +177,10 @@
   var countListeners = [];
   var countProgress = {};
   var countRevision = {};
+  var liveQueues = {};
+  var liveStops = [];
+  var liveTimer = null;
+  var liveGeneration = 0;
   function pendingCounts(onProgress) {
     if (!countsPending) countProgress = {};
     if (typeof onProgress === 'function') {
@@ -187,6 +191,7 @@
     var revision = Object.assign({}, countRevision);
     var keys = ['jobs', 'candidates', 'feedback', 'news', 'names', 'messages'];
     function currentCount(key, n) {
+      if (liveQueues[key]) return Object.keys(liveQueues[key]).length;
       // A confirmed decision is newer than a read already in flight. This
       // applies both to late individual results and the combined response.
       return (revision[key] || 0) !== (countRevision[key] || 0) && lastCounts && validCount(lastCounts[key])
@@ -341,6 +346,8 @@
   /** The owning panel knows its queue after a confirmed write. Repaint the
       tile, cache and account badge synchronously, without another read. */
   function setPendingCount(key, n) {
+    // Once subscribed, a panel's older list cannot replace the live total.
+    if (liveQueues[key]) n = Object.keys(liveQueues[key]).length;
     var tile = TILES.filter(function (tile) { return tile.key === key; })[0];
     if (!startedFor || !OAAccounts.isAdmin() || !validCount(n) ||
         !tile) return;
@@ -360,6 +367,158 @@
       }
     }
     correctBadge(null);
+  }
+
+  function setPendingItem(key, id, pending) {
+    if (!liveQueues[key]) return false;
+    if (pending) liveQueues[key][id] = liveQueues[key][id] || {};
+    else delete liveQueues[key][id];
+    setPendingCount(key, Object.keys(liveQueues[key]).length);
+    return true;
+  }
+
+  function stopLiveCounts() {
+    liveGeneration++;
+    liveStops.splice(0).forEach(function (stop) { stop(); });
+    clearInterval(liveTimer);
+    liveTimer = null;
+    liveQueues = {};
+  }
+
+  function startLiveCounts(db, owner) {
+    stopLiveCounts();
+    var generation = liveGeneration;
+    function active() { return generation === liveGeneration && startedFor === owner && OAAccounts.isAdmin(); }
+    function listen(ref, onValue) {
+      if (typeof ref.onSnapshot !== 'function') return;
+      var stopped = false;
+      function connect() {
+        if (!active() || stopped) return;
+        return ref.onSnapshot({ includeMetadataChanges: true }, function (snap) {
+          // Cached snapshots and unconfirmed local writes are not decisions.
+          if (!active() || (snap.metadata && (snap.metadata.fromCache || snap.metadata.hasPendingWrites))) return;
+          onValue(snap);
+        }, function () {
+          // Preserve the last honest count; retry after reconnect/focus or on
+          // the next timer tick, without multiplying active subscriptions.
+          unsubscribe = null;
+        });
+      }
+      var unsubscribe = connect();
+      var retry = function () { if (!unsubscribe && !stopped) unsubscribe = connect(); };
+      liveRetries.push(retry);
+      liveStops.push(function () { stopped = true; if (unsubscribe) unsubscribe(); });
+    }
+    var liveRetries = [];
+    function queue(key, ref) {
+      listen(ref, function (snap) {
+        var previous = liveQueues[key];
+        var next = {};
+        snap.forEach(function (d) { next[d.id] = d.data(); });
+        liveQueues[key] = next;
+        setPendingCount(key, snap.size);
+        var added = Object.keys(next).filter(function (id) { return previous && !previous[id]; });
+        // An arrival opens its panel even if another item left at the same
+        // time and the total therefore stayed unchanged.
+        if (added.length) {
+          var tile = TILES.filter(function (t) { return t.key === key; })[0];
+          var panel = tile && $(tile.to.slice(1));
+          var section = panel && panel.querySelector('.oa-aa-section');
+          if (section) section.open = true;
+          if (key === 'names' && sectionLoads['oa-aa-names']) {
+            var list = $('oa-aa-names-list');
+            var heading = list.querySelector('[data-name-status="pending"]');
+            if (!heading) {
+              var empty = list.querySelector(':scope > .oa-hint');
+              if (empty) empty.remove();
+              heading = document.createElement('h4');
+              heading.className = 'oa-aa-group-h';
+              heading.setAttribute('data-name-status', 'pending');
+              list.insertBefore(heading, list.firstChild);
+            }
+            heading.textContent = 'Waiting for your decision (' + Object.keys(next).length + ')';
+            added.forEach(function (id) {
+              var existing = Array.prototype.filter.call(list.querySelectorAll('[data-id]'), function (card) { return card.getAttribute('data-id') === id; })[0];
+              if (existing && existing.querySelector('[data-role="to"]')) return;
+              if (existing) existing.remove();
+              heading.insertAdjacentHTML('afterend', fixCard(id, next[id]));
+            });
+          }
+        }
+        window.dispatchEvent(new CustomEvent('oa-admin-pending', { detail: { key: key, docs: next, added: added } }));
+      });
+    }
+    queue('jobs', db.collection('jobReviews').where('status', '==', 'pending'));
+    queue('feedback', db.collection(OAFB.col.feedback).where('status', '==', 'open'));
+    queue('names', db.collection('nameFixes').where('status', '==', 'pending'));
+    queue('messages', db.collection(OAFB.col.messages).where('needsAdmin', '==', true));
+    listen(db.collection(OAFB.col.registered), function (snap) { receiveCount(owner, 'users', snap.size); });
+
+    var candidates = null, meta = null, overrides = null, yearDecisions = null;
+    function candidateCount() {
+      if (!active() || !candidates || !meta) return;
+      var before = lastCounts && lastCounts.candidates;
+      var previous = liveQueues.candidates;
+      var held = 0, entries = {};
+      candidates.forEach(function (d) { if (candGroupOf(d.data(), meta.revealAt) === 'held') { held++; entries[d.id] = d.data(); } });
+      liveQueues.candidates = entries;
+      setPendingCount('candidates', held);
+      var arrived = previous && Object.keys(entries).some(function (id) { return !previous[id]; });
+      if (arrived) $('oa-aa-cands').querySelector('.oa-aa-section').open = true;
+      if (held > before || arrived) refreshLoaded('oa-aa-cands');
+    }
+    function refreshLoaded(id) {
+      if (sectionLoads[id]) sectionLoads[id].then(function () {
+        if (active() && sectionInitializers[id]) return sectionInitializers[id]();
+      })['catch'](function () {});
+    }
+    listen(db.collection(OAFB.col.candidateSubmissions), function (snap) { candidates = snap; candidateCount(); });
+    function newsCount() {
+      if (!overrides || !window.OANews) return Promise.resolve();
+      return fetchJson('/changelog.json').then(function (data) {
+        if (!active()) return;
+        var pending = OANews.partition(data.updates || [], overrides).pending;
+        var before = lastCounts && lastCounts.news;
+        newsMemo = Promise.resolve(pending);
+        setPendingCount('news', pending.length);
+        if (pending.length > before) refreshLoaded('oa-aa-news');
+      });
+    }
+    function yearCount() {
+      if (!yearDecisions || !window.OAYearCheck) return Promise.resolve();
+      return yearCheckRows().then(function (rows) {
+        if (active()) {
+          var n = OAYearCheck.partition(rows, yearDecisions).open.length;
+          var before = lastYearCheck;
+          receiveCount(owner, 'yearcheck', n);
+          if (n > before) refreshLoaded('oa-aa-yc');
+        }
+      });
+    }
+    function map(snap) { var values = {}; snap.forEach(function (d) { values[d.id] = d.data(); }); return values; }
+    if (window.OANews) listen(db.collection(OANews.COLLECTION), function (snap) { overrides = map(snap); newsCount()['catch'](function () {}); });
+    if (window.OAYearCheck) listen(db.collection(OAYearCheck.COLLECTION), function (snap) { yearDecisions = map(snap); yearCount()['catch'](function () {}); });
+    var checking = false;
+    function checkFiles() {
+      if (!active() || document.hidden || checking) return;
+      liveRetries.forEach(function (retry) { retry(); });
+      checking = true;
+      ['/changelog.json', '/data/candidates-meta.json', YEARCHECK].forEach(function (url) { delete jsonMemo[url]; });
+      Promise.all([
+        fetchJson('/data/candidates-meta.json').then(function (value) { meta = value; candidateCount(); }),
+        newsCount(), yearCount()
+      ].map(function (p) { return p['catch'](function () {}); })).then(function () { checking = false; });
+    }
+    fetchJson('/data/candidates-meta.json').then(function (value) { meta = value; candidateCount(); })['catch'](function () {});
+    // Build-generated files have no push channel. Revalidate them once a
+    // minute while visible and as soon as the admin returns to the tab.
+    liveTimer = setInterval(checkFiles, 60000);
+    document.addEventListener('visibilitychange', checkFiles);
+    window.addEventListener('online', checkFiles);
+    liveStops.push(function () {
+      document.removeEventListener('visibilitychange', checkFiles);
+      window.removeEventListener('online', checkFiles);
+    });
   }
 
   /* -------------------------------------------------------- candidate cards */
@@ -684,7 +843,7 @@
         var rows = groups[g[0]];
         if (!rows.length) return;
         rows.sort(byNewest);
-        out += '<h4 class="oa-aa-group-h">' + g[1] + ' (' + rows.length + ')</h4>' +
+        out += '<h4 class="oa-aa-group-h" data-name-status="' + g[0] + '">' + g[1] + ' (' + rows.length + ')</h4>' +
           rows.map(function (r) { return fixCard(r.id, r.v); }).join('');
       });
       list.innerHTML = out ||
@@ -725,7 +884,7 @@
       var buttons = card.querySelectorAll('button');
       buttons.forEach(function (button) { button.disabled = true; });
       db.collection('nameFixes').doc(id).update(patch).then(function () {
-        if (lastCounts && validCount(lastCounts.names)) {
+        if (!setPendingItem('names', id, act === 'reopen') && lastCounts && validCount(lastCounts.names)) {
           setPendingCount('names', Math.max(0, lastCounts.names + (act === 'reopen' ? 1 : -1)));
         }
         return renderNameFixes(db);
@@ -750,6 +909,7 @@
       cached menu badge is set from them, the same rule my-postings applies. */
   function correctBadge(groups) {
     if (groups) lastCandidateCount = groups.held.length;
+    if (liveQueues.candidates) lastCandidateCount = Object.keys(liveQueues.candidates).length;
     if (!lastCounts) return;
     if (lastCandidateCount !== null) lastCounts.candidates = lastCandidateCount;
     var total = 0, known = 0;
@@ -1107,13 +1267,13 @@
         'oa-aa-names': function () {
           wireNameFixActions(db);
           return renderNameFixes(db).then(function (pending) {
-            if (typeof pending === 'number' && lastCounts) {
-              lastCounts.names = pending;
-              correctBadge(null);
-            }
+            setPendingCount('names', pending);
           });
         }
       };
+
+      if (startedFor !== owner || !OAAccounts.isAdmin()) return;
+      startLiveCounts(db, owner);
 
       // Counts are useful while every section is closed. They must not wait
       // for the candidate roster or any other full collection to render.
@@ -1123,7 +1283,7 @@
         correctBadge(null);
       });
       registeredCount().then(function (n) {
-        receiveCount(owner, 'users', n);
+        if (!summaryResolved.users) receiveCount(owner, 'users', n);
       })['catch'](function () { receiveCount(owner, 'users', null); });
       Promise.all([yearCheckRows(), yearCheckDocs(db)]).then(function (both) {
         var split = OAYearCheck.partition(both[0], both[1] || {});
@@ -1205,6 +1365,7 @@
       show($('oa-aa-admin'), is);
       show($('oa-aa-signin-p'), !is && !u && OAFB.enabled);
       if (!is) {
+        stopLiveCounts();
         startedFor = null;
         lastCandidateCount = null;
         lastCounts = null;
@@ -1246,6 +1407,8 @@
     /** The one number beside "Admin area" — shared with oa-accounts.js. */
     pendingCounts: pendingCounts,
     setPendingCount: setPendingCount,
+    setPendingItem: setPendingItem,
+    pendingItems: function (key) { return liveQueues[key] || null; },
     /** Repaint the summary strip. oa-users.js calls it after sending or
         answering, so the "Message replies waiting" tile follows what the
         panel below it now shows. Best-effort: a refused read keeps the

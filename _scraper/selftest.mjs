@@ -25489,7 +25489,7 @@ async function testRegistrationFields() {
      && /if \(seed\.linkFails\) \{/.test(shimSrc) && /Promise\.reject\(err\)/.test(shimSrc),
     'shim: linkWithPopup really ATTACHES the provider, and an ORCID entry\'s uid IS the iD — a shim ' +
     'that merely resolved made every connect look like an ORCID that sent nothing back');
-  ok(/if \(seed\.setDelayMs\) return later\(seed\.setDelayMs\);/.test(shimSrc)
+  ok(/if \(seed\.setDelayMs\) return later\(seed\.setDelayMs\)(?:;|\.then\()/.test(shimSrc)
      && /var wait = seed\.linkDelayMs \|\| 0;/.test(shimSrc)
      && /if \(seed\.linkVerifies\) u\.emailVerified = true;/.test(shimSrc)
      && /if \(!u\.email\) u\.email = seed\.linkEmail \|\| 'linked@example\.edu';/.test(shimSrc),

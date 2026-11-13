@@ -27,10 +27,21 @@
   var seed = window.__FAKE_FB || {};
   var docs = Object.create(null);          // "path/to/doc" -> plain object
   var log = [];
+  var subscriptions = [];
+  function notifySubscribers(path) {
+    if (!seed.realtime) return;
+    Promise.resolve().then(function () {
+      subscriptions.slice().forEach(function (entry) {
+        if (!path || path.slice(0, path.lastIndexOf('/')) === entry.ref.path) entry.emit();
+      });
+    });
+  }
 
   window.__fb = {
     log: log,
     docs: docs,
+    subscriptions: subscriptions,
+    notify: notifySubscribers,
     /* the reads `holdReads` is keeping, and the release that lands them. The
        list is RUNTIME-settable, not seed-only: a check that reproduces a late
        paint has to hold one read and let the next one through, which it can
@@ -165,7 +176,8 @@
        and opening the card that follows) can only be measured with the gap
        open; the same-tick resolve hid an unhandled rejection and a wrong card
        for as long as this shim answered instantly. */
-    if (seed.setDelayMs) return later(seed.setDelayMs);
+    if (seed.setDelayMs) return later(seed.setDelayMs).then(function () { notifySubscribers(this.path); }.bind(this));
+    notifySubscribers(this.path);
     return Promise.resolve();
   };
   function later(ms, value) { return new Promise(function (r) { setTimeout(function () { r(value); }, ms); }); }
@@ -173,11 +185,13 @@
     record('update', this.path, patch);
     if (!docs[this.path]) return Promise.reject(new Error('not-found: ' + this.path));
     docs[this.path] = Object.assign({}, docs[this.path], resolveIncrements(docs[this.path], patch));
+    notifySubscribers(this.path);
     return Promise.resolve();
   };
   DocRef.prototype.delete = function () {
     record('delete', this.path);
     delete docs[this.path];
+    notifySubscribers(this.path);
     return Promise.resolve();
   };
 
@@ -325,6 +339,21 @@
   Col.prototype.limit = function (n) {
     return new Query(this.path, [], null, n);
   };
+  if (seed.realtime) {
+    Query.prototype.onSnapshot = Col.prototype.onSnapshot = function (options, next, error) {
+      var ref = this, active = true;
+      var entry = { ref: ref, emit: function (metadata) {
+        if (!active) return;
+        var snapshot = ref.__run ? ref.__run() : querySnap(childrenOf(ref.path).map(snapOf));
+        snapshot.metadata = metadata || { fromCache: false, hasPendingWrites: false };
+        next(snapshot);
+      }, fail: function () { if (active) { remove(); error(new Error('Test connection refused')); } } };
+      function remove() { active = false; var i = subscriptions.indexOf(entry); if (i >= 0) subscriptions.splice(i, 1); }
+      subscriptions.push(entry);
+      ref.get().then(function () { entry.emit(); }, function (err) { remove(); error(err); });
+      return remove;
+    };
+  }
 
   /* A write batch. Grown for the roster's broadcast (2026-08-24), which sends
      a message and its thread bookkeeping as ONE write: two sequential writes

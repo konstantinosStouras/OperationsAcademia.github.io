@@ -1511,6 +1511,22 @@
 
   function boot() {
     if (!root.OAAccounts || !root.OAFB || !$('oa-aa-users')) return;
+    root.addEventListener('oa-admin-pending', function (event) {
+      if (!root.OAAccounts.isAdmin() || event.detail.key !== 'messages') return;
+      var pending = event.detail.docs;
+      state.rows.forEach(function (row) {
+        if (pending[row.uid]) row.thread = Object.assign({}, row.thread, pending[row.uid], { uid: row.uid });
+        else if (row.thread) row.thread.needsAdmin = false;
+      });
+      Object.keys(pending).forEach(function (uid) {
+        if (state.rows.some(function (row) { return row.uid === uid; })) return;
+        var previous = state.ghosts.filter(function (thread) { return thread.uid === uid; })[0];
+        if (previous) Object.assign(previous, pending[uid]);
+        else state.ghosts.push(Object.assign({ uid: uid }, pending[uid]));
+      });
+      // Updating the roster must not replace a message being composed.
+      renderTable();
+    });
     $('oa-u-close').addEventListener('click', closeComposer);
     $('oa-u-dialog').addEventListener('cancel', function (event) { event.preventDefault(); closeComposer(); });
     $('oa-u-dialog').addEventListener('keydown', function (event) {

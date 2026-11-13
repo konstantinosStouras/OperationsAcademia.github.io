@@ -40,7 +40,7 @@ const fix = id => ({ path: 'nameFixes/' + id, data: { kind: 'institution', from:
           if (/\/data\/jobs\.json(?:\?|$)/.test(url)) return route.fulfill({ json: [] });
           return route.continue();
         });
-        await page.addInitScript(({ user, docs }) => { window.__FAKE_FB = { user, docs }; }, { user: admin, docs });
+        await page.addInitScript(({ user, docs, realtime }) => { window.__FAKE_FB = { user, docs, realtime }; }, { user: admin, docs, realtime: process.env.OA_TEST_REALTIME === '1' });
         await page.goto(base + '/admin-area');
         await page.locator('#oa-review-publication').waitFor();
         await page.waitForFunction(() => document.querySelector('#oa-aa-summary-status').hidden);
