@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-13T12:26:00.482Z",
+ "generated": "2026-11-13T16:49:30.674Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -6246,9 +6246,9 @@
    115
   ],
   "2026-11-13": [
-   22,
-   44,
-   44
+   28,
+   55,
+   55
   ]
  },
  "pages": [
@@ -9304,7 +9304,7 @@
    "to": "2026-11-13",
    "metric": "visits",
    "zone": "UTC",
-   "total": 19561,
+   "total": 19572,
    "items": [
     {
      "name": "00",
@@ -9364,15 +9364,15 @@
     },
     {
      "name": "14",
-     "value": 982
+     "value": 986
     },
     {
      "name": "15",
-     "value": 1021
+     "value": 1026
     },
     {
      "name": "16",
-     "value": 1041
+     "value": 1043
     },
     {
      "name": "17",
@@ -9857,7 +9857,7 @@
   "source": "usage",
   "from": "2026-08-17",
   "to": "2026-11-13",
-  "sessions": 19561,
+  "sessions": 19572,
   "avgSessionSec": 451,
   "viewsPerSession": 1
  },
@@ -9975,16 +9975,16 @@
     "visits": 11
    },
    {
+    "name": "Texas A&M University",
+    "visits": 10
+   },
+   {
     "name": "The Ohio State University",
     "visits": 10
    },
    {
     "name": "University of Chicago",
     "visits": 10
-   },
-   {
-    "name": "Texas A&M University",
-    "visits": 9
    },
    {
     "name": "The University of Texas at Austin",
@@ -10225,16 +10225,16 @@
     "visits": 6
    },
    {
+    "name": "Texas A&M University",
+    "visits": 6
+   },
+   {
     "name": "University College Dublin (UCD)",
     "visits": 6
    },
    {
     "name": "Virginia Tech",
     "visits": 6
-   },
-   {
-    "name": "Texas A&M University",
-    "visits": 5
    },
    {
     "name": "University of Chicago",
@@ -10318,10 +10318,10 @@
     "days": 30,
     "from": "2026-10-15",
     "to": "2026-11-13",
-    "seen": 3549,
-    "resolved": 1095,
-    "academic": 85,
-    "placed": 703,
+    "seen": 3561,
+    "resolved": 1097,
+    "academic": 88,
+    "placed": 704,
     "all": [
      {
       "name": "Indiana University Bloomington",
@@ -10396,6 +10396,10 @@
       "visits": 8
      },
      {
+      "name": "Texas A&M University",
+      "visits": 8
+     },
+     {
       "name": "University College Dublin (UCD)",
       "visits": 8
      },
@@ -10413,10 +10417,6 @@
      },
      {
       "name": "Singapore Management University (SMU)",
-      "visits": 7
-     },
-     {
-      "name": "Texas A&M University",
       "visits": 7
      },
      {
@@ -10589,10 +10589,10 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-11-13",
-    "seen": 9397,
-    "resolved": 2829,
-    "academic": 146,
-    "placed": 1284,
+    "seen": 9409,
+    "resolved": 2831,
+    "academic": 149,
+    "placed": 1285,
     "all": [
      {
       "name": "Indiana University Bloomington",
@@ -10703,16 +10703,16 @@
       "visits": 11
      },
      {
+      "name": "Texas A&M University",
+      "visits": 10
+     },
+     {
       "name": "The Ohio State University",
       "visits": 10
      },
      {
       "name": "University of Chicago",
       "visits": 10
-     },
-     {
-      "name": "Texas A&M University",
-      "visits": 9
      },
      {
       "name": "The University of Texas at Austin",
@@ -10936,10 +10936,10 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-11-13",
-    "seen": 9397,
-    "resolved": 2829,
-    "academic": 146,
-    "placed": 1284,
+    "seen": 9409,
+    "resolved": 2831,
+    "academic": 149,
+    "placed": 1285,
     "all": [
      {
       "name": "Indiana University Bloomington",
@@ -11050,16 +11050,16 @@
       "visits": 11
      },
      {
+      "name": "Texas A&M University",
+      "visits": 10
+     },
+     {
       "name": "The Ohio State University",
       "visits": 10
      },
      {
       "name": "University of Chicago",
       "visits": 10
-     },
-     {
-      "name": "Texas A&M University",
-      "visits": 9
      },
      {
       "name": "The University of Texas at Austin",
@@ -11283,10 +11283,10 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-11-13",
-    "seen": 9397,
-    "resolved": 2829,
-    "academic": 146,
-    "placed": 1284,
+    "seen": 9409,
+    "resolved": 2831,
+    "academic": 149,
+    "placed": 1285,
     "all": [
      {
       "name": "Indiana University Bloomington",
@@ -11397,16 +11397,16 @@
       "visits": 11
      },
      {
+      "name": "Texas A&M University",
+      "visits": 10
+     },
+     {
       "name": "The Ohio State University",
       "visits": 10
      },
      {
       "name": "University of Chicago",
       "visits": 10
-     },
-     {
-      "name": "Texas A&M University",
-      "visits": 9
      },
      {
       "name": "The University of Texas at Austin",
@@ -11628,15 +11628,15 @@
    }
   },
   "recentDays": 7,
-  "seen": 9397,
-  "resolved": 2829,
-  "academic": 146,
-  "placed": 1284
+  "seen": 9409,
+  "resolved": 2831,
+  "academic": 149,
+  "placed": 1285
  },
  "totals": {
-  "visitors": 48996,
-  "sessions": 70189,
-  "pageviews": 143453,
+  "visitors": 49002,
+  "sessions": 70200,
+  "pageviews": 143464,
   "days": 1247,
   "universities": 84
  },
@@ -11648,7 +11648,7 @@
     "to": "2026-11-13",
     "metric": "visits",
     "zone": "UTC",
-    "total": 6699,
+    "total": 6710,
     "items": [
      {
       "name": "00",
@@ -11708,15 +11708,15 @@
      },
      {
       "name": "14",
-      "value": 266
+      "value": 270
      },
      {
       "name": "15",
-      "value": 341
+      "value": 346
      },
      {
       "name": "16",
-      "value": 296
+      "value": 298
      },
      {
       "name": "17",
@@ -12060,7 +12060,7 @@
     "to": "2026-11-13",
     "metric": "visits",
     "zone": "UTC",
-    "total": 19561,
+    "total": 19572,
     "items": [
      {
       "name": "00",
@@ -12120,15 +12120,15 @@
      },
      {
       "name": "14",
-      "value": 982
+      "value": 986
      },
      {
       "name": "15",
-      "value": 1021
+      "value": 1026
      },
      {
       "name": "16",
-      "value": 1041
+      "value": 1043
      },
      {
       "name": "17",
@@ -12616,7 +12616,7 @@
     "to": "2026-11-13",
     "metric": "visits",
     "zone": "UTC",
-    "total": 19561,
+    "total": 19572,
     "items": [
      {
       "name": "00",
@@ -12676,15 +12676,15 @@
      },
      {
       "name": "14",
-      "value": 982
+      "value": 986
      },
      {
       "name": "15",
-      "value": 1021
+      "value": 1026
      },
      {
       "name": "16",
-      "value": 1041
+      "value": 1043
      },
      {
       "name": "17",
@@ -13344,7 +13344,7 @@
     "to": "2026-11-13",
     "metric": "visits",
     "zone": "UTC",
-    "total": 19561,
+    "total": 19572,
     "items": [
      {
       "name": "00",
@@ -13404,15 +13404,15 @@
      },
      {
       "name": "14",
-      "value": 982
+      "value": 986
      },
      {
       "name": "15",
-      "value": 1021
+      "value": 1026
      },
      {
       "name": "16",
-      "value": 1041
+      "value": 1043
      },
      {
       "name": "17",
@@ -14347,7 +14347,7 @@
    "source": "usage",
    "from": "2026-10-15",
    "to": "2026-11-13",
-   "sessions": 6699,
+   "sessions": 6710,
    "avgSessionSec": 359,
    "viewsPerSession": 1
   },
@@ -14355,7 +14355,7 @@
    "source": "usage",
    "from": "2026-08-17",
    "to": "2026-11-13",
-   "sessions": 19561,
+   "sessions": 19572,
    "avgSessionSec": 451,
    "viewsPerSession": 1
   },
@@ -14363,7 +14363,7 @@
    "source": "usage",
    "from": "2026-08-17",
    "to": "2026-11-13",
-   "sessions": 19561,
+   "sessions": 19572,
    "avgSessionSec": 451,
    "viewsPerSession": 1
   },
@@ -14371,7 +14371,7 @@
    "source": "usage",
    "from": "2026-08-17",
    "to": "2026-11-13",
-   "sessions": 19561,
+   "sessions": 19572,
    "avgSessionSec": 451,
    "viewsPerSession": 1
   }
