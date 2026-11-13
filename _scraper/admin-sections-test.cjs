@@ -37,7 +37,9 @@ const server = http.createServer((req, res) => {
         user: { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com', emailVerified: true,
           displayName: 'Test Admin', providerData: [] },
         docs: [{ path: 'userDirectory/one', data: { name: 'Test Person', email: 'person@example.edu',
-          affiliation: 'Test University', first: 1000, seen: 2000 } }]
+          affiliation: 'Test University', first: 1000, seen: 2000 } },
+          { path: 'accountDeletions/erasing-one', data: { uid: 'erasing-one', status: 'clearing', accessBlockedAt: 123, email: 'erasing@example.edu' } },
+          { path: 'accountDeletions/done-one', data: { uid: 'done-one', status: 'done', doneAt: Date.now() } }]
       };
     });
     const ready = async () => {
@@ -70,7 +72,14 @@ const server = http.createServer((req, res) => {
       await page.waitForFunction(id => !document.getElementById(id).hasAttribute('aria-busy'),
         await section.evaluate(el => el.parentElement.id));
       if (i === 0) await page.locator('#oa-review-publication').waitFor({ state: 'visible' });
-      if (i === 7) await page.locator('#oa-aa-users .oa-u-table').waitFor({ state: 'visible' });
+      if (i === 7) {
+        await page.locator('#oa-aa-users .oa-u-table').waitFor({ state: 'visible' });
+        const progress = await page.locator('#oa-u-deletion-progress').textContent();
+        assert.match(progress, /erasing@example.edu: Access blocked; deleting data/);
+        assert.match(progress, /Account done-one: Deleted/);
+        assert.equal(await page.locator('#oa-aa-users .oa-u-table tbody tr[data-uid="erasing-one"]').count(), 0,
+          'deletion progress remains visible after the deleted roster row is gone');
+      }
       assert.equal(await section.locator('.oa-aa-section-minus').isVisible(), true);
       assert.equal(await section.locator('.oa-aa-section-body').isVisible(), true);
       await section.locator('.oa-aa-section-icon').click();

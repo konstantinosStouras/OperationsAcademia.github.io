@@ -378,7 +378,7 @@
                  people who have replied and are waiting DO have a tile above,
                  but the list itself is a statistic — everyone who has ever
                  signed in — and the page reads queues first, statistics last.
-                 assets/oa-users.js?v=20261113-erasure draws it; both collections are admin-read
+                 assets/oa-users.js?v=20261113-erasure-progress draws it; both collections are admin-read
                  in _firestore.rules, so an unhidden panel still loads nothing
                  for the wrong visitor. -->
             <section class="oa-panel" id="oa-aa-users" hidden>
@@ -409,9 +409,10 @@
               <p class="oa-hint">Delete removes an account and everything the
                 person posted: their job postings, candidate profile and
                 placement reports come off the site, their e-mail alerts stop,
-                and their sign-in is deleted. It starts within a couple of
-                minutes (at the site&rsquo;s next update at the latest), and you
-                can call it off until then; the row goes on its own once it has.</p>
+                and their sign-in is deleted. It blocks member access immediately and
+                prevents registration with the same sign-in identities. Cleanup
+                continues in the background; see Deletion progress below. Once
+                confirmed, deletion cannot be cancelled.</p>
               <div id="oa-aa-users-list"><p class="oa-hint">Loading&hellip;</p></div>
               <dialog id="oa-u-dialog" aria-labelledby="oa-u-title" aria-describedby="oa-u-delivery">
                 <header class="oa-u-dialog-head">
@@ -535,8 +536,8 @@
          Delete control writes the same work order the account page's own
          panel writes, so the two cannot disagree. Loaded BEFORE the
          roster that reads it. -->
-    <script data-oa-sections="oa-aa-users" data-src="assets/oa-account-delete.js?v=20261113-erasure"></script>
-    <script data-oa-sections="oa-aa-users" data-src="assets/oa-users.js?v=20261113-erasure"></script>
+    <script data-oa-sections="oa-aa-users" data-src="assets/oa-account-delete.js?v=20261113-erasure-progress"></script>
+    <script data-oa-sections="oa-aa-users" data-src="assets/oa-users.js?v=20261113-erasure-progress"></script>
     <!-- The market-year report links each flagged posting to the page that
          actually carries it, so it reads the same window rule jobs.html and
          previous-markets.html sort themselves by (oa-jobnav.js), and it

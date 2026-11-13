@@ -313,7 +313,7 @@
       return { queued: false, label: 'Deleted', cancellable: false };
     }
     if (req.cleanupError) {
-      return { queued: true, label: 'Access blocked; cleanup will retry', cancellable: false };
+      return { queued: true, label: req.accessBlockedAt ? 'Access blocked; cleanup will retry' : 'Deletion will retry', cancellable: false };
     }
     if (req.accessBlockedAt) {
       return { queued: true, label: 'Access blocked; deleting data', cancellable: false };

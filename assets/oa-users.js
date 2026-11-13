@@ -737,18 +737,18 @@
       after the bound, so a doorbell that is down costs a few dozen reads and
       nothing else. One reload of the roster when an order has moved on, and
       that is the read that drops the row. */
-  var WATCH_EVERY_MS = 15 * 1000;
-  var WATCH_TICKS = 40;
+  var WATCH_EVERY_MS = 60 * 1000;
+  var WATCH_TICKS = 120;
 
   /** The rows whose order is filed and not yet started: `requested` is the
       one state a Cancel is offered in, so the chip's own rule decides it. */
   function queuedUids() {
     var D = root.OAAccountDelete;
     if (!D || !state.deletions) return [];
-    return state.rows.filter(function (r) {
-      var st = D.stateOf(state.deletions[r.uid]);
+    return Object.keys(state.deletions).filter(function (uid) {
+      var st = D.stateOf(state.deletions[uid]);
       return st.queued;
-    }).map(function (r) { return r.uid; });
+    });
   }
 
   function watchQueued() {
@@ -763,7 +763,7 @@
       db().then(function (d) {
         return Promise.all(uids.map(function (uid) {
           return d.collection(root.OAAccountDelete.COLLECTION).doc(uid).get()
-            .then(function (snap) { return snap.exists ? String((snap.data() || {}).status || '') : ''; })
+            .then(function (snap) { return snap.exists ? String((snap.data() || {}).status || '') + '|' + ((snap.data() || {}).cleanupError ? '1' : '0') : ''; })
             /* a read that failed is UNKNOWN: keep waiting rather than reload
                a roster over an order that may not have moved */
             ['catch'](function () { return null; });
@@ -773,7 +773,10 @@
         /* moved on: the sweep has started (`clearing`), finished (`done`), or
            the order was called off in another tab (gone). Any of them is a
            row that no longer reads as queued, so the roster is read again. */
-        var moved = statuses.some(function (st) { return st !== null && st !== 'requested'; });
+        var moved = statuses.some(function (st, i) {
+          var previous = state.deletions[uids[i]] || {};
+          return st !== null && st !== (String(previous.status || '') + '|' + (previous.cleanupError ? '1' : '0'));
+        });
         if (moved) { state.watch = null; load(); return; }
         if (w.ticks < WATCH_TICKS) w.timer = setTimeout(tick, WATCH_EVERY_MS);
         else state.watch = null;
@@ -806,6 +809,25 @@
           'workflow from the Actions tab.'
         : 'Could not do that (' + esc(err && (err.code || err.message)) + ').') +
       '</p>');
+  }
+
+  function deletionProgress() {
+    var D = root.OAAccountDelete;
+    if (!D || !state.deletions) return '';
+    var uids = Object.keys(state.deletions).filter(function (uid) {
+      var order = state.deletions[uid];
+      return order.status !== 'done' || Number(order.doneAt) > Date.now() - 24 * 60 * 60 * 1000;
+    });
+    if (!uids.length) return '';
+    return '<section id="oa-u-deletion-progress" aria-label="Deletion progress">' +
+      '<h4 class="oa-aa-group-h">Deletion progress</h4>' +
+      '<p class="oa-hint">Cleanup continues after an account leaves the member list. ' +
+      'Pending jobs retry automatically; completed deletions are shown here for 24 hours.</p><ul>' +
+      uids.map(function (uid) {
+        var order = state.deletions[uid];
+        var label = order.status === 'done' ? 'Account ' + uid : order.name || order.email || uid;
+        return '<li>' + esc(label) + ': <strong>' + esc(D.stateOf(order).label) + '</strong></li>';
+      }).join('') + '</ul></section>';
   }
 
   function renderTable() {
@@ -842,7 +864,7 @@
     var picked = pickedUids().length;
 
     if (!state.rows.length) {
-      host.innerHTML = '<p class="oa-hint">No registered accounts yet. A row is ' +
+      host.innerHTML = deletionProgress() + '<p class="oa-hint">No registered accounts yet. A row is ' +
         'written when someone signs in, and the daily directory sync adds every ' +
         'account Firebase Auth knows.</p>';
       return;
@@ -960,7 +982,7 @@
         '<button type="button" class="button oa-btn-ghost" id="oa-u-clear">Clear selection</button></div>' +
       '<div class="oa-u-wrap"><table class="oa-u-table"><thead>' + head +
         '</thead><tbody>' + body + '</tbody></table></div>' +
-      ghosts;
+      ghosts + deletionProgress();
 
     wireTable();
   }

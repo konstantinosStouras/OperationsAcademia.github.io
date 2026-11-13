@@ -7450,12 +7450,12 @@ async function testAccountDeletion() {
   ok(/\.doc\(uid\)\.get\(\)/.test(users.slice(users.indexOf('function watchQueued'), users.indexOf('function cancelDelete')))
      && !/collection\(DIRECTORY\)/.test(users.slice(users.indexOf('function watchQueued'), users.indexOf('function cancelDelete'))),
     '…reading the order documents alone, never the roster');
-  ok(/WATCH_TICKS/.test(users) && /st !== null && st !== 'requested'/.test(users),
+  ok(/WATCH_TICKS/.test(users) && /st !== null && st !==/.test(users),
     '…bounded, and reloading only once an order has moved on; a failed read keeps waiting');
   ok(/Starts within a couple of minutes/.test(users), 'the chip says how long');
-  ok(/It starts within a couple of\s+minutes \(at the site&rsquo;s next update at the latest\)/.test(adminPage)
+  ok(/It blocks member access immediately/.test(adminPage)
      && !/normally within a few minutes, and you can call it off/.test(adminPage),
-    'the hint says the deployed cadence and keeps the safety net\'s, true on both sides of the deploy');
+    'the hint states immediate access blocking and background cleanup');
   ok(!/twenty minutes/.test(await readFile(path.join(root, 'assets', 'oa-account-delete.js'), 'utf8')),
     'and the account page no longer promises the sign-in goes "within about twenty minutes"');
 
