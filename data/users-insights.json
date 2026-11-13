@@ -1,10 +1,10 @@
 {
- "generated": "2026-11-13T02:42:13.244Z",
- "members": 468,
+ "generated": "2026-11-13T17:39:45.177Z",
+ "members": 470,
  "k": 3,
  "affiliation": {
-  "listed": 387,
-  "other": 49,
+  "listed": 388,
+  "other": 50,
   "none": 32
  },
  "universities": {
@@ -211,14 +211,14 @@
     "members": 3
    }
   ],
-  "rest": 189
+  "rest": 190
  },
  "countries": {
   "count": 18,
   "shown": [
    {
     "name": "United States",
-    "members": 244
+    "members": 245
    },
    {
     "name": "Canada",
@@ -262,6 +262,6 @@
    }
   ],
   "rest": 9,
-  "unknown": 102
+  "unknown": 103
  }
 }
