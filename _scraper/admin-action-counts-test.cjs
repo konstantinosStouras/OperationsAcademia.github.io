@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
-const { chromium } = require('playwright');
+const testBrowser = require('./_admin-test-browser.cjs');
 const root = path.resolve(__dirname, '..');
 const server = http.createServer((req, res) => {
   let name = decodeURIComponent(req.url.split('?')[0]);
@@ -21,11 +21,11 @@ const fix = id => ({ path: 'nameFixes/' + id, data: { kind: 'institution', from:
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const base = 'http://127.0.0.1:' + server.address().port;
   const shim = fs.readFileSync(path.join(root, '_scraper/_fake-firebase.js'), 'utf8');
-  const browser = await chromium.launch({ headless: true, ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}) });
+  const browser = await testBrowser.launch().catch(error => { server.close(); throw error; });
   try {
     for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
       async function fixture(docs) {
-        const context = await browser.newContext({ viewport, isMobile: viewport.width < 500, hasTouch: viewport.width < 500 });
+        const context = await browser.newContext(testBrowser.context(viewport));
         const page = await context.newPage();
         const errors = [];
         page.on('pageerror', e => errors.push(e.message));
@@ -90,7 +90,10 @@ const fix = id => ({ path: 'nameFixes/' + id, data: { kind: 'institution', from:
       await count('jobs', 1);
       await p.evaluate(() => { window.__holdJobCount = true; window.__releaseJobCount = null; window.__countRefresh = OAAdminArea.refresh(); });
       await p.waitForFunction(() => !!window.__releaseJobCount);
-      await card('three').getByRole('button', { name: 'Reject', exact: true }).click();
+      // WebKit does not focus buttons on pointer clicks. Exercise the
+      // keyboard path explicitly to check focus recovery after collapse.
+      await card('three').getByRole('button', { name: 'Reject', exact: true }).focus();
+      await card('three').getByRole('button', { name: 'Reject', exact: true }).press('Enter');
       await count('jobs', 0);
       assert.equal(await section('oa-review').evaluate(el => el.open), false, 'last rejection collapses jobs immediately');
       assert.equal(await section('oa-review').locator('summary').evaluate(el => el === document.activeElement), true, 'focus returns to the collapsed header');

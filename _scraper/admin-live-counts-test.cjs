@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
-const { chromium } = require('playwright');
+const testBrowser = require('./_admin-test-browser.cjs');
 const root = path.resolve(__dirname, '..');
 const server = http.createServer((req, res) => {
   let name = decodeURIComponent(req.url.split('?')[0]);
@@ -21,10 +21,10 @@ const fix = id => ({ path: 'nameFixes/' + id, data: { kind: 'institution', from:
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const base = 'http://127.0.0.1:' + server.address().port;
   const shim = fs.readFileSync(path.join(root, '_scraper/_fake-firebase.js'), 'utf8');
-  const browser = await chromium.launch({ headless: true, ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}) });
+  const browser = await testBrowser.launch().catch(error => { server.close(); throw error; });
   try {
     for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
-      const context = await browser.newContext({ viewport, isMobile: viewport.width < 500, hasTouch: viewport.width < 500 });
+      const context = await browser.newContext(testBrowser.context(viewport));
       const p = await context.newPage();
       const errors = [];
       let revealAt = '2099-01-01';

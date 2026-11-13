@@ -1,0 +1,47 @@
+name: OA — admin cross-browser checks
+
+on:
+  push:
+    paths:
+      - 'admin-area.html'
+      - 'assets/oa-*.js'
+      - 'assets/oa-*.css'
+      - '_scraper/admin-*-test.cjs'
+      - '_scraper/_admin-test-browser.cjs'
+      - '_scraper/_fake-firebase.js'
+      - '.github/workflows/oa-admin-browsers.yml'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  admin:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [firefox, webkit, msedge]
+    env:
+      PW_BROWSER: ${{ matrix.browser }}
+      OA_TEST_REALTIME: '1'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install browser test tools
+        timeout-minutes: 3
+        run: npm install --no-save --no-audit --no-fund playwright@1
+      - name: Install Firefox or WebKit
+        if: matrix.browser != 'msedge'
+        timeout-minutes: 3
+        run: npx playwright install ${{ matrix.browser }}
+      # Edge is preinstalled on the Windows runner. Narrow Firefox checks
+      # responsive/touch behavior; WebKit covers the engine, not native Safari.
+      - name: New arrivals preserve edits and open sections
+        run: node _scraper/admin-live-counts-test.cjs
+      - name: Decisions update counters and collapse cleared sections
+        run: node _scraper/admin-action-counts-test.cjs
