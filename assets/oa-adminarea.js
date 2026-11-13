@@ -174,7 +174,14 @@
    * one refused read never hides the rest of the queue.
    */
   var countsPending = null;
-  function pendingCounts() {
+  var countListeners = [];
+  var countProgress = {};
+  function pendingCounts(onProgress) {
+    if (!countsPending) countProgress = {};
+    if (typeof onProgress === 'function') {
+      countListeners.push(onProgress);
+      Object.keys(countProgress).forEach(function (key) { onProgress(key, countProgress[key]); });
+    }
     if (countsPending) return countsPending;
     var request = OAFB.ready().then(function (fb) {
       var db = fb.firestore();
@@ -192,7 +199,14 @@
            beside it, which is a statistic. One equality filter on a top-level
            collection, so it needs no composite index. */
         countOf(db.collection(OAFB.col.messages).where('needsAdmin', '==', true))['catch'](nul)
-      ]);
+      ].map(function (read, index) {
+        var key = ['jobs', 'candidates', 'feedback', 'news', 'names', 'messages'][index];
+        return read.then(function (n) {
+          countProgress[key] = n;
+          countListeners.forEach(function (notify) { notify(key, n); });
+          return n;
+        });
+      }));
     }).then(function (r) {
       var total = 0, known = 0;
       for (var i = 0; i < r.length; i++) {
@@ -207,7 +221,8 @@
                messages: r[5], total: known ? total : null };
     });
     countsPending = request;
-    request.then(function () { countsPending = null; }, function () { countsPending = null; });
+    var done = function () { countsPending = null; countListeners = []; };
+    request.then(done, done);
     return request;
   }
 
@@ -247,32 +262,69 @@
      no badge arithmetic can sum it, painted from this page's own read. */
   var lastYearCheck = null;
 
+  var SUMMARY_KEY = 'oaAdminSummary:v1';
+  var summaryResolved = {};
+  var queueSeen = {};
+  var sectionTouched = {};
+
+  function validCount(n) { return typeof n === 'number' && isFinite(n) && n >= 0 && Math.floor(n) === n; }
+
+  function readSummary(uid) {
+    try {
+      var cache = JSON.parse(localStorage.getItem(SUMMARY_KEY) || 'null');
+      if (cache && cache.uid === uid && typeof cache.at === 'number' &&
+          Date.now() >= cache.at && Date.now() - cache.at < 86400000 && cache.counts) return cache.counts;
+    } catch (e) { /* storage is optional */ }
+    return {};
+  }
+
   function paintTiles(c) {
     var host = $('oa-aa-tiles');
     if (!host) return;
-    host.innerHTML = TILES.map(function (t) {
-      var n = c[t.key];
-      var known = typeof n === 'number';
-      return '<a class="oa-aa-tile' + (known && n > 0 ? ' is-due' : '') + '" href="' + t.to + '">' +
-        '<span class="oa-aa-tile-n">' + (known ? n : '?') + '</span>' +
-        '<span class="oa-aa-tile-l">' + esc(t.label) + '</span></a>';
-    }).join('') +
-      /* The last card is a STATISTIC, not a queue: never "due", and out of
-         every total, so no badge arithmetic can sum a figure nobody can
-         clear. It WAS a span, deliberately, because it opened nothing — since
-         2026-08-24 it opens the roster, so it is a link like the others and
-         keeps only the class that holds it out of the sums. */
-      /* The market-year report sits between the queues and the statistic: it
-         IS something the maintainer clears — by settling each posting — but
-         it is read from a served file rather than from Firestore, so it is
-         not in `c` and never reaches the badge. */
-      '<a class="oa-aa-tile' + (lastYearCheck > 0 ? ' is-due' : '') + '" href="#oa-aa-yc">' +
-        '<span class="oa-aa-tile-n">' +
-        (typeof lastYearCheck === 'number' ? lastYearCheck : '?') + '</span>' +
-        '<span class="oa-aa-tile-l">Market year to check</span></a>' +
-      '<a class="oa-aa-tile oa-aa-tile-stat" href="#oa-aa-users">' +
-        '<span class="oa-aa-tile-n">' + (typeof lastUsers === 'number' ? lastUsers : '?') + '</span>' +
-        '<span class="oa-aa-tile-l">Registered users</span></a>';
+    var values = Object.assign({}, c, { users: lastUsers, yearcheck: lastYearCheck });
+    // The grid ships in the HTML. Update numbers in place so refreshes never
+    // remove a focused tile or hold the entire grid behind the slowest read.
+    host.querySelectorAll('[data-oa-count]').forEach(function (tile) {
+      var key = tile.getAttribute('data-oa-count');
+      var n = values[key];
+      tile.querySelector('.oa-aa-tile-n').textContent = validCount(n) ? String(n) : '?';
+      tile.classList.toggle('is-due', key !== 'users' && validCount(n) && n > 0);
+      tile.title = validCount(n) && !summaryResolved[key] ? 'Last known count; updating' : '';
+    });
+    var message = $('oa-aa-summary-status');
+    if (message) {
+      var keys = Object.keys(summaryResolved);
+      message.hidden = keys.length === 8 && keys.every(function (key) { return summaryResolved[key]; });
+      message.textContent = keys.length < 8 ? 'Updating counts…' : 'Some counts are unavailable. Reload to retry.';
+    }
+    if (window.OAAccounts && OAAccounts.isAdmin() && OAAccounts.user()) {
+      try {
+        localStorage.setItem(SUMMARY_KEY, JSON.stringify({ uid: OAAccounts.user().uid, at: Date.now(), counts: values }));
+      } catch (e) { /* private browsing still gets the live counts */ }
+    }
+  }
+
+  function openWaitingSection(key, n) {
+    if (!validCount(n) || !OAAccounts.isAdmin()) return;
+    var tile = TILES.filter(function (t) { return t.key === key; })[0];
+    var id = key === 'yearcheck' ? 'oa-aa-yc' : tile && tile.to.slice(1);
+    if (!id) return; // Registered users is a statistic, never a queue.
+    var previous = queueSeen[key];
+    queueSeen[key] = n;
+    if (!n || (previous === undefined ? sectionTouched[id] : n <= previous)) return;
+    var panel = $(id);
+    var disclosure = panel && panel.querySelector('.oa-aa-section');
+    if (disclosure) disclosure.open = true;
+  }
+
+  function receiveCount(owner, key, n) {
+    if (!owner || startedFor !== owner || !OAAccounts.isAdmin()) return;
+    summaryResolved[key] = validCount(n);
+    if (key === 'users') lastUsers = n;
+    else if (key === 'yearcheck') lastYearCheck = n;
+    else lastCounts[key] = n;
+    paintTiles(lastCounts);
+    openWaitingSection(key, n);
   }
 
   /* -------------------------------------------------------- candidate cards */
@@ -989,6 +1041,7 @@
   }
 
   function start() {
+    var owner = startedFor;
     return OAFB.ready().then(function (fb) {
       var db = fb.firestore();
       sectionInitializers = {
@@ -1028,21 +1081,18 @@
 
       // Counts are useful while every section is closed. They must not wait
       // for the candidate roster or any other full collection to render.
-      paintTiles({});
-      pendingCounts().then(function (c) {
+      pendingCounts(function (key, n) { receiveCount(owner, key, n); }).then(function (c) {
+        if (startedFor !== owner || !OAAccounts.isAdmin()) return;
         lastCounts = c;
         correctBadge(null);
       });
       registeredCount().then(function (n) {
-        if (typeof n !== 'number') return;
-        lastUsers = n;
-        if (lastCounts) paintTiles(lastCounts);
-      })['catch'](function () { /* unknown, never zero */ });
+        receiveCount(owner, 'users', n);
+      })['catch'](function () { receiveCount(owner, 'users', null); });
       Promise.all([yearCheckRows(), yearCheckDocs(db)]).then(function (both) {
         var split = OAYearCheck.partition(both[0], both[1] || {});
-        lastYearCheck = split.open.length;
-        if (lastCounts) paintTiles(lastCounts);
-      })['catch'](function () { /* the tile keeps its unknown count */ });
+        receiveCount(owner, 'yearcheck', split.open.length);
+      })['catch'](function () { receiveCount(owner, 'yearcheck', null); });
     })['catch'](function () {
       var g = $('oa-aa-guest');
       show(g, true);
@@ -1081,6 +1131,7 @@
       disclosure.appendChild(body);
       panel.appendChild(disclosure);
       panel.classList.add('oa-aa-collapsible');
+      summary.addEventListener('click', function () { sectionTouched[panel.id] = true; });
       disclosure.addEventListener('toggle', function () {
         if (disclosure.open) loadSection(panel);
       });
@@ -1092,7 +1143,14 @@
     if (tiles) tiles.addEventListener('click', function (e) {
       var link = e.target.closest('a[href^="#"]');
       if (!link || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
-      var panel = $(link.getAttribute('href').slice(1));
+      var id = link.getAttribute('href').slice(1);
+      sectionTouched[id] = true;
+      if (!OAAccounts.isAdmin()) {
+        $('oa-aa-admin').setAttribute('data-oa-pending-section', id);
+        e.preventDefault();
+        return;
+      }
+      var panel = $(id);
       var disclosure = panel && panel.querySelector('.oa-aa-section');
       if (disclosure) disclosure.open = true;
     });
@@ -1113,16 +1171,35 @@
       if (!is) {
         startedFor = null;
         lastCandidateCount = null;
+        lastCounts = null;
+        lastUsers = lastYearCheck = null;
+        summaryResolved = {};
+        queueSeen = {};
+        sectionTouched = {};
+        $('oa-aa-admin').removeAttribute('data-oa-summary-preview');
+        try { localStorage.removeItem(SUMMARY_KEY); } catch (e) {}
         sectionLoads = {};
         sectionInitializers = {};
         return;
       }
       if (startedFor === u.uid) return;   // onChange fires on every auth event
       startedFor = u.uid;
+      var cached = readSummary(u.uid);
+      lastCounts = Object.assign({}, cached);
+      lastUsers = validCount(cached.users) ? cached.users : null;
+      lastYearCheck = validCount(cached.yearcheck) ? cached.yearcheck : null;
+      $('oa-aa-admin').removeAttribute('data-oa-summary-preview');
+      paintTiles(lastCounts);
       $('oa-aa-admin').querySelectorAll(':scope > .oa-panel').forEach(function (panel) {
         show(panel, true);
       });
       deskReady = start();
+      var pending = $('oa-aa-admin').getAttribute('data-oa-pending-section');
+      if (pending && $(pending)) {
+        var target = $(pending).querySelector('.oa-aa-section');
+        if (target) { sectionTouched[pending] = true; target.open = true; }
+        $('oa-aa-admin').removeAttribute('data-oa-pending-section');
+      }
     });
   }
 
@@ -1137,7 +1214,9 @@
         panel below it now shows. Best-effort: a refused read keeps the
         previous honest figure rather than replacing it with a zero. */
     refresh: function () {
-      return pendingCounts().then(function (c) {
+      var owner = startedFor;
+      return pendingCounts(function (key, n) { receiveCount(owner, key, n); }).then(function (c) {
+        if (!owner || startedFor !== owner || !OAAccounts.isAdmin()) return;
         lastCounts = c;
         // Keep a loaded candidate roster's exact count when another panel
         // refreshes the summary, and update the menu badge from that same sum.

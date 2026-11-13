@@ -3982,7 +3982,7 @@
     queue.length = 0;
     /* the counts belong to the account that is leaving; a shared machine must
        not show the next person how many postings the last one had */
-    try { localStorage.removeItem(COUNT_KEY); sessionStorage.removeItem(COUNT_SESSION); } catch (e) { /* ignore */ }
+    try { localStorage.removeItem(COUNT_KEY); localStorage.removeItem('oaAdminSummary:v1'); sessionStorage.removeItem(COUNT_SESSION); } catch (e) { /* ignore */ }
     /* the forum's handle for the season (sessionStorage) and its seen-marks,
        saved questions and watched tags (localStorage) belong to the account
        that is leaving too: a handle is the one identity the forum has, and

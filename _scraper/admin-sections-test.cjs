@@ -30,6 +30,11 @@ const server = http.createServer((req, res) => {
       const url = route.request().url();
       if (url.includes('/firebasejs/')) return route.fulfill({ contentType: 'text/javascript', body: shim });
       if (!url.startsWith(base)) return route.abort();
+      // This suite exercises empty sections. Nonzero queues auto-open and
+      // are covered separately by admin-summary-test.cjs.
+      if (url.includes('/changelog.json')) return route.fulfill({ json: { updates: [] } });
+      if (url.includes('/data/candidates-meta.json')) return route.fulfill({ json: { heldCount: 0, revealAt: '2020-01-01' } });
+      if (url.includes('/data/jobs-yearcheck.json')) return route.fulfill({ json: { postings: [] } });
       return route.continue();
     });
     await page.addInitScript(() => {
@@ -59,7 +64,7 @@ const server = http.createServer((req, res) => {
     await ready();
     const sections = page.locator('#oa-aa-admin > .oa-panel > .oa-aa-section');
     assert.equal(await sections.count(), 8);
-    assert.equal(await page.locator('.oa-aa-section[open]').count(), 0, 'all eight start closed');
+    assert.equal(await page.locator('.oa-aa-section[open]').count(), 0, 'all eight empty sections start closed');
     for (let i = 0; i < 8; i++) {
       const section = sections.nth(i);
       await section.waitFor({ state: 'visible' });

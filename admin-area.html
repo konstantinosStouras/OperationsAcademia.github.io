@@ -186,7 +186,49 @@
                  count() over the registeredUsers tally, admin-read in the rules
                  and shown nowhere public — which links to nothing and joins no
                  total, so the badge still counts only what is waiting. -->
-            <nav class="oa-aa-tiles" id="oa-aa-tiles" aria-label="What is waiting for review, and how many users are registered"></nav>
+            <nav class="oa-aa-tiles" id="oa-aa-tiles" aria-label="What is waiting for review, and how many users are registered">
+              <a class="oa-aa-tile" href="#oa-review" data-oa-count="jobs"><span class="oa-aa-tile-n">?</span><span class="oa-aa-tile-l">Job postings to approve</span></a>
+              <a class="oa-aa-tile" href="#oa-aa-cands" data-oa-count="candidates"><span class="oa-aa-tile-n">?</span><span class="oa-aa-tile-l">Candidate profiles held</span></a>
+              <a class="oa-aa-tile" href="#oa-inbox" data-oa-count="feedback"><span class="oa-aa-tile-n">?</span><span class="oa-aa-tile-l">Open feedback tickets</span></a>
+              <a class="oa-aa-tile" href="#oa-aa-news" data-oa-count="news"><span class="oa-aa-tile-n">?</span><span class="oa-aa-tile-l">Updates awaiting publication</span></a>
+              <a class="oa-aa-tile" href="#oa-aa-names" data-oa-count="names"><span class="oa-aa-tile-n">?</span><span class="oa-aa-tile-l">Name corrections suggested</span></a>
+              <a class="oa-aa-tile" href="#oa-aa-users" data-oa-count="messages"><span class="oa-aa-tile-n">?</span><span class="oa-aa-tile-l">Message replies waiting</span></a>
+              <a class="oa-aa-tile" href="#oa-aa-yc" data-oa-count="yearcheck"><span class="oa-aa-tile-n">?</span><span class="oa-aa-tile-l">Market year to check</span></a>
+              <a class="oa-aa-tile oa-aa-tile-stat" href="#oa-aa-users" data-oa-count="users"><span class="oa-aa-tile-n">?</span><span class="oa-aa-tile-l">Registered users</span></a>
+            </nav>
+            <p class="oa-hint" id="oa-aa-summary-status" role="status" hidden></p>
+            <!-- Paint only this account's previously verified summary before
+                 deferred scripts or Firebase load. Panels remain gated/hidden. -->
+            <script>
+            (function () {
+              try {
+                var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
+                var c = JSON.parse(localStorage.getItem('oaAdminSummary:v1') || 'null');
+                if (!h || !c || c.uid !== h.uid || localStorage.getItem('oaAuthPending') === h.uid ||
+                    typeof c.at !== 'number' || Date.now() < c.at || Date.now() - c.at >= 86400000 || !c.counts) return;
+                var host = document.getElementById('oa-aa-admin');
+                host.hidden = false;
+                host.setAttribute('data-oa-summary-preview', '1');
+                document.getElementById('oa-aa-guest').hidden = true;
+                document.querySelectorAll('#oa-aa-tiles [data-oa-count]').forEach(function (tile) {
+                  var key = tile.getAttribute('data-oa-count'), n = c.counts[key];
+                  if (typeof n !== 'number' || !isFinite(n) || n < 0 || Math.floor(n) !== n) return;
+                  tile.querySelector('.oa-aa-tile-n').textContent = String(n);
+                  tile.classList.toggle('is-due', key !== 'users' && n > 0);
+                  tile.title = 'Last known count; updating';
+                });
+                var message = document.getElementById('oa-aa-summary-status');
+                message.hidden = false;
+                message.textContent = 'Last known counts — updating…';
+                document.getElementById('oa-aa-tiles').addEventListener('click', function (e) {
+                  if (!host.hasAttribute('data-oa-summary-preview') || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+                  var a = e.target.closest('a[href^="#"]');
+                  if (a) { e.preventDefault(); host.setAttribute('data-oa-pending-section', a.getAttribute('href').slice(1)); }
+                });
+              } catch (e) { /* No stored summary: live counts arrive after sign-in. */ }
+            })();
+            </script>
+
 
             <!-- ============================ postings awaiting review -->
             <!-- First deliberately: a queued posting is not on the site until it
@@ -494,7 +536,7 @@
     <script defer src="assets/oa-feature-badges.js?v=20261030-posting-roles"></script>
     <script defer src="assets/v3.js"></script>
     <script defer src="assets/oa-firebase.js"></script>
-    <script defer src="assets/oa-accounts.js?v=20261113-admin-lazy"></script>
+    <script defer src="assets/oa-accounts.js?v=20261113-admin-summary"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-listing-tracking.js"></script>
     <script defer src="assets/oa-news.js"></script>
@@ -551,6 +593,6 @@
          still listed — absence means SHOW. -->
     <script defer src="assets/oa-yearcheck.js"></script>
     <script data-oa-sections="oa-aa-cands" data-src="assets/oa-candidate-data.js?v=20261013-2"></script>
-    <script defer src="assets/oa-adminarea.js?v=20261113-lazy"></script>
+    <script defer src="assets/oa-adminarea.js?v=20261113-summary"></script>
   </body>
 </html>

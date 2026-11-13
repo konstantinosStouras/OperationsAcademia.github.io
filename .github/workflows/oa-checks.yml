@@ -229,6 +229,7 @@ jobs:
             run_check node _scraper/university-map-test.mjs
           else
             run_check node _scraper/admin-sections-test.cjs
+            run_check node _scraper/admin-summary-test.cjs
             run_check node _scraper/candidate-overview-browser-test.mjs
             run_check node _scraper/job-poster-controls-test.mjs
             run_check node _scraper/page-test.mjs
