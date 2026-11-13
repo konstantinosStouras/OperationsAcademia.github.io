@@ -38,7 +38,7 @@ const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', ({ '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml' })[path.extname(file)] || 'application/octet-stream');
   if (url === '/admin-area.html') {
     const seed = JSON.stringify({ user, realtime: true, docs: [] });
-    const init = '<script>window.__FAKE_FB=' + seed + ';window.__testErrors=[];window.addEventListener("error",function(e){if(e.error)__testErrors.push(String(e.error));});window.addEventListener("unhandledrejection",function(e){__testErrors.push(String(e.reason));});</script>';
+    const init = '<script>window.__FAKE_FB=' + seed + ';window.__testDocumentId=String(Date.now())+":"+String(Math.random());window.__testErrors=[];window.addEventListener("error",function(e){if(e.error)__testErrors.push(String(e.error));});window.addEventListener("unhandledrejection",function(e){__testErrors.push(String(e.reason));});</script>';
     return res.end(fs.readFileSync(file, 'utf8').replace('<head>', '<head>' + init));
   }
   if (url === '/assets/oa-firebase.js') {
@@ -75,7 +75,9 @@ const server = http.createServer((req, res) => {
     }
     async function arrive(doc) { await execute('window.__fb.docs[arguments[0].path]=arguments[0].data;window.__fb.notify(arguments[0].path);', doc); }
     await wait(() => execute('return !!document.querySelector("#oa-aa-summary-status").hidden'), 'initial counts ready');
-    const navigation = await execute('return performance.timeOrigin');
+    // A fresh marker per document detects a reload without relying on
+    // Safari's privacy-rounded performance timestamps remaining bit-identical.
+    const navigation = await execute('return window.__testDocumentId');
     await count('jobs', 0);
     assert.equal(await isOpen('oa-review'), false);
     await arrive(job('one'));
@@ -141,7 +143,7 @@ const server = http.createServer((req, res) => {
     await count('news', 1); await count('yearcheck', 1);
     assert.equal(await isOpen('oa-aa-news'), true);
     assert.equal(await isOpen('oa-aa-yc'), true);
-    assert.equal(await execute('return performance.timeOrigin'), navigation, 'no page reload');
+    assert.equal(await execute('return window.__testDocumentId'), navigation, 'no page reload');
     assert.equal(await execute('return document.documentElement.scrollWidth>innerWidth'), false);
     assert.deepEqual(await execute('return window.__testErrors'), []);
     fs.writeFileSync(path.join(output, 'native-safari-admin.png'), await driver.takeScreenshot(), 'base64');
