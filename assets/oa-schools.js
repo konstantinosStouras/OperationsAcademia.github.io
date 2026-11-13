@@ -494,7 +494,13 @@
       'Graduate School of Business': 'Stanford Graduate School of Business',
       'Graduate School of Business (GSB)': 'Stanford Graduate School of Business'
     },
-    'The University of Hong Kong': { 'School of Business': 'Faculty of Business and Economics' },
+    // HKU's faculty and its business-school brand name identify one school.
+    // Verified 2026-11-13: ug.hkubs.hku.hk, Student Handbook 2025–2026.
+    'The University of Hong Kong': {
+      'School of Business': 'Faculty of Business and Economics',
+      'HKU Business School': 'Faculty of Business and Economics',
+      'Faculty of Business and Economics (HKU Business School)': 'Faculty of Business and Economics'
+    },
     'The Chinese University of Hong Kong, Shenzhen': {
       'CUHK(SZ)': 'School of Management and Economics',
       'CUHK (SZ)': 'School of Management and Economics',
@@ -531,6 +537,12 @@
      else the generic rule still applies, so a poster typing "Operations
      Management Department" at some other school still lands on the bare name. */
   var SCOPED_UNIT_ALIASES = {
+    // Statistics is a group within TOPS, not a second department.
+    // Verified 2026-11-13: stern.nyu.edu/.../academic-departments/tops/research
+    'New York University': {
+      'Technology, Operations and Statistics': 'Technology, Operations, and Statistics',
+      'Technology, Operations, and Statistics (Statistics Group)': 'Technology, Operations, and Statistics'
+    },
     // Owner's faculty-directory decisions, 2026-10-26. These also normalize new postings.
     'Miami University': {
       'Information Systems and Technology': 'Department of Information Systems and Analytics',
@@ -1001,6 +1013,10 @@
     var universityKey = institutionKey(institution || '');
     var unitPart = (universityKey === 'texas state university' || universityKey === 'university of northern iowa') &&
       fold(unit) === 'department of management' ? 'Management' : unit;
+    // This broad HKU posting already has a reviewed map location and may have
+    // saved corrections. Changing its school title must not change its address.
+    if (universityKey === 'university of hong kong' && fold(school) === 'faculty of business and economics' &&
+        fold(unit) === 'business analytics statistics operations management and information systems') schoolPart = 'HKU Business School';
     // Keep saved corrections attached after repairing these legacy labels.
     if (universityKey === 'air force institute of technology' && fold(unit) === 'department of operational sciences') unitPart = 'Air Force Headquarters';
     if (universityKey === 'carnegie mellon university' && fold(school) === 'heinz college of information systems and public policy' && fold(unit) === 'operations research') {

@@ -14943,39 +14943,12 @@
   "id": "new-york-university__leonard-n-stern-school-of-business__technology-operations-and-statistics",
   "institution": "New York University",
   "school": "Leonard N. Stern School of Business",
-  "department": "Technology, Operations and Statistics",
+  "department": "Technology, Operations, and Statistics",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://www.stern.nyu.edu/experience-stern/about/departments-centers-initiatives/academic-departments/tops/faculty-staff/full-time-faculty",
   "sources": [
    "omlist",
-   "seed"
-  ],
-  "mapLocationIds": [
-   "new-york-stern-technology-kaufman"
-  ],
-  "mapLocationKind": "school",
-  "mapInstitutionNames": [
-   "New York University"
-  ],
-  "mapSearchTerms": [
-   "Leonard N. Stern School of Business"
-  ],
-  "country": "United States",
-  "mapDepartmentLinks": {
-   "new-york-stern-technology-kaufman": {
-    "facultyUrl": "https://www.stern.nyu.edu/experience-stern/about/departments-centers-initiatives/academic-departments/tops/faculty-staff/full-time-faculty"
-   }
-  },
-  "facultyUrl": "https://www.stern.nyu.edu/experience-stern/about/departments-centers-initiatives/academic-departments/tops/faculty-staff/full-time-faculty"
- },
- {
-  "id": "new-york-university__leonard-n-stern-school-of-business__technology-operations-and-statistics-statistics-group",
-  "institution": "New York University",
-  "school": "Leonard N. Stern School of Business",
-  "department": "Technology, Operations, and Statistics (Statistics Group)",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
    "postings",
    "seed"
   ],
@@ -14990,7 +14963,13 @@
   ],
   "mapSearchTerms": [
    "Leonard N. Stern School of Business"
-  ]
+  ],
+  "mapDepartmentLinks": {
+   "new-york-stern-technology-kaufman": {
+    "facultyUrl": "https://www.stern.nyu.edu/experience-stern/about/departments-centers-initiatives/academic-departments/tops/faculty-staff/full-time-faculty"
+   }
+  },
+  "facultyUrl": "https://www.stern.nyu.edu/experience-stern/about/departments-centers-initiatives/academic-departments/tops/faculty-staff/full-time-faculty"
  },
  {
   "id": "new-york-university-abu-dhabi____is",
@@ -22730,39 +22709,6 @@
   "mapLocationKind": "unresolved"
  },
  {
-  "id": "university-of-hong-kong__faculty-of-business-and-economics-hku-business-school__information-and-innovation-management",
-  "institution": "The University of Hong Kong",
-  "school": "Faculty of Business and Economics (HKU Business School)",
-  "department": "Information and Innovation Management",
-  "type": "Business School",
-  "country": "Hong Kong",
-  "sources": [
-   "postings",
-   "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-11-06",
-  "mapLocationIds": [
-   "hong-kong-business-innovation-kk-leung"
-  ],
-  "mapLocationKind": "department",
-  "mapInstitutionNames": [
-   "The University of Hong Kong"
-  ],
-  "mapSearchTerms": [
-   "Faculty of Business and Economics (HKU Business School)",
-   "Innovation and Information Management"
-  ],
-  "mapDepartmentLinks": {
-   "hong-kong-business-innovation-kk-leung": {
-    "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate"
-   }
-  },
-  "facultyUrl": "https://www.hkubs.hku.hk/people/?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate",
-  "deptUrl": "https://www.hkubs.hku.hk/people/faculty?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate&region=hku",
-  "deptUrlInherited": true
- },
- {
   "id": "university-of-hong-kong__faculty-of-business-and-economics__information-and-innovation-management",
   "institution": "The University of Hong Kong (HKU)",
   "school": "Faculty of Business and Economics",
@@ -22787,8 +22733,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2025-09-10",
+  "n": 3,
+  "lastPosted": "2026-11-06",
   "lat": 22.2679201,
   "lng": 114.1290719,
   "mapLocationIds": [
@@ -26780,7 +26726,7 @@
  {
   "id": "university-of-hong-kong__hku-business-school__business-analytics-statistics-operations-management-and-info",
   "institution": "University of Hong Kong",
-  "school": "HKU Business School",
+  "school": "Faculty of Business and Economics",
   "department": "Business Analytics/Statistics, Operations Management, and Information Systems",
   "type": "Business School",
   "country": "Hong Kong",

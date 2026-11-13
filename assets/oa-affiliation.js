@@ -178,6 +178,7 @@
   'unc': 'University of North Carolina at Chapel Hill',
   'usc': 'University of Southern California',
   'polyu': 'Hong Kong Polytechnic University',
+  'hku business school': 'University of Hong Kong',
   };
 
   function shortForm(v) {
@@ -243,6 +244,7 @@
     'Erasmus University': 'Erasmus University Rotterdam',
     'European School of Management and Technology': 'ESMT Berlin',
     'Katholieke Universiteit (KU) Leuven': 'KU Leuven',
+    'London School of Economics': 'London School of Economics and Political Science',
     'NC State University': 'North Carolina State University',
     'NTU': 'Nanyang Technological University',           // its card's postings are in Singapore
     'NYU Shanghai': 'New York University Shanghai',
@@ -277,11 +279,15 @@
     'Colorado School of Mines',
     'Copenhagen Business School',
     'EMLV (Ecole de Commerce et de Management)',
+    // Independent institution: escp.eu/legal-notice (checked 2026-11-13).
+    'ESCP Business School',
     'Frankfurt School of Finance and Management',
     'Hanken School of Economics',
     'Indian School of Business (ISB)',
     'Kedge Business School',
     'London Business School (LBS)',
+    // Full university title: lse.ac.uk/about-lse/introducing-LSE (2026-11-13).
+    'London School of Economics and Political Science',
     'Naval Postgraduate School',
     'NEOMA Business School',
     'SKEMA Business School',

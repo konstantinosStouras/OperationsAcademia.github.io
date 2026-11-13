@@ -6,6 +6,43 @@ import { referencePlaces } from './sync-reference-places.mjs';
 const require = createRequire(import.meta.url);
 const S = require('../assets/oa-schools.js');
 const U = require('../assets/oa-uniinfo.js');
+const A = require('../assets/oa-affiliation.js');
+// Scoped naming repairs must unify the affected place without changing an
+// identically named department or school at another university.
+for (const institution of ['University of Hong Kong', 'The University of Hong Kong']) {
+  for (const school of ['School of Business', 'HKU Business School',
+    'Faculty of Business and Economics (HKU Business School)']) {
+    assert.equal(S.canonSchool(school, institution), 'Faculty of Business and Economics');
+  }
+}
+assert.equal(S.canonSchool('School of Business', 'Another University'), 'School of Business');
+const hkuUnit = 'Business Analytics/Statistics, Operations Management, and Information Systems';
+assert.equal(S.directoryRowKey('University of Hong Kong', 'Faculty of Business and Economics', hkuUnit),
+  S.directoryRowKey('University of Hong Kong', 'HKU Business School', hkuUnit),
+  'Renaming the school retains the broad HKU posting’s correction and reviewed map address');
+assert.equal(A.settle('HKU Business School', A.index({ universities: ['University of Hong Kong'] })),
+  'University of Hong Kong', 'The former school title still resolves in the affiliation picker');
+const nyuDepartment = 'Technology, Operations, and Statistics';
+for (const unit of ['Technology, Operations and Statistics',
+  'Technology, Operations, and Statistics (Statistics Group)',
+  'Department of Technology, Operations, and Statistics']) {
+  assert.equal(S.canonUnit(unit, 'New York University'), nyuDepartment);
+}
+assert.equal(S.canonUnit('Technology, Operations, and Statistics (Statistics Group)', 'Another University'),
+  'Technology, Operations, and Statistics (Statistics Group)');
+assert.equal(S.directoryRowKey('New York University', 'Leonard N. Stern School of Business', nyuDepartment),
+  S.directoryRowKey('New York University', 'Leonard N. Stern School of Business', 'Technology, Operations and Statistics'),
+  'The department keeps its established correction address');
+const repairedAffiliations = A.listFromDirectory([
+  { institution: 'ESCP Business School' },
+  { institution: 'London School of Economics' },
+  { institution: 'London School of Economics and Political Science' },
+]);
+assert.deepEqual(repairedAffiliations.universities,
+  ['ESCP Business School', 'London School of Economics and Political Science']);
+assert.ok(repairedAffiliations.aliases.some(([from, to]) =>
+  from === 'London School of Economics' && to === 'London School of Economics and Political Science'));
+for (const name of repairedAffiliations.universities) assert.ok(A.STANDALONE.includes(name));
 // Regression: official commas stay inside school names on both ingest paths.
 for (const [institution, school] of [
   ['Washington and Lee University', 'Williams School of Commerce, Economics and Politics'],

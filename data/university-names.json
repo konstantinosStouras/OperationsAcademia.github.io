@@ -213,7 +213,7 @@
   "Lincoln Memorial University",
   "Lingnan University",
   "London Business School",
-  "London School of Economics",
+  "London School of Economics and Political Science",
   "Longwood University",
   "Louisiana Tech University",
   "Loyola University Chicago",
@@ -979,10 +979,6 @@
    "Brandeis University"
   ],
   [
-   "HKU Business School",
-   "University of Hong Kong"
-  ],
-  [
    "HKUST School of Business and Management",
    "Hong Kong University of Science and Technology"
   ],
@@ -1715,6 +1711,10 @@
   [
    "LBS",
    "London Business School"
+  ],
+  [
+   "London School of Economics",
+   "London School of Economics and Political Science"
   ],
   [
    "Lousiana Tech Univ",

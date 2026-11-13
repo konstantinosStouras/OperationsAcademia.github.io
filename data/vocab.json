@@ -2668,6 +2668,10 @@
    "n": 3
   },
   {
+   "v": "Faculty of Business and Economics",
+   "n": 3
+  },
+  {
    "v": "Faculty of Engineering",
    "n": 3
   },
@@ -3108,14 +3112,6 @@
    "n": 1
   },
   {
-   "v": "Faculty of Business and Economics",
-   "n": 1
-  },
-  {
-   "v": "Faculty of Business and Economics (HKU Business School)",
-   "n": 1
-  },
-  {
    "v": "Faculty of Engineering and Architecture",
    "n": 1
   },
@@ -3213,10 +3209,6 @@
   },
   {
    "v": "Heinz College of Information Systems and Public Policy",
-   "n": 1
-  },
-  {
-   "v": "HKU Business School",
    "n": 1
   },
   {
@@ -4431,6 +4423,10 @@
   },
   {
    "v": "Technology Management",
+   "n": 2
+  },
+  {
+   "v": "Technology, Operations, and Statistics",
    "n": 2
   },
   {
@@ -5719,14 +5715,6 @@
   },
   {
    "v": "Technology and Innovation, Center for Supply Chain Digitalisation",
-   "n": 1
-  },
-  {
-   "v": "Technology, Operations, and Statistics",
-   "n": 1
-  },
-  {
-   "v": "Technology, Operations, and Statistics (Statistics Group)",
    "n": 1
   },
   {
@@ -9988,15 +9976,13 @@
    "units": [
     "Information, Operations and Management Sciences",
     "OM and AI",
-    "Technology, Operations and Statistics",
-    "Technology, Operations, and Statistics (Statistics Group)"
+    "Technology, Operations, and Statistics"
    ],
    "bySchool": {
     "Leonard N. Stern School of Business": [
      "Information, Operations and Management Sciences",
      "OM and AI",
-     "Technology, Operations and Statistics",
-     "Technology, Operations, and Statistics (Statistics Group)"
+     "Technology, Operations, and Statistics"
     ]
    }
   },
@@ -12811,9 +12797,7 @@
   },
   "University of Hong Kong": {
    "schools": [
-    "Faculty of Business and Economics",
-    "Faculty of Business and Economics (HKU Business School)",
-    "HKU Business School"
+    "Faculty of Business and Economics"
    ],
    "units": [
     "BA",
@@ -12827,13 +12811,8 @@
      "Data and Systems Engineering"
     ],
     "Faculty of Business and Economics": [
+     "Business Analytics/Statistics, Operations Management, and Information Systems",
      "Information and Innovation Management"
-    ],
-    "Faculty of Business and Economics (HKU Business School)": [
-     "Information and Innovation Management"
-    ],
-    "HKU Business School": [
-     "Business Analytics/Statistics, Operations Management, and Information Systems"
     ]
    }
   },
@@ -15491,9 +15470,7 @@
    "Operations Management"
   ],
   "Faculty of Business and Economics": [
-   "Information and Innovation Management"
-  ],
-  "Faculty of Business and Economics (HKU Business School)": [
+   "Business Analytics/Statistics, Operations Management, and Information Systems",
    "Information and Innovation Management"
   ],
   "Faculty of Data and Decision Sciences": [
@@ -15632,9 +15609,6 @@
   "Heinz College of Information Systems and Public Policy": [
    "Operations Research"
   ],
-  "HKU Business School": [
-   "Business Analytics/Statistics, Operations Management, and Information Systems"
-  ],
   "HKUST School of Business and Management": [
    "Information Systems, Business Statistics and Operations Management"
   ],
@@ -15760,8 +15734,7 @@
   "Leonard N. Stern School of Business": [
    "Information, Operations and Management Sciences",
    "OM and AI",
-   "Technology, Operations, and Statistics",
-   "Technology, Operations, and Statistics (Statistics Group)"
+   "Technology, Operations, and Statistics"
   ],
   "Loeb-Sullivan School of International Business and Logistics": [
    "International Business and Logistics"
