@@ -1525,6 +1525,65 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   color: var(--ink, #313a45);
 }
 
+/* Admin frames: the whole top edge is one keyboard-accessible disclosure.
+   Scope these rules so existing panels elsewhere keep their layout. */
+#oa-aa-admin > .oa-aa-collapsible { padding: 0; }
+#oa-aa-admin .oa-aa-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 76px;
+  padding: 16px 24px;
+  border-radius: var(--radius, 6px);
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink);
+}
+#oa-aa-admin .oa-aa-section-head::-webkit-details-marker { display: none; }
+#oa-aa-admin .oa-aa-section-head:hover { background: var(--bg-3); }
+#oa-aa-admin .oa-aa-section-head:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+#oa-aa-admin .oa-aa-section-head > .oa-panel-h {
+  margin: 0;
+  min-width: 0;
+  font-size: 19px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+#oa-aa-admin .oa-aa-section-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-2);
+  font: 400 26px/1 var(--font-sans, sans-serif);
+}
+#oa-aa-admin .oa-aa-section-minus,
+#oa-aa-admin .oa-aa-section[open] > summary .oa-aa-section-plus { display: none; }
+#oa-aa-admin .oa-aa-section[open] > summary .oa-aa-section-minus { display: inline; }
+#oa-aa-admin .oa-aa-section[open] > summary {
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: var(--radius, 6px) var(--radius, 6px) 0 0;
+}
+#oa-aa-admin .oa-aa-section-body { padding: 22px 28px 26px; }
+/* Keep the closed roster aligned with the other frames; its table still
+   gets the existing wider desktop layout when opened. */
+#oa-aa-users.oa-aa-collapsible:has(> .oa-aa-section:not([open])) {
+  width: auto;
+  margin-left: 0;
+}
+@media (max-width: 600px) {
+  #oa-aa-admin .oa-aa-section-head { padding: 14px 16px; gap: 12px; }
+  #oa-aa-admin .oa-aa-section-head > .oa-panel-h { font-size: 17px; }
+  #oa-aa-admin .oa-aa-section-body { padding: 18px; }
+}
+
 .oa-lede { font-size: 16px; line-height: 1.6; }
 .oa-muted { color: var(--mut, #7a7a7a); font-weight: 400; }
 .oa-rule { margin: 28px 0 22px; border: 0; border-top: 1px solid var(--line-soft, #ececec); }

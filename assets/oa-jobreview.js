@@ -1847,7 +1847,10 @@
 
   var publicationRead = 0;
   function renderPublicationStatus(db) {
-    var host = $('oa-review');
+    // Keep asynchronous content inside the disclosure body, just like the
+    // rejected-postings drawer. The list's parent also works before wrapping.
+    var host = $('oa-review-list');
+    host = host && host.parentNode;
     if (!host || !OAAccounts.isAdmin()) return Promise.resolve();
     var box = $('oa-review-publication');
     if (!box) { box = document.createElement('section'); box.id = 'oa-review-publication'; host.appendChild(box); }

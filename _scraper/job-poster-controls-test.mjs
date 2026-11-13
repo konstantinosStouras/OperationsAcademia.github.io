@@ -44,6 +44,7 @@ try {
   const shim=await fs.readFile(path.join(root,'_scraper/_fake-firebase.js'),'utf8');
   await page.route('**/firebasejs/**',r=>r.fulfill({status:200,contentType:'text/javascript',body:shim}));
   await page.goto('http://127.0.0.1:'+server.address().port+'/admin-area.html');
+  await page.locator('#oa-aa-users > .oa-aa-section > summary').click();
   await page.waitForSelector('#oa-u-jobyear');
   assert.equal(await page.locator('.oa-u-table tbody tr').count(),3);
   await page.selectOption('#oa-u-jobyear',String(year-1));

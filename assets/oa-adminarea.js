@@ -991,8 +991,51 @@
     });
   }
 
+  /* Each frame is an independent native disclosure. Build them before the
+     admin gate opens; moving (not cloning) the contents preserves listeners,
+     form values and the existing panels' asynchronous rendering. */
+  function wireSections() {
+    var admin = $('oa-aa-admin');
+    if (!admin || admin.dataset.oaSections) return;
+    admin.dataset.oaSections = '1';
+    admin.querySelectorAll(':scope > .oa-panel').forEach(function (panel) {
+      var heading = panel.querySelector('.oa-panel-h');
+      if (!heading) return;
+      var disclosure = document.createElement('details');
+      disclosure.className = 'oa-aa-section';
+      var summary = document.createElement('summary');
+      summary.className = 'oa-aa-section-head';
+      summary.appendChild(heading);
+      var icon = document.createElement('span');
+      icon.className = 'oa-aa-section-icon';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.innerHTML = '<span class="oa-aa-section-plus">+</span>' +
+        '<span class="oa-aa-section-minus">&minus;</span>';
+      summary.appendChild(icon);
+      var body = document.createElement('div');
+      body.className = 'oa-aa-section-body';
+      while (panel.firstChild) body.appendChild(panel.firstChild);
+      disclosure.appendChild(summary);
+      disclosure.appendChild(body);
+      panel.appendChild(disclosure);
+      panel.classList.add('oa-aa-collapsible');
+    });
+
+    // Summary tiles still take the admin straight into the selected queue,
+    // including repeat clicks on the same fragment after closing its frame.
+    var tiles = $('oa-aa-tiles');
+    if (tiles) tiles.addEventListener('click', function (e) {
+      var link = e.target.closest('a[href^="#"]');
+      if (!link || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      var panel = $(link.getAttribute('href').slice(1));
+      var disclosure = panel && panel.querySelector('.oa-aa-section');
+      if (disclosure) disclosure.open = true;
+    });
+  }
+
   function boot() {
     if (!$('oa-aa') || !window.OAAccounts || !window.OAFB) return;
+    wireSections();
 
     var signin = $('oa-aa-signin');
     if (signin) signin.addEventListener('click', function () { OAAccounts.openAuth(); });

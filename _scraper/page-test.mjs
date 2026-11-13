@@ -72,6 +72,15 @@ const BASE = `http://127.0.0.1:${port}/`;
    root. Nothing was dropped in the move — it is the same suite, re-aimed. */
 const V2 = 'v2/';
 
+/* Review scenarios below exercise panel contents after the admin opens them.
+   The default-closed disclosure behavior has its own focused browser test. */
+async function expandAdminSections(q) {
+  await q.waitForSelector('#oa-aa-admin .oa-aa-section', { state: 'attached' });
+  await q.evaluate(() => {
+    document.querySelectorAll('#oa-aa-admin .oa-aa-section').forEach((el) => { el.open = true; });
+  });
+}
+
 let chromium;
 try {
   ({ chromium } = requireFor(import.meta.url)('playwright'));
@@ -7066,6 +7075,7 @@ for (const w of [320, 360, 390, 430]) {
   /* -- the desk itself ------------------------------------------------------ */
   {
     const { ctx, q, errors } = await adminAreaPage(ADMIN, 'admin-area.html');
+    await expandAdminSections(q);
     await q.waitForFunction(() => {
       const g = document.getElementById('oa-aa-guest');
       const a = document.getElementById('oa-aa-admin');
@@ -7643,6 +7653,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.route('**/data/jobs.json', (r) => r.fulfill({
       status: 200, contentType: 'application/json', body: '[]' }));
     await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    await expandAdminSections(q);
 
     const card = q.locator('#oa-review-list .oa-rv-card',
       { hasText: 'Approved Instantly University' });
@@ -7726,6 +7737,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.route('**/data/jobs.json', (r) => r.fulfill({
       status: 200, contentType: 'application/json', body: '[]' }));
     await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    await expandAdminSections(q);
     const card = q.locator('#oa-review-list .oa-rv-card', { hasText: 'Handle Ready University' });
     await card.waitFor({ timeout: 10000 });
     const cardEl = await card.elementHandle();
@@ -7893,6 +7905,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.route('**/data/jobs.json', (r) => r.fulfill({
       status: 200, contentType: 'application/json', body: JSON.stringify(LIVE) }));
     await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    await expandAdminSections(q);
 
     await q.waitForFunction(() => {
       const b = document.querySelector('#oa-review-sources button[data-source="crawled"]');
@@ -8004,6 +8017,7 @@ for (const w of [320, 360, 390, 430]) {
     eq(await q.locator('#oa-menu a[href="admin-area"]').count(), 0,
       'admin area: a resolved non-admin session gets no menu row');
     await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    await expandAdminSections(q);
     await q.waitForTimeout(600);
     ok(await q.locator('#oa-aa-guest').isVisible() && await q.locator('#oa-aa-admin').isHidden(),
       'admin area: and the desk stays the guest note for them');
@@ -8137,6 +8151,7 @@ for (const w of [320, 360, 390, 430]) {
   /* -- the maintainer's roster --------------------------------------------- */
   {
     const { ctx, q, errors } = await open(ADMIN, 'admin-area.html');
+    await expandAdminSections(q);
     await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
 
     const text = await q.textContent('#oa-aa-users');
@@ -8657,6 +8672,7 @@ for (const w of [320, 360, 390, 430]) {
      navigation, and a failed broadcast can be retried without duplicates. */
   {
     const { ctx, q, errors } = await open(ADMIN, 'admin-area.html');
+    await expandAdminSections(q);
     await q.waitForSelector('#oa-aa-users tbody tr');
     await q.click('tr:has-text("bea@example.edu") .oa-u-pick');
     await q.click('tr:has-text("cy@example.edu") .oa-u-pick');
@@ -8865,6 +8881,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.route('**/firebasejs/**', (r) =>
       r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
     await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    await expandAdminSections(q);
     await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
     /* THE SEASON UNDER WAY, deliberately: `candSeasons()` seeds it
        unconditionally, so asking only whether the chosen season is still
@@ -8939,6 +8956,7 @@ for (const w of [320, 360, 390, 430]) {
     await q.route('**/firebasejs/**', (r) =>
       r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
     await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    await expandAdminSections(q);
     await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
     const over = await q.evaluate(() =>
       document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -9274,6 +9292,7 @@ for (const w of [320, 360, 390, 430]) {
   /* -- the maintainer deleting somebody ------------------------------------- */
   {
     const { ctx, q, errors } = await open(ADMIN, 'admin-area.html');
+    await expandAdminSections(q);
     await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
     eq(await q.$$eval('.oa-u-kill', (n) => n.length), 1,
       'admin delete: a roster row offers it — the other half the owner asked for — ' +
@@ -9316,6 +9335,7 @@ for (const w of [320, 360, 390, 430]) {
     const clearing = seed.concat([{ path: 'accountDeletions/' + LEAVER.uid,
       data: { uid: LEAVER.uid, by: 'admin', status: 'clearing', askedAt: 1, clearedAt: 2 } }]);
     const { ctx, q } = await open(ADMIN, 'admin-area.html', clearing);
+    await expandAdminSections(q);
     await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
     const row = await q.textContent('#oa-aa-users');
     ok(row.indexOf('Deleting now') !== -1,
