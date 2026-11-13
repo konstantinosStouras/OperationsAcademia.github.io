@@ -22,7 +22,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function signedIn() {
-      return request.auth != null;
+      return request.auth != null
+        && !exists(/databases/$(database)/documents/accountBlocks/$(request.auth.uid));
     }
 
     // A signed-in account whose address is known to be real. An account
@@ -1001,7 +1002,8 @@ service cloud.firestore {
       // See (3) above: the sweep writes with the Admin SDK.
       allow update: if false;
 
-      allow delete: if isAdmin() && resource.data.status == 'requested';
+      allow delete: if isAdmin() && resource.data.status == 'requested'
+        && !exists(/databases/$(database)/documents/accountBlocks/$(uid));
     }
 
     // ------------------------------------------------ what's-new decisions

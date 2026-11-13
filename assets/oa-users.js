@@ -715,8 +715,9 @@
       ([nameOf(r), addressOf(r)].filter(Boolean).join('\n') || r.uid) + '\n\n' +
       'Their job postings, candidate profile and placement reports come off the ' +
       'site, their e-mail alerts stop, their messages and details are removed, ' +
-      'and their sign-in is deleted. You can call it off while it is still ' +
-      'queued, and not afterwards.\n\n' +
+      'and their sign-in is deleted. Member access is blocked immediately and ' +
+      'their sign-in identities are blocked from registering again. Data cleanup ' +
+      'continues in the background. This cannot be undone.\n\n' +
       'Type ' + D.CONFIRM_WORD + ' to confirm:');
     if (!D.matchesConfirmation(typed)) return;
     D.requestFor(r).then(load)['catch'](function (err) { sayRosterError(err); });
@@ -746,7 +747,7 @@
     if (!D || !state.deletions) return [];
     return state.rows.filter(function (r) {
       var st = D.stateOf(state.deletions[r.uid]);
-      return st.queued && st.cancellable;
+      return st.queued;
     }).map(function (r) { return r.uid; });
   }
 

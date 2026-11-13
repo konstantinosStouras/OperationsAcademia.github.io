@@ -20,7 +20,8 @@ service firebase.storage {
   match /b/{bucket}/o {
 
     function signedIn() {
-      return request.auth != null;
+      return request.auth != null
+        && !firestore.exists(/databases/(default)/documents/accountBlocks/$(request.auth.uid));
     }
 
     /* A signed-in account whose address is known to be real: the same test

@@ -134,6 +134,7 @@ async function currentCandidate(D, uid, Y) {
 
 /** Whether this token may enter this room; throws the room's one refusal. */
 async function admitted(D, token, uid, room, Y) {
+  await require('../account-access').assertActive(D, uid, HttpsError);
   const admin = adminToken(token);
   if (room === 'open') {
     if (!verifiedToken(token)) refuse('permission-denied', 'verified');

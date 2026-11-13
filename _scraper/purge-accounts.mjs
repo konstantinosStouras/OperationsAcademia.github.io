@@ -71,6 +71,7 @@
      (none)       carry the orders out
    --------------------------------------------------------------------------- */
 
+import { eraseTree, eraseUploads } from './account-erasure.mjs';
 import { isMain } from './_main.mjs';
 import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
@@ -299,9 +300,10 @@ async function killUserSubtree(db, uid) {
   }
   for (const sub of subs) {
     const snap = await sub.get();
-    n += await killAll(db, snap.docs.map((d) => d.ref));
+    for (const doc of snap.docs) await eraseTree(db, doc.ref);
+    n += snap.size;
   }
-  await root.delete().catch(() => {});
+  await eraseTree(db, root);
   return n;
 }
 
@@ -323,8 +325,7 @@ async function killUsage(db, uid) {
 async function killThread(db, uid) {
   const head = db.collection('messages').doc(uid);
   const items = await head.collection('items').get();
-  await killAll(db, items.docs.map((d) => d.ref));
-  await head.delete().catch(() => {});
+  await eraseTree(db, head);
   return items.size;
 }
 
@@ -332,7 +333,7 @@ async function killKeys(db, uid, keys) {
   let n = 0;
   for (const key of keys) {
     const ref = db.collection('accountKeys').doc(key);
-    const got = await ref.get().catch(() => null);
+    const got = await ref.get();
     /* ONLY WHILE IT STILL NAMES THIS ACCOUNT. A claim can be taken over by
        another signed-in account — that is how the ghost claim left behind by
        a merge heals — and deleting one that has moved on would un-notice
@@ -372,14 +373,13 @@ async function killKeys(db, uid, keys) {
  */
 async function anonymiseContributions(db, uid) {
   let n = 0;
-  for (const [col, blanks] of [['directoryEdits', ['name']], ['nameFixes', ['authEmail']]]) {
+  for (const [col, blanks] of [['directoryEdits', ['name', 'by']], ['nameFixes', ['authEmail', 'uid']]]) {
     const field = col === 'directoryEdits' ? 'by' : 'uid';
     let snap;
     try {
       snap = await db.collection(col).where(field, '==', uid).get();
     } catch (e) {
-      warn(`${col} could not be read for ${uid} (${e.code || e.name || 'error'})`);
-      continue;
+      throw e;
     }
     const todo = snap.docs.filter((d) => blanks.some((k) => (d.data() || {})[k]));
     for (let i = 0; i < todo.length; i += 400) {
@@ -399,15 +399,7 @@ async function anonymiseContributions(db, uid) {
 }
 
 async function killUploads(fb, uid) {
-  if (!fb.bucket) return 0;
-  try {
-    const [files] = await fb.bucket.getFiles({ prefix: `uploads/${uid}/` });
-    for (const f of files) await f.delete().catch(() => {});
-    return files.length;
-  } catch (e) {
-    warn(`uploads for ${uid} could not be cleared (${e.code || e.name || 'error'})`);
-    return 0;
-  }
+  return eraseUploads(fb.bucket, uid);
 }
 
 /** Everything this account has posted, as {col -> [{id, data}]}. */
@@ -448,7 +440,7 @@ async function clearAccount(fb, uid, order, held) {
   let orcid = String(order.orcid || '');
   try {
     if (!orcid) orcid = ((await db.collection('profiles').doc(uid).get()).data() || {}).orcid || '';
-  } catch { /* already gone */ }
+  } catch (e) { throw e; }
   let email = order.email || '';
   /* AND THE AUTH RECORD IS THE OTHER PLACE BOTH LIVE, which matters because
      the profile may already be gone: a person deleting their own account
@@ -465,7 +457,7 @@ async function clearAccount(fb, uid, order, held) {
       const pd = (rec.providerData || []).filter((x) => x && x.providerId === 'oidc.orcid');
       if (pd.length && pd[0].uid) orcid = String(pd[0].uid);
     }
-  } catch { /* already gone, or never had one */ }
+  } catch (e) { if (e.code !== 'auth/user-not-found') throw e; }
 
   /* 1. THE SIGN-IN FIRST, and this is the OPPOSITE of the order the browser
         uses, for a reason that is the mirror image of the browser's. A browser
@@ -523,13 +515,16 @@ async function clearAccount(fb, uid, order, held) {
   removed.messages = await killThread(db, uid);
 
   /* 6. …and the documents no client can reach in either direction */
-  for (const col of CLOSED_DOCS) await db.collection(col).doc(uid).delete().catch(() => {});
+  for (const col of CLOSED_DOCS) await eraseTree(db, db.collection(col).doc(uid));
 
   /* 7. the identity keys, the usage records and the upload landing strip */
   removed.keys = await killKeys(db, uid, keysFor({ email, orcid }));
   removed.usage = await killUsage(db, uid);
   removed.uploads = await killUploads(fb, uid);
   removed.anon = await anonymiseContributions(db, uid);
+  // Finds identity keys even if the profile or Auth record was removed earlier.
+  const claims = await db.collection('accountKeys').where('uid', '==', uid).get();
+  for (const claim of claims.docs) await eraseTree(db, claim.ref);
 
   return removed;
 }
@@ -550,8 +545,9 @@ async function sweepOwned(db, uid) {
   let n = 0;
   for (const col of OWNED_DOCS) {
     const ref = db.collection(col).doc(uid);
-    const got = await ref.get().catch(() => null);
-    if (got && got.exists) { await ref.delete().catch(() => {}); n++; }
+    const got = await ref.get();
+    await eraseTree(db, ref);
+    if (got && got.exists) n++;
   }
   return n;
 }
@@ -617,6 +613,15 @@ async function purgeSubmissions(fb, uid, order, held) {
   }
   /* …and sweep the three owned documents once more, in case one of those
      tokens re-created the tally mark or the roster row while we waited. */
+  // Forum identity secrets remain inside the existing backend. Ask it to
+  // erase linkable content only after in-flight calls have had time to finish.
+  if (!order.forumErasedAt) {
+    if (!order.forumErasureRequestedAt) await db.collection(COLLECTION).doc(uid).set(
+      { forumErasureRequestedAt: Date.now() }, { merge: true });
+    return { done: false, why: 'waiting for backend forum erasure' };
+  }
+  // A second full sweep catches requests already running when the block landed.
+  await clearAccount(fb, uid, order, held);
   const again = await sweepOwned(db, uid);
   if (again) warn(`${uid}: ${again} document(s) had come back and were removed again`);
 
@@ -633,8 +638,7 @@ async function purgeSubmissions(fb, uid, order, held) {
     const docs = held[s.col] || [];
     if (docs.length) {
       for (const doc of docs) {
-        const reports = await db.collection(s.col).doc(doc.id).collection('analytics').get();
-        await killAll(db, reports.docs.map(d => d.ref));
+        await eraseTree(db, db.collection(s.col).doc(doc.id));
       }
       deleted += await killAll(db, docs.map((d) => db.collection(s.col).doc(d.id)));
     }
@@ -690,6 +694,9 @@ async function main() {
       continue;
     }
 
+    await require('../_functions/account-access.js').queueDeletion({
+      db, auth: fb.auth, HttpsError: class extends Error { constructor(code, message) { super(message); this.code = code; } }
+    }, uid, data.by);
     let removed = data.removed || null;
     let clearedAt = Number(data.clearedAt) || 0;
     /* CLEARED means the clear FINISHED, which is what `clearedAt` records.
@@ -734,6 +741,7 @@ async function main() {
       (purged.drive ? `, ${purged.drive} file(s) removed from Drive` : '')));
     } catch (e) {
       failed++;
+      await db.collection(COLLECTION).doc(uid).set({ cleanupError: true, lastAttemptAt: Date.now() }, { merge: true });
       warn(`${uid}: could not be carried out (${e.code || e.name || 'error'}) — ` +
            'left open, and the rest of the queue was carried on with');
     }
@@ -742,7 +750,7 @@ async function main() {
   if (DRY) { log('--dry-run: nothing written.'); return 0; }
   log(`${cleared} account(s) cleared, ${finished} finished, ${waiting} still open ` +
       '(each line above says why)' + (failed ? `, ${failed} threw and were left open` : '') + '.');
-  return 0;
+  return failed ? 1 : 0;
 }
 
 /* ---------------------------------------------------------------- selftest */

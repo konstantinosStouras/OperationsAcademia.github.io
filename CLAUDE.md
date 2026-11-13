@@ -412,7 +412,7 @@ needs no separate look at the prose.
 apply over a season already imported. The tracking sheet's tab cycle stays a
 floor on top of it (`marketYearAtLeast`, applied in `rowsFromTab`), and the
 two hardly ever argue — measured over the 543 served postings, **fourteen of
-the seventeen** rows whose deadline outruns their posting date already carry
+the twenty** rows whose deadline outruns their posting date already carry
 the year the cascade gives them. The tab had been standing in for a deadline
 nobody was reading.
 
@@ -572,7 +572,7 @@ is made or carried:
   gained the field without waiting for the workbook to change;
 * `applyEdits` in `jobreview.mjs`, LAST, because a review card is the one
   place a posting's dates are moved after it was made. Missing from this list
-  until 2026-10-05, and it stopped the sheet read committing for seventeen
+  until 2026-10-05, and it stopped the sheet read committing for twenty
   days: see "A crawled posting goes up when it is approved" below.
 
 **AFTER the heal count in build-jobs, deliberately, and skipped in
@@ -2774,7 +2774,7 @@ users, the process stays as-is"*, and then, over a screenshot of four
 postings with no controls on them, *"how come several job postings do not
 show edit and take down buttons?"*
 
-### First, the sheet read had stopped, for seventeen days
+### First, the sheet read had stopped, for twenty days
 
 `data/jobmarket.json` had not been committed since **2026-09-18**. Every run
 of `oa-jobmarket-sheet.yml` read the workbook, wrote the file, and then went
@@ -4758,7 +4758,7 @@ whole point.** The sweep stays a workflow with the Admin SDK, live on merge;
 the doorbell only makes it prompt, exactly as `publishOnChange` does for a
 posting. Inert until the functions are deployed, and while it is inert nothing
 is lost: the build chain and the daily cron carry a deletion on the old
-cadence. **The deploy count is SEVENTEEN** for it, moved in the header, both
+cadence. **The deploy count is TWENTY** for it, moved in the header, both
 setup pages and every count sentence in this file, so a deploy read back at
 fifteen is a stale checkout. `git pull && npm install --prefix _functions &&
 firebase deploy --only functions --project operations-academia`, and read
@@ -5016,7 +5016,7 @@ live site's from `assets/v3.css`, the button is a coloured table cell with a
 VML fallback for Outlook, and the link is written out in full as text as well
 as behind the button.
 
-**The deploy count is SEVENTEEN now.** Five doorbells (`revealCandidates` and
+**The deploy count is TWENTY now.** Five doorbells (`revealCandidates` and
 `purgeOnRequest` among them), `recordVisit`, `sendVerificationEmail`, and the
 nine forum callables
 (see "The forum"). Read the list back after every deploy; fewer means a stale
@@ -6805,7 +6805,7 @@ deliberately NOT named in any workflow: the "every builder has a caller,
 never both" guard refuses a builder both in `BUILDERS` and in a workflow, and
 the byte pin already catches drift, so the `--check` mode is for a hand run.
 
-**The deploy count is SEVENTEEN.** `_functions/index.js` re-exports the nine
+**The deploy count is TWENTY.** `_functions/index.js` re-exports the nine
 callables one per line (`exports.forumX = forum.forumX;`) so a deploy's
 per-function lines and the selftest's count of them agree; the header, both
 setup pages and the count sentences in this file moved from six together,
@@ -11559,7 +11559,7 @@ the nested `talks` map. It is what makes the narrowed guard above safe.
 **THE ADMIN "WHAT CHANGED" E-MAIL HAD NEVER SENT.** `build-jobs.mjs:1178` uses
 `ownerTag` and never imported it; the ReferenceError was swallowed by the block's
 own catch into a log warning. It throws on the first live document carrying a
-`ref`, and the served file holds seventeen. The guard that should have caught it
+`ref`, and the served file holds twenty. The guard that should have caught it
 pins the block by regex over the SOURCE TEXT, so it was green and had never
 executed the code — `eslint --rule no-undef` reports exactly one problem in that
 file, and it was this.

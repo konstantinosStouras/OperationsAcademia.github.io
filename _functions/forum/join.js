@@ -96,6 +96,7 @@ exports.forumJoin = onCall(P.OPTS, async (req) => {
   const token = req.auth.token || {};
   const uid = req.auth.uid;
   const D = P.db();
+  await require('../account-access').assertActive(D, req.auth.uid, HttpsError);
   const Y = P.season();
   const admin = P.adminToken(token);
   const verified = P.verifiedToken(token);

@@ -312,6 +312,12 @@
     if (req.status === 'done') {
       return { queued: false, label: 'Deleted', cancellable: false };
     }
+    if (req.cleanupError) {
+      return { queued: true, label: 'Access blocked; cleanup will retry', cancellable: false };
+    }
+    if (req.accessBlockedAt) {
+      return { queued: true, label: 'Access blocked; deleting data', cancellable: false };
+    }
     if (req.status === 'clearing') {
       return { queued: true, label: 'Deleting now', cancellable: false };
     }
@@ -660,10 +666,10 @@
       say(msg, '');
       var host = $('pa-delete-panel');
       host.innerHTML =
-        '<h3 class="v3-h3">Your account is gone.</h3>' +
+        '<h3 class="v3-h3">Your deletion is being completed.</h3>' +
         '<p>Thank you for having been part of Operations Academia. Everything you ' +
-          'posted comes off the site within a few minutes, and nothing that says ' +
-          'who you were is kept.</p>' +
+          'posted is removed by the cleanup service. See the Privacy Policy for ' +
+          'the minimal security records and anonymous contributions retained.</p>' +
         (signInGone
           ? ''
           : '<p>You are signed out now, and the sign-in itself is removed for you ' +
@@ -684,7 +690,7 @@
         ? NOT_DEPLOYED
         : 'We could not delete the account (' +
           ((err && (err.code || err.message)) || 'unknown error') +
-          '). Nothing was removed, so you can try again.', 'err');
+          '). Deletion may already be queued; reload to check before retrying.', 'err');
       if (root.console) root.console.error('OA delete:', err);
     });
   }
@@ -726,15 +732,9 @@
       now: now || Date.now()
     });
     if (!order) return Promise.reject(new Error('no account named'));
-    return db().then(function (d) {
-      /* the same read-first as the account page's own, and for the same
-         reason: a `set` over an order that is already filed is an UPDATE, and
-         every browser update of one is refused */
-      var ref = d.collection(COLLECTION).doc(order.uid);
-      return ref.get()['catch'](function () { return null; }).then(function (snap) {
-        return (snap && snap.exists) ? null : ref.set(order);
-      });
-    }).then(function () { return order; });
+    return root.OAFB.readyFunctions().then(function (fb) {
+      return fb.functions().httpsCallable('adminDeleteAccount')({ uid: order.uid });
+    }).then(function () { order.accessBlockedAt = Date.now(); return order; });
   }
 
   /** Call it off, while it is still queued. The rules refuse this once the

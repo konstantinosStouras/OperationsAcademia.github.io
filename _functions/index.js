@@ -2,7 +2,7 @@
    Operations Academia: instant publish, the visit resolver, and the
    verification mailer.
 
-   SEVENTEEN functions live in this file: five doorbells (publishOnChange,
+   TWENTY functions live in this file: five doorbells (publishOnChange,
    publishOnCandidateChange, publishOnReview, purgeOnRequest, and the clock,
    revealCandidates), the university-visit resolver (recordVisit), the e-mail
    verification mailer (sendVerificationEmail, set up in
@@ -10,7 +10,8 @@
    from ./forum (forumJoin, forumPost, forumEdit, forumDelete, forumAccept,
    forumVote, forumThreadVotes, forumView, forumModerate; the FORUM_SECRET
    runbook is in _SETUP-INSTANT-PUBLISH.md), plus the authenticated candidate
-   reader (readCandidateProfiles). A deploy lists all seventeen, and
+   reader (readCandidateProfiles), adminDeleteAccount, guardAccountCreation and
+   guardAccountSignIn. A deploy lists all twenty, and
    reading that count back is how a deploy from a stale checkout is caught.
 
    FIVE doorbells, one job each. When a job posting changes in Firestore,
@@ -349,19 +350,44 @@ exports.publishOnReview = onDocumentWritten(
    and an address, and a dispatch payload is not the place for either. */
 
 const PURGE_EVENT_TYPE = 'oa-account-deletion';
+const accountAccess = require('./account-access');
+const { beforeUserCreated, beforeUserSignedIn } = require('firebase-functions/v2/identity');
+function deletionDeps() {
+  adminApp();
+  return { db: getFirestore(), auth: getAuth(), HttpsError };
+}
+exports.adminDeleteAccount = onCall({ region: 'us-central1', timeoutSeconds: 60, maxInstances: 5 },
+  request => accountAccess.createAdminDelete(deletionDeps())(request));
+const identityGuard = event => {
+  adminApp();
+  return accountAccess.checkIdentity(getFirestore(), event.data, HttpsError);
+};
+exports.guardAccountCreation = beforeUserCreated({ region: 'us-central1', minInstances: 1 }, identityGuard);
+exports.guardAccountSignIn = beforeUserSignedIn({ region: 'us-central1', minInstances: 1 }, identityGuard);
+
 
 exports.purgeOnRequest = onDocumentWritten(
   {
     document: 'accountDeletions/{uid}',
     secrets: [GH_DISPATCH_TOKEN],
     region: 'us-central1',
-    // a lost ring is caught by the build chain and the daily cron
-    retry: false,
+    timeoutSeconds: 540,
+    // Retry both the access block and the durable worker dispatch.
+    retry: true,
   },
   async (event) => {
     const after = event.data && event.data.after && event.data.after.exists
       ? event.data.after.data() : null;
     if (!after) return;
+    if (after.forumErasureRequestedAt && !after.forumErasedAt && after.status !== 'done') {
+      const deps = deletionDeps();
+      // Use the backend's existing secret access; no new worker permission.
+      await require('./account-erasure').eraseForum({ db: deps.db, auth: deps.auth }, event.params.uid);
+      await deps.db.collection('accountDeletions').doc(event.params.uid).set(
+        { forumErasedAt: Date.now() }, { merge: true });
+      await ring(PURGE_EVENT_TYPE, { uid: event.params.uid }, 'forum erasure completed');
+      return;
+    }
 
     if (after.status !== 'requested') {
       logger.debug('skip: sweep bookkeeping', { status: after.status });
@@ -374,6 +400,7 @@ exports.purgeOnRequest = onDocumentWritten(
       return;
     }
 
+    await accountAccess.queueDeletion(deletionDeps(), event.params.uid, after.by);
     await ring(PURGE_EVENT_TYPE, { uid: event.params.uid }, 'account purge dispatched');
   });
 
@@ -450,6 +477,7 @@ exports.sendVerificationEmail = onCall(
     const db = getFirestore();
     const today = new Date().toISOString().slice(0, 10);
     const now = Date.now();
+    await accountAccess.assertActive(db, uid, HttpsError);
     const limitRef = db.collection('verifyMail').doc(uid);
 
     /* The slot is RESERVED in a transaction before anything is sent. Read,
@@ -570,7 +598,7 @@ exports.sendVerificationEmail = onCall(
   });
 
 /* ===========================================================================
-   WHICH UNIVERSITY A VISITOR CAME FROM: the eighth function in this file,
+   WHICH UNIVERSITY A VISITOR CAME FROM: the eleventh function in this file,
    and one of the two here that are not doorbells (the other is the
    verification mailer above; the five doorbells are publishOnChange,
    publishOnCandidateChange, revealCandidates, publishOnReview and

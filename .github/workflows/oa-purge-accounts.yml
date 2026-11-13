@@ -45,7 +45,7 @@ on:
     types: [completed]
   schedule:
     # once a day, off the hour so it does not queue behind every other :00 job
-    - cron: '17 5 * * *'
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
     inputs:
       dry_run:

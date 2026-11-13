@@ -556,8 +556,12 @@ async function main() {
        would survive every run and go on freezing that row against its own
        owner. It is also what takes an affiliation OFF a row once its owner
        has blanked the profile's field, which the browser's merge cannot. */
-    for (const [uid, row] of pending) batch.set(col.doc(uid), row);
-    await batch.commit();
+    // A roster snapshot must not restore a deleted member. Reading the block
+    // inside the same transaction also closes a concurrent deletion race.
+    await fb.db.runTransaction(async tx => {
+      const blocks = await tx.getAll(...pending.map(([uid]) => fb.db.collection('accountBlocks').doc(uid)));
+      pending.forEach(([uid, row], i) => { if (!blocks[i].exists) tx.set(col.doc(uid), row); });
+    });
     pending = [];
   };
 

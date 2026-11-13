@@ -38,6 +38,7 @@ exports.forumModerate = onCall(P.OPTS, async (req) => {
   const room = d.room;
   if (!M.isRoom(room)) P.refuse('invalid-argument', 'room');
   const D = P.db();
+  await require('../account-access').assertActive(D, req.auth.uid, HttpsError);
   const Y = P.season();
   const seasonRef = D.collection('forumSeasons').doc(String(Y));
   const roomRef = seasonRef.collection('rooms').doc(room);

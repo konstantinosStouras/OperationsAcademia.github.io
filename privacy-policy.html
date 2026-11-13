@@ -385,11 +385,12 @@
           how you used the site is deleted; a job advertisement or CV you uploaded is
           deleted, including the copy of it kept in the maintainer&rsquo;s Google
           Drive; and your sign-in is removed, so the address and password no longer
-          open anything. Most of it happens the moment you press the button, the rest
-          within a few minutes once the site has rebuilt the pages your postings were
-          on, and the last of it within the hour. What we keep afterwards is the date
-          the account was deleted and how many things came off the site with it, and
-          nothing that says who you were.</p>
+          open member-only content. Cleanup runs in the background and retries failures;
+          it is marked complete only after the stored records and published postings
+          have been cleared. We retain a minimal deletion record and an account-ID block
+          to reject old sessions. Public pages remain publicly accessible. Historical
+          backups, service logs and previously published Git history are not rewritten
+          by account deletion and may retain earlier information.</p>
           <p>Removing a single message from your list, described above, is a different
           thing: that message stays in the conversation and the maintainer keeps their
           copy of it. Deleting your account removes the conversation itself, on both
@@ -402,8 +403,13 @@
           stays, because other people rely on it, but your name is removed from it, so the
           card says it was last edited by a registered user instead.</p>
           <p>The site&rsquo;s maintainer can also delete an account, and it removes exactly
-          the same things. Your own deletion begins the moment you press the button; one
-          the maintainer asks for starts within a couple of minutes.</p>
+          the same things. A maintainer deletion immediately blocks member access and
+          also retains private hashes of sign-in identities to prevent re-registration
+          with those identities, including Gmail aliases. These security records contain
+          no plaintext names or addresses. A new, unrelated identity cannot reliably be
+          attributed to a previously deleted person. Forum contributions that remain
+          linkable to the account are erased, including stored quotes; contributions from
+          seasons whose identity keys have already been destroyed remain anonymous.</p>
 
           <h2>The forum</h2>
           <p>The Site has an anonymous forum in two rooms: a Candidates&rsquo; room for the

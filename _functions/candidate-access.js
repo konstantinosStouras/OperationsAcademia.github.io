@@ -19,6 +19,7 @@ function createReader({ db, HttpsError, revealed }) {
       throw new HttpsError('permission-denied', 'Verify your email before viewing candidate profiles.');
     }
     const database = db();
+    await require('./account-access').assertActive(database, request.auth.uid, HttpsError);
     const state = await database.collection(STATE_COLLECTION).doc('current').get();
     if (!state.exists || !state.data().ready) throw new HttpsError('unavailable', 'Candidate profiles are being updated. Please try again shortly.');
     const metadata = state.data();
