@@ -64,11 +64,15 @@ const fix = id => ({ path: 'nameFixes/' + id, data: { kind: 'institution', from:
       await first.getByRole('button', { name: 'Edit', exact: true }).click();
       await first.locator('[data-key="school"]').fill('Unsaved school correction');
       await section('oa-review').locator('summary').click();
-      await arrive(job('two'));
+      const newest = job('two');
+      newest.data.row.posted = '2026-11-02';
+      await arrive(newest);
       await count('jobs', 2);
       await p.locator('[data-review-id="two"]').waitFor();
       assert.equal(await section('oa-review').evaluate(el => el.open), true);
       assert.equal(await first.locator('[data-key="school"]').inputValue(), 'Unsaved school correction', 'arrivals preserve unsaved fields');
+      const fieldIds = await p.locator('[data-review-id] [id]').evaluateAll(nodes => nodes.map(node => node.id));
+      assert.equal(new Set(fieldIds).size, fieldIds.length, 'newest arrivals must not reuse existing form field IDs');
       await first.getByRole('button', { name: 'Reject', exact: true }).click();
       await count('jobs', 1);
       await p.locator('[data-review-id="two"]').getByRole('button', { name: 'Reject', exact: true }).click();

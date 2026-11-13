@@ -411,10 +411,13 @@
       '</div>';
   }
 
-  function cardHtml(doc, i) {
+  // Live arrivals can sort ahead of already-mounted cards. A list index is
+  // not an identity: give each new card its own field/label namespace.
+  var cardSerial = 0;
+  function cardHtml(doc) {
     var row = doc.row || {};
     var ad = safeHref(fieldValue(doc, 'adUrl'));
-    var idp = 'rv' + i;
+    var idp = 'rv' + (++cardSerial);
     var dups = Array.isArray(doc.dup) ? doc.dup : [];
 
     /* The heading reads the posting as it WOULD BE PUBLISHED — the row with
@@ -1563,7 +1566,7 @@
       cards[i] = card;
       card.setAttribute('data-review-id', doc.rowId);
       card.className = 'oa-fb-card oa-rv-card';
-      card.innerHTML = cardHtml(doc, i);
+      card.innerHTML = cardHtml(doc);
 
       card.addEventListener('click', function (e) {
         /* The business-school note's "Use it": fill the School box with the

@@ -87,11 +87,15 @@ const server = http.createServer((req, res) => {
     await click('[data-review-id="one"] [data-act="edit"]');
     await fill('[data-review-id="one"] [data-key="school"]', 'Unsaved Safari school correction');
     await click('#oa-review .oa-aa-section > summary');
-    await arrive(job('two'));
+    const newest = job('two');
+    newest.data.row.posted = '2026-11-02';
+    await arrive(newest);
     await count('jobs', 2);
     await element('[data-review-id="two"]');
     assert.equal(await isOpen('oa-review'), true);
     assert.equal(await (await element('[data-review-id="one"] [data-key="school"]')).getAttribute('value'), 'Unsaved Safari school correction');
+    const fieldIds = await execute('return Array.from(document.querySelectorAll("[data-review-id] [id]"),function(el){return el.id})');
+    assert.equal(new Set(fieldIds).size, fieldIds.length, 'incoming cards keep unique field IDs');
     console.log('PASS: arrivals update counters, open the section and preserve unsaved job edits');
 
     await execute('window.__fb.holdReads=["jobSubmissions/"];');
@@ -147,7 +151,8 @@ const server = http.createServer((req, res) => {
     assert.equal(await execute('return document.documentElement.scrollWidth>innerWidth'), false);
     assert.deepEqual(await execute('return window.__testErrors'), []);
     fs.writeFileSync(path.join(output, 'native-safari-admin.png'), await driver.takeScreenshot(), 'base64');
-    await driver.executeAsyncScript('var done=arguments[arguments.length-1];OAAccounts.signOut().then(function(){done(true)},function(e){done(String(e))});');
+    await execute('OAAccounts.signOut();');
+    await wait(() => execute('return !OAAccounts.isAdmin() && __fb.subscriptions.length===0'), 'sign-out completes');
     assert.equal(await execute('return __fb.subscriptions.length'), 0);
     assert.equal(await execute('return localStorage.getItem("oaAdminSummary:v1")'), null);
     console.log('PASS: all other queues, no reload, no script errors, and sign-out cleanup');
