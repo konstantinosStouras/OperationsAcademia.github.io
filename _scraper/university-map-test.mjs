@@ -72,6 +72,23 @@ async function pageAt(query='',mobile=false){
   return p;
 }
 try{
+  for(const mobile of [false,true]){
+    // The published posting's legacy URL shape, kept as a fixture so retiring
+    // the job in a later season does not remove this map-link regression.
+    const whitewater={institution:'University of Wisconsin-Whitewater',school:'College of Business and Economics',unit:'Information Technology and Supply Chain Management',
+      furtherInfoUrl:'https://www.operationsacademia.org/universities?filterA=University%20of%20Wisconsin-Whitewater'};
+    const w=await pageAt(new URL(nav.furtherInfoUrl(whitewater)).search,mobile);
+    await w.waitForSelector('.oa-map-selected-department');
+    const text=await w.locator('.oa-map-popup').innerText();
+    assert.match(text,/College of Business and Economics/);
+    assert.match(text,/Information Technology and Supply Chain Management/);
+    assert.match(text,/809 West Starin Road/);
+    assert.doesNotMatch(text,/Hyer Hall|university administration/);
+    const marker=await w.evaluate(()=>{const p=testMap.map._popup.getLatLng();return {lat:p.lat,lng:p.lng};});
+    assert.deepEqual(marker,{lat:42.8391,lng:-88.7437},'Whitewater job link opens the verified Hyland Hall pin');
+    assert.equal(await w.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+    await w.close();
+  }
   const p=await pageAt('?university='+encodeURIComponent(university));
   await p.waitForFunction(()=>document.querySelectorAll('.oa-map-logo').length===2);
   assert.equal(await p.locator('.oa-map-cluster').count(),0,'a university search reveals its school logos');

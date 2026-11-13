@@ -6060,22 +6060,28 @@
       "notes": "UNIVERSITY-LEVEL RECORD: source directory row contains only institution and members source, with no school, department or posting affiliation. Preserve empty academic unit; verify actual university administrative location without inferring business school. Official current administration contact identifies building; external named building footprint supplies coordinates. This is not a department-location claim."
     },
     {
-      "id": "location-706-university-level-administration",
+      "id": "wisconsin-whitewater-itscm-hyland",
       "institution": "University of Wisconsin-Whitewater",
       "institutionKey": "University of Wisconsin-Whitewater",
       "rowIds": [
+        "university-of-wisconsin-whitewater__college-of-business-and-economics__information-technology-and-supply-chain-management",
         "university-of-wisconsin-whitewater"
       ],
-      "school": "",
-      "department": "",
-      "building": "Hyer Hall, university administration",
-      "address": "800 West Main Street, Whitewater, Wisconsin 53190, United States",
-      "lat": 42.836258,
-      "lng": -88.7433694,
-      "addressSource": "https://www.uww.edu/chancellor",
-      "coordinateSource": "https://www.openstreetmap.org/way/506760808",
-      "checked": "2026-10-24",
-      "notes": "UNIVERSITY-LEVEL RECORD: source directory row contains only institution and members source, with no school, department or posting affiliation. Preserve empty academic unit; verify actual university administrative location without inferring business school. Official current administration contact identifies building; external named building footprint supplies coordinates. This is not a department-location claim."
+      "school": "College of Business and Economics",
+      "department": "Department of Information Technology and Supply Chain Management",
+      "building": "Timothy J. Hyland Hall",
+      "address": "809 West Starin Road, Whitewater, Wisconsin 53190, United States",
+      "country": "United States",
+      "lat": 42.8391,
+      "lng": -88.7437,
+      "addressSource": "https://www.uww.edu/cobe/departments/it-supply-chain-management",
+      "coordinateSource": "https://www.openstreetmap.org/way/190509827",
+      "supportingSources": [
+        "https://www.uww.edu/aaec/major-exploration/academic-departments",
+        "https://www.uww.edu/documents/adminaffairs/fpm/Campus%20Facilities%20Planning/Campus%20Address%20Re-alignment%20Crosswalk%20Table-%20quick%20ref2.pdf"
+      ],
+      "checked": "2026-11-13",
+      "notes": "The current directory has an IT and Supply Chain Management department row instead of the former university-only row. The official department contact identifies Hyland Hall at 809 West Starin Road; the university academic-departments list independently places ITSCM in Hyland. The marker was checked inside the named OpenStreetMap Hyland Hall building footprint, whose street address agrees with the university. Replaces the former Hyer Hall administration fallback; the old university-only row ID remains solely for historical link and audit continuity. This evidence is for the named department, not the chancellor's office."
     },
     {
       "id": "location-711-university-level-administration",

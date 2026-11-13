@@ -33168,8 +33168,17 @@
   ],
   "n": 1,
   "lastPosted": "2026-11-06",
-  "mapLocationIds": [],
-  "mapLocationKind": "unresolved"
+  "mapLocationIds": [
+   "wisconsin-whitewater-itscm-hyland"
+  ],
+  "mapLocationKind": "exact",
+  "mapInstitutionNames": [
+   "University of Wisconsin-Whitewater"
+  ],
+  "mapSearchTerms": [
+   "College of Business and Economics",
+   "Department of Information Technology and Supply Chain Management"
+  ]
  },
  {
   "id": "university-of-zurich__department-of-business-administration__business-analytics-and-operations",

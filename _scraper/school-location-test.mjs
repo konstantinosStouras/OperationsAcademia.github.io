@@ -8,6 +8,19 @@ const read=name=>JSON.parse(fs.readFileSync(new URL(name,import.meta.url),'utf8'
 const verified=read('../data/school-map-locations.json').records.filter(r=>!S.directoryExcluded(r));
 const directory=read('../data/directory.json');
 const rows=Array.isArray(directory)?directory:directory.rows;
+// A new departmental posting replaced Whitewater's university-only row.
+// Keep the old link resolvable while locating the actual department, rather
+// than attaching its card to the former administration-building fallback.
+const whitewater=rows.find(r=>r.id==='university-of-wisconsin-whitewater__college-of-business-and-economics__information-technology-and-supply-chain-management');
+const hyland=verified.find(v=>v.id==='wisconsin-whitewater-itscm-hyland');
+assert.ok(whitewater&&hyland,'Whitewater has current department location evidence');
+assert.ok(hyland.rowIds.includes(whitewater.id));
+assert.ok(hyland.rowIds.includes('university-of-wisconsin-whitewater'),'historical university link remains covered');
+assert.deepEqual(whitewater.mapLocationIds,[hyland.id]);
+assert.equal(whitewater.mapLocationKind,'exact');
+assert.equal(hyland.building,'Timothy J. Hyland Hall');
+assert.equal(hyland.department,'Department of Information Technology and Supply Chain Management');
+assert.ok(!verified.some(v=>v.id==='location-706-university-level-administration'),'retired administration pin is not served');
 const seen=new Map(), ids=new Set();
 assert.equal(model.displayName('WU Vienna'),'Vienna University of Economics and Business');
 assert.ok(model.rowMatchScore({school:'Health',department:''},'Health','')>
