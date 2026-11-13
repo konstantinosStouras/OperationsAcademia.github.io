@@ -7294,7 +7294,7 @@ async function testAccountDeletion() {
 
   /* the SCRIPT TAGS, not the first mention: a panel's comment names the file
      that draws it a hundred lines above the tag that loads it */
-  const iMod = adminPage.indexOf('src="assets/oa-account-delete.js"');
+  const iMod = scriptIndex(adminPage, 'assets/oa-account-delete.js');
   const iUsers = adminPage.search(/src="assets\/oa-users\.js(?:\?[^"\s]*)?"/);
   ok(iMod > 0 && iUsers > iMod,
     'the Admin area loads the shared module BEFORE the roster that reads it');
@@ -8026,7 +8026,8 @@ async function testUsersAndMessages() {
      refreshed once a session, so answering a reply dropped the tile and left
      the menu counting it for the rest of the session. */
   const adminJs = await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8');
-  ok(/OAAccounts\.setCount\('admin', c\.total\)/.test(adminJs),
+  ok(/refresh: function[\s\S]*correctBadge\(null\)/.test(adminJs)
+     && /OAAccounts\.setCount\('admin', total\)/.test(adminJs),
     'refreshing the tiles corrects the account menu\'s own count too');
 
   /* ------------------------------------------------- what a sort cannot do */
@@ -8044,8 +8045,8 @@ async function testUsersAndMessages() {
   const admin = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   ok(admin.includes('id="oa-aa-users"') && admin.includes('assets/oa-users.js'),
     'the Admin area carries the roster panel and loads the module that draws it');
-  ok(/<script defer src="assets\/oa-users\.js(?:\?[^"\s]*)?">/.test(admin),
-    '…deferred, like every other script on the page');
+  ok(/<script data-oa-sections="oa-aa-users" data-src="assets\/oa-users\.js(?:\?[^"\s]*)?">/.test(admin),
+    'the roster tools are downloaded only when its section opens');
   ok(!/loadScript\('assets\/oa-users\.js'/.test(accts)
     && !/renderTable|csvOf|oa-u-table/.test(area),
     'the roster lives in its OWN file and the badge path never fetches it: ' +
@@ -11828,13 +11829,13 @@ function testReviewDuplicates() {
   /* SCRIPT TAGS, not the first mention: the panel is named in a comment two
      hundred lines above its own tag, so a bare indexOf compares a sentence
      with a script. */
-  const tagAt = (f) => adminPage.indexOf('<script defer src="assets/' + f);
+  const tagAt = (f) => scriptIndex(adminPage, 'assets/' + f);
   ok(tagAt('oa-advert-dup.js') > tagAt('oa-schools.js'),
     'and loads the rule after oa-schools.js, whose institutionKey it folds names with');
   ok(tagAt('oa-advert-dup.js') < tagAt('oa-jobreview.js'),
     'and before the panel that calls it');
-  ok(/<script defer src="assets\/oa-advert-dup\.js">/.test(adminPage),
-    'deferred, like every other script on the page');
+  ok(/<script data-oa-sections="oa-review" data-src="assets\/oa-advert-dup\.js">/.test(adminPage),
+    'the duplicate checker is downloaded only when Job postings opens');
 
   /* AND IT NEEDS NO RULES REDEPLOY. The sync writes with the Admin SDK, which
      bypasses the rules; the BUTTON writes from a browser, so every key it
@@ -14281,7 +14282,7 @@ async function testCandidateReveal() {
     'alerts.html loads oa-reveal.js BEFORE the matcher whose factory is handed it');
   const adminHtml = await read('admin-area.html');
   ok(tagAt(adminHtml, 'oa-reveal.js') > 0
-     && tagAt(adminHtml, 'oa-reveal.js') < tagAt(adminHtml, 'oa-submissions.js')
+     && tagAt(adminHtml, 'oa-reveal.js') < scriptIndex(adminHtml, 'assets/oa-submissions.js')
      && tagAt(adminHtml, 'oa-reveal.js') < tagAt(adminHtml, 'oa-adminarea.js'),
     'admin-area.html loads oa-reveal.js before both panels that ask it');
   /* ---- updatedAt: a public field, day-cut, never an alerts cursor ---- */
@@ -19212,7 +19213,7 @@ async function testJobComments() {
   ok(/var tag = f\.area \? 'div' : 'p';/.test(rv) && /'<' \+ tag \+ ' class="oa-rv-field'/.test(rv),
     'job comments: a field that takes prose is a block, since the editor puts a div beside the box');
   const admin = await read('admin-area.html');
-  const adminTag = (f) => admin.indexOf('<script defer src="assets/' + f);
+  const adminTag = (f) => scriptIndex(admin, 'assets/' + f);
   ok(adminTag('oa-forum-markup.js') > 0
      && adminTag('oa-forum-markup.js') < adminTag('oa-editor.js')
      && adminTag('oa-editor.js') < adminTag('oa-jobreview.js')

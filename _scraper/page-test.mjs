@@ -8055,6 +8055,10 @@ for (const w of [320, 360, 390, 430]) {
         affiliation: 'Example University, Department of Operations' } },
     { path: 'userDirectory/u-msg-3', data: { name: 'Cy Carter',
         email: 'cy@example.edu', first: 3000, seen: 1000 } },
+    // A lazy roster opens after registration. Include the admin explicitly
+    // rather than racing the account module's own directory write.
+    { path: 'userDirectory/admin-uid-0000000000', data: { name: 'Test Admin',
+        email: 'kstouras@gmail.com', first: 900, seen: 900, affiliation: 'Test University' } },
     /* …and one row seeded to be TOO WIDE for its panel: a long name, a long
        address and an affiliation that is a sentence. The owner's report
        (2026-09-08) was of names and addresses cut mid-word to fit the table
@@ -8252,12 +8256,14 @@ for (const w of [320, 360, 390, 430]) {
        .indexOf(q) >= 0` answered to "com" as well, so an ordinary search for
        a .com address quietly listed every incomplete row — rows the query
        appears nowhere in — and select-all under it ticked those strangers for
-       the compose box, whose confirmation says only how many. No seeded row
-       holds "com" anywhere, so the honest answer here is none at all. */
+       the compose box, whose confirmation says only how many. Only the
+       admin's .com address matches; incomplete rows must stay out. */
     await q.fill('#oa-u-filter', 'com');
     await q.waitForFunction(() =>
-      document.querySelectorAll('#oa-aa-users tbody tr').length === 0, null, { timeout: 10000 });
-    ok(true, 'roster: a Find needle inside a magic word ("com" in "incomplete") lists nobody');
+      document.querySelectorAll('#oa-aa-users tbody tr').length === 1 &&
+      document.querySelector('#oa-aa-users tbody tr').dataset.uid === 'admin-uid-0000000000',
+      null, { timeout: 10000 });
+    ok(true, 'roster: "com" matches the admin address, never the incomplete marker');
     await q.fill('#oa-u-filter', 'inc');
     await q.waitForFunction(() =>
       document.querySelectorAll('#oa-aa-users tbody tr').length > 0, null, { timeout: 10000 });

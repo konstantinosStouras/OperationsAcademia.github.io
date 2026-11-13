@@ -493,24 +493,26 @@
     <script defer src="assets/oa-feature-badges.js?v=20261030-posting-roles"></script>
     <script defer src="assets/v3.js"></script>
     <script defer src="assets/oa-firebase.js"></script>
-    <script defer src="assets/oa-accounts.js?v=20261030-posting-roles"></script>
+    <script defer src="assets/oa-accounts.js?v=20261113-admin-lazy"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-listing-tracking.js"></script>
     <script defer src="assets/oa-news.js"></script>
+    <script data-oa-sections="oa-review oa-aa-users oa-aa-yc" data-src="assets/oa-jobnav.js?v=20261025-map-routing"></script>
+    <!-- Panel tools are downloaded in dependency order on first expansion. -->
     <!-- The review card asks the maintainer the posting form's own three name
          questions, so it mounts the posting form's own cascade: choosing a
          university narrows the school list, choosing a school narrows the
          department list. All three are optional — without them the card's
          boxes are plain text inputs and everything else still works. -->
-    <script defer src="assets/oa-schools.js?v=20261009-buffalo"></script>
-    <script defer src="assets/oa-combo.js"></script>
-    <script defer src="assets/oa-place-picker.js?v=20261009-reference"></script>
-    <script defer src="assets/oa-uniinfo.js?v=20261009-reference"></script>
+    <script data-oa-sections="oa-review oa-aa-names" data-src="assets/oa-schools.js?v=20261009-buffalo"></script>
+    <script data-oa-sections="oa-review" data-src="assets/oa-combo.js"></script>
+    <script data-oa-sections="oa-review" data-src="assets/oa-place-picker.js?v=20261009-reference"></script>
+    <script data-oa-sections="oa-review" data-src="assets/oa-uniinfo.js?v=20261009-reference"></script>
     <!-- "Check for duplicate adverts" reads THE PIPELINE'S OWN RULE, never a
          browser copy of it: assets/oa-advert-dup.js is the one definition, and
          _scraper/jobreview.mjs re-exports the same file. It loads AFTER
          oa-schools.js, whose institutionKey it folds names with. -->
-    <script defer src="assets/oa-advert-dup.js"></script>
+    <script data-oa-sections="oa-review" data-src="assets/oa-advert-dup.js"></script>
     <!-- Approving a posting shows it on the jobs page straight away: the row
          the build is about to publish is echoed into this browser's own
          storage, exactly as a saved EDIT already is. Optional — without it an
@@ -518,23 +520,23 @@
          oa-countries.js goes with it: the build canonicalises an edited
          country ("USA" is served as "United States"), so the echo has to as
          well or it shows a spelling the site will not publish. -->
-    <script defer src="assets/oa-countries.js"></script>
-    <script defer src="assets/oa-fresh.js?v=20261031-safe-takedown"></script>
-    <script defer src="assets/oa-forum-markup.js"></script>
-    <script defer src="assets/oa-editor.js"></script>
-    <script defer src="assets/oa-jobreview.js?v=20261031-retention"></script>
+    <script data-oa-sections="oa-review" data-src="assets/oa-countries.js"></script>
+    <script data-oa-sections="oa-review" data-src="assets/oa-fresh.js?v=20261031-safe-takedown"></script>
+    <script data-oa-sections="oa-review" data-src="assets/oa-forum-markup.js"></script>
+    <script data-oa-sections="oa-review" data-src="assets/oa-editor.js"></script>
+    <script data-oa-sections="oa-review" data-src="assets/oa-jobreview.js?v=20261031-retention"></script>
     <!-- oa-reveal.js BEFORE the two panels that ask whether the candidate
          profiles are out yet (oa-submissions.js, oa-adminarea.js): the reveal
          is an instant, 14:00 UTC on the reveal day, decided in one place. -->
     <script defer src="assets/oa-reveal.js"></script>
-    <script defer src="assets/oa-submissions.js"></script>
-    <script defer src="assets/oa-feedback.js"></script>
+    <script data-oa-sections="oa-subs" data-src="assets/oa-submissions.js"></script>
+    <script data-oa-sections="oa-inbox" data-src="assets/oa-feedback.js"></script>
     <!-- the one definition of what deleting an account is: the roster's
          Delete control writes the same work order the account page's own
          panel writes, so the two cannot disagree. Loaded BEFORE the
          roster that reads it. -->
-    <script defer src="assets/oa-account-delete.js?v=20261113-erasure"></script>
-    <script defer src="assets/oa-users.js?v=20261113-erasure"></script>
+    <script data-oa-sections="oa-aa-users" data-src="assets/oa-account-delete.js?v=20261113-erasure"></script>
+    <script data-oa-sections="oa-aa-users" data-src="assets/oa-users.js?v=20261113-erasure"></script>
     <!-- The market-year report links each flagged posting to the page that
          actually carries it, so it reads the same window rule jobs.html and
          previous-markets.html sort themselves by (oa-jobnav.js), and it
@@ -546,9 +548,8 @@
          the duplicate warning names its postings without linking them, and
          without oa-yearcheck nothing can be settled but every posting is
          still listed — absence means SHOW. -->
-    <script defer src="assets/oa-jobnav.js?v=20261025-map-routing"></script>
     <script defer src="assets/oa-yearcheck.js"></script>
-    <script defer src="assets/oa-candidate-data.js?v=20261013-2"></script>
-    <script defer src="assets/oa-adminarea.js"></script>
+    <script data-oa-sections="oa-aa-cands" data-src="assets/oa-candidate-data.js?v=20261013-2"></script>
+    <script defer src="assets/oa-adminarea.js?v=20261113-lazy"></script>
   </body>
 </html>

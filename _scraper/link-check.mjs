@@ -18,7 +18,7 @@
 
    So there are two rules, and the second is the one a cutover breaks.
 
-   1. EVERY internal href/src/data-include resolves to a file that exists.
+   1. EVERY internal href/src/data-src/data-include resolves to a file that exists.
       Extension-less links are allowed: GitHub Pages serves /jobs from
       jobs.html, which the old design's nav relied on and /v1/ still does.
 
@@ -137,7 +137,7 @@ function idsOf(rel) {
   return idCache.get(rel);
 }
 
-const ATTR = /\s(?:href|src|data-include)="([^"]*)"/g;
+const ATTR = /\s(?:href|src|data-src|data-include)="([^"]*)"/g;
 
 
 /* Live pages that CHOOSE not to be indexed, each with its reason. The rule

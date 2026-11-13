@@ -43,9 +43,15 @@ const server = http.createServer((req, res) => {
     const ready = async () => {
       await page.locator('#oa-aa-admin').waitFor({ state: 'visible' });
       await page.waitForFunction(() => document.querySelectorAll('#oa-aa-tiles a').length === 8);
-      await page.locator('#oa-review-publication').waitFor({ state: 'attached' });
-      assert.equal(await page.locator('#oa-review-publication').isVisible(), false,
-        'asynchronously added publication status stays inside the closed frame');
+      await page.waitForFunction(() => Array.from(document.querySelectorAll('#oa-aa-tiles .oa-aa-tile-n'))
+        .every(el => el.textContent !== '?'));
+      assert.equal(await page.locator('#oa-review-publication').count(), 0,
+        'closed job section does not fetch or render publication data');
+      assert.equal(await page.evaluate(() => typeof window.OAUsers), 'undefined',
+        'closed roster does not download its tools');
+      assert.equal(await page.evaluate(() => performance.getEntriesByType('resource')
+        .some(r => /\/data\/(jobs|candidates)\.json/.test(r.name))), false,
+        'closed sections do not download full jobs or candidate feeds');
     };
     await page.goto(base + '/admin-area');
     await ready();
@@ -61,10 +67,16 @@ const server = http.createServer((req, res) => {
       assert.equal(await section.locator('.oa-aa-section-body').isVisible(), false);
       await section.locator('.oa-aa-section-icon').click();
       assert.equal(await isOpen(), true, 'plus opens');
+      await page.waitForFunction(id => !document.getElementById(id).hasAttribute('aria-busy'),
+        await section.evaluate(el => el.parentElement.id));
+      if (i === 0) await page.locator('#oa-review-publication').waitFor({ state: 'visible' });
+      if (i === 7) await page.locator('#oa-aa-users .oa-u-table').waitFor({ state: 'visible' });
       assert.equal(await section.locator('.oa-aa-section-minus').isVisible(), true);
       assert.equal(await section.locator('.oa-aa-section-body').isVisible(), true);
       await section.locator('.oa-aa-section-icon').click();
       assert.equal(await isOpen(), false, 'minus closes');
+      if (i === 0) assert.equal(await page.locator('#oa-review-publication').isVisible(), false,
+        'asynchronously added publication status stays inside the closed frame');
       await summary.click({ position: { x: 5, y: 3 } });
       assert.equal(await isOpen(), true, 'top frame edge opens');
       await summary.click({ position: { x: 5, y: 3 } });
@@ -75,6 +87,18 @@ const server = http.createServer((req, res) => {
       await page.keyboard.press('Space');
       assert.equal(await isOpen(), false, 'Space closes');
     }
+    await page.waitForLoadState('networkidle');
+    const loadTotals = () => page.evaluate(() => ({
+      scripts: performance.getEntriesByType('resource').filter(r => r.initiatorType === 'script').length,
+      reads: window.__fb.log.filter(r => ['get', 'list', 'query'].includes(r.op)).length
+    }));
+    const loaded = await loadTotals();
+    for (let i = 0; i < 8; i++) {
+      await sections.nth(i).locator(':scope > summary').click();
+      await sections.nth(i).locator(':scope > summary').click();
+    }
+    await page.waitForLoadState('networkidle');
+    assert.deepEqual(await loadTotals(), loaded, 'reopening uses loaded tools and data');
     await page.evaluate(() => {
       const fixture = document.createElement('div');
       fixture.innerHTML = '<input id="draft" value="unsaved edit"><button id="action">Action</button><details id="nested" open><summary>Reviewed</summary>Kept</details>';
@@ -112,6 +136,31 @@ const server = http.createServer((req, res) => {
         await sections.nth(7).locator('summary').click();
       }
     }
+    // A failed first download can be retried without duplicating controls.
+    await page.reload();
+    await ready();
+    let attempts = 0;
+    await page.route('**/assets/oa-users.js*', route => {
+      attempts++;
+      return attempts === 1 ? route.abort() : route.fallback();
+    });
+    await sections.nth(7).locator('summary').click();
+    await sections.nth(7).getByRole('button', { name: 'Try again' }).click();
+    await page.locator('#oa-aa-users .oa-u-table').waitFor({ state: 'visible' });
+    assert.equal(attempts, 2);
+    assert.equal(await page.locator('#oa-aa-users .oa-u-table').count(), 1);
+    assert.equal(await page.locator('script[src*="assets/oa-users.js"]').count(), 1);
+    await page.reload();
+    await ready();
+    attempts = 0;
+    await sections.nth(7).locator('summary').click();
+    await sections.nth(7).getByRole('button', { name: 'Try again' }).waitFor();
+    await sections.nth(7).locator('summary').click();
+    await sections.nth(7).locator('summary').click();
+    await page.locator('#oa-aa-users .oa-u-table').waitFor({ state: 'visible' });
+    await page.waitForFunction(() => !document.querySelector('#oa-aa-users').hasAttribute('aria-busy'));
+    assert.equal(attempts, 2, 'reopening can also retry the failed download');
+    assert.equal(await sections.nth(7).locator('.oa-aa-loading').count(), 0, 'no stale failure notice');
     assert.deepEqual(errors, []);
     console.log('admin-sections: eight frames, keyboard, tiles, preserved edits, reload, light/dark and desktop/mobile passed');
   } finally {

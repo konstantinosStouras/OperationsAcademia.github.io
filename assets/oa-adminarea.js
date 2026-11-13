@@ -173,8 +173,10 @@
    * resolves null — unknown, not zero — and the total sums what IS known, so
    * one refused read never hides the rest of the queue.
    */
+  var countsPending = null;
   function pendingCounts() {
-    return OAFB.ready().then(function (fb) {
+    if (countsPending) return countsPending;
+    var request = OAFB.ready().then(function (fb) {
       var db = fb.firestore();
       var nul = function () { return null; };
       return Promise.all([
@@ -204,6 +206,9 @@
       return { jobs: r[0], candidates: r[1], feedback: r[2], news: r[3], names: r[4],
                messages: r[5], total: known ? total : null };
     });
+    countsPending = request;
+    request.then(function () { countsPending = null; }, function () { countsPending = null; });
+    return request;
   }
 
   /**
@@ -490,7 +495,7 @@
   function renderNews(db) {
     var list = $('oa-aa-news-list');
     if (!list) return;
-    pendingNews(db).then(function (p) {
+    return pendingNews(db).then(function (p) {
       if (p === null) { show($('oa-aa-news'), false); return; }
       if (!p.length) {
         list.innerHTML = '<p class="oa-hint">Nothing waiting &mdash; every logged ' +
@@ -651,12 +656,14 @@
   /* ------------------------------------------------------------- the badge */
 
   var lastCounts = null;
+  var lastCandidateCount = null;
 
   /** The exact-where-loaded correction: once the page has real numbers, the
       cached menu badge is set from them, the same rule my-postings applies. */
   function correctBadge(groups) {
+    if (groups) lastCandidateCount = groups.held.length;
     if (!lastCounts) return;
-    if (groups) lastCounts.candidates = groups.held.length;
+    if (lastCandidateCount !== null) lastCounts.candidates = lastCandidateCount;
     var total = 0, known = 0;
     ['jobs', 'candidates', 'feedback', 'news', 'names', 'messages'].forEach(function (k) {
       if (typeof lastCounts[k] === 'number') { total += lastCounts[k]; known++; }
@@ -919,68 +926,123 @@
 
   var startedFor = null;
 
+  var deskReady = Promise.resolve();
+  var sectionInitializers = {};
+  var sectionLoads = {};
+  var scriptLoads = {};
+
+  // Only download a section's tools when that frame is first opened. Shared
+  // dependencies use one promise, even when two frames open at the same time.
+  function loadSectionScript(declaration) {
+    var src = declaration.getAttribute('data-src');
+    if (scriptLoads[src]) return scriptLoads[src];
+    scriptLoads[src] = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = function () {
+        script.remove();
+        delete scriptLoads[src];
+        reject(new Error('Could not load section tools'));
+      };
+      document.head.appendChild(script);
+    });
+    return scriptLoads[src];
+  }
+
+  function loadSection(panel) {
+    if (!OAAccounts.isAdmin() || sectionLoads[panel.id]) return;
+    var owner = startedFor;
+    var body = panel.querySelector('.oa-aa-section-body');
+    var previousStatus = body.querySelector('.oa-aa-loading');
+    if (previousStatus) previousStatus.remove();
+    var status = document.createElement('p');
+    status.className = 'oa-hint oa-aa-loading';
+    status.setAttribute('role', 'status');
+    status.textContent = 'Loading section…';
+    body.insertBefore(status, body.firstChild);
+    panel.setAttribute('aria-busy', 'true');
+    var scripts = Array.prototype.filter.call(document.querySelectorAll('script[data-oa-sections]'), function (el) {
+      return el.getAttribute('data-oa-sections').split(' ').indexOf(panel.id) !== -1;
+    });
+    sectionLoads[panel.id] = deskReady.then(function () {
+      return scripts.reduce(function (previous, script) {
+        return previous.then(function () { return loadSectionScript(script); });
+      }, Promise.resolve());
+    }).then(function () {
+      if (!OAAccounts.isAdmin() || startedFor !== owner) return;
+      return sectionInitializers[panel.id] ? sectionInitializers[panel.id]() : null;
+    }).then(function () {
+      status.remove();
+      panel.removeAttribute('aria-busy');
+    })['catch'](function () {
+      delete sectionLoads[panel.id];
+      panel.removeAttribute('aria-busy');
+      status.textContent = 'Could not load this section. ';
+      var retry = document.createElement('button');
+      retry.type = 'button';
+      retry.className = 'button';
+      retry.textContent = 'Try again';
+      retry.addEventListener('click', function () { status.remove(); loadSection(panel); });
+      status.appendChild(retry);
+    });
+  }
+
   function start() {
-    OAFB.ready().then(function (fb) {
+    return OAFB.ready().then(function (fb) {
       var db = fb.firestore();
-
-      fetchJson('/data/candidates-meta.json')['catch'](function () { return {}; })
-        .then(function (meta) {
-          var revealAt = String((meta && meta.revealAt) || '');
-          var hint = $('oa-aa-cands-hint');
-          // the instant, computed (assets/oa-reveal.js): null when no real
-          // day is announced, and `revealed` once 14:00 UTC on it has passed
-          var when = OAReveal.describeReveal(revealAt);
-          if (hint && when && !when.revealed) {
-            hint.innerHTML = 'Every profile filed through the site, including the ' +
-              'ones held back until the reveal at <strong>' + esc(when.utc) + ' on ' +
-              esc(when.dayLong) + '</strong>. Edit opens the same form the candidate ' +
-              'used; a held profile is visible to nobody but you and its candidate ' +
-              'until the reveal publishes it. Reviewed profiles are tucked away ' +
-              'below; expand them whenever you need to edit or take one down.';
-          }
-          show($('oa-aa-cands'), true);
-          wireCandidateActions(db, revealAt);
-          return renderCandidates(db, revealAt);
-        })
-        .then(function (groups) {
-          /* tiles first from the shared counter, then corrected from the real
-             documents the moment they are on screen */
-          return pendingCounts().then(function (c) {
-            lastCounts = c;
-            paintTiles(c);
-            correctBadge(groups);
+      sectionInitializers = {
+        'oa-aa-cands': function () {
+          return fetchJson('/data/candidates-meta.json')['catch'](function () { return {}; })
+            .then(function (meta) {
+              var revealAt = String((meta && meta.revealAt) || '');
+              var hint = $('oa-aa-cands-hint');
+              var when = OAReveal.describeReveal(revealAt);
+              if (hint && when && !when.revealed) {
+                hint.innerHTML = 'Every profile filed through the site, including the ' +
+                  'ones held back until the reveal at <strong>' + esc(when.utc) + ' on ' +
+                  esc(when.dayLong) + '</strong>. Edit opens the same form the candidate ' +
+                  'used; a held profile is visible to nobody but you and its candidate ' +
+                  'until the reveal publishes it. Reviewed profiles are tucked away ' +
+                  'below; expand them whenever you need to edit or take one down.';
+              }
+              wireCandidateActions(db, revealAt);
+              return renderCandidates(db, revealAt);
+            }).then(function (groups) { correctBadge(groups); });
+        },
+        'oa-aa-yc': function () {
+          wireYearCheckActions(db);
+          return renderYearCheck(db).then(function () { if (lastCounts) paintTiles(lastCounts); });
+        },
+        'oa-aa-news': function () { return renderNews(db); },
+        'oa-aa-names': function () {
+          wireNameFixActions(db);
+          return renderNameFixes(db).then(function (pending) {
+            if (typeof pending === 'number' && lastCounts) {
+              lastCounts.names = pending;
+              correctBadge(null);
+            }
           });
-        })['catch'](function () { /* each panel reports its own failure */ });
+        }
+      };
 
-      /* the statistic beside the queues. Whichever read answers last paints
-         last: landing before pendingCounts, it rides that paint (paintTiles
-         always draws the card from lastUsers); landing after, it repaints the
-         strip that is already on screen. A refused read keeps the '?'. */
+      // Counts are useful while every section is closed. They must not wait
+      // for the candidate roster or any other full collection to render.
+      paintTiles({});
+      pendingCounts().then(function (c) {
+        lastCounts = c;
+        correctBadge(null);
+      });
       registeredCount().then(function (n) {
         if (typeof n !== 'number') return;
         lastUsers = n;
         if (lastCounts) paintTiles(lastCounts);
-      })['catch'](function () { /* rules not deployed / offline — unknown, never 0 */ });
-
-      show($('oa-aa-yc'), true);
-      wireYearCheckActions(db);
-      renderYearCheck(db).then(function (n) {
-        /* whichever read answers last paints last, exactly as the registered
-           count does — paintTiles always draws this card from lastYearCheck */
-        if (typeof n === 'number' && lastCounts) paintTiles(lastCounts);
-      });
-
-      show($('oa-aa-news'), true);
-      renderNews(db);
-
-      show($('oa-aa-names'), true);
-      wireNameFixActions(db);
-      renderNameFixes(db).then(function (pending) {
-        if (typeof pending === 'number' && lastCounts) {
-          lastCounts.names = pending;
-          correctBadge(null);
-        }
-      });
+      })['catch'](function () { /* unknown, never zero */ });
+      Promise.all([yearCheckRows(), yearCheckDocs(db)]).then(function (both) {
+        var split = OAYearCheck.partition(both[0], both[1] || {});
+        lastYearCheck = split.open.length;
+        if (lastCounts) paintTiles(lastCounts);
+      })['catch'](function () { /* the tile keeps its unknown count */ });
     })['catch'](function () {
       var g = $('oa-aa-guest');
       show(g, true);
@@ -1019,6 +1081,9 @@
       disclosure.appendChild(body);
       panel.appendChild(disclosure);
       panel.classList.add('oa-aa-collapsible');
+      disclosure.addEventListener('toggle', function () {
+        if (disclosure.open) loadSection(panel);
+      });
     });
 
     // Summary tiles still take the admin straight into the selected queue,
@@ -1045,10 +1110,19 @@
       show($('oa-aa-guest'), !is);
       show($('oa-aa-admin'), is);
       show($('oa-aa-signin-p'), !is && !u && OAFB.enabled);
-      if (!is) { startedFor = null; return; }
+      if (!is) {
+        startedFor = null;
+        lastCandidateCount = null;
+        sectionLoads = {};
+        sectionInitializers = {};
+        return;
+      }
       if (startedFor === u.uid) return;   // onChange fires on every auth event
       startedFor = u.uid;
-      start();
+      $('oa-aa-admin').querySelectorAll(':scope > .oa-panel').forEach(function (panel) {
+        show(panel, true);
+      });
+      deskReady = start();
     });
   }
 
@@ -1065,19 +1139,9 @@
     refresh: function () {
       return pendingCounts().then(function (c) {
         lastCounts = c;
-        paintTiles(c);
-        /* …AND THE BADGE BESIDE "Admin area", which is the same number. It is
-           cached per account and refreshed ONCE a session, so answering a
-           message reply dropped the tile here and left the menu counting it
-           for the rest of the session — the two disagreeing about a figure
-           that is computed by this one function precisely so they cannot.
-           setCount is the exact-where-loaded path the badge rules already
-           name; it writes the cache and repaints, and does nothing at all
-           when this is not the account it belongs to. */
-        if (window.OAAccounts && typeof OAAccounts.setCount === 'function'
-            && c && typeof c.total === 'number') {
-          OAAccounts.setCount('admin', c.total);
-        }
+        // Keep a loaded candidate roster's exact count when another panel
+        // refreshes the summary, and update the menu badge from that same sum.
+        correctBadge(null);
       })['catch'](function () { /* keep what is on screen */ });
     },
     /* the pure pieces, for the selftest */

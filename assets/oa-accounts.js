@@ -1123,7 +1123,7 @@
   function loadScript(src, globalName) {
     if (window[globalName]) return Promise.resolve();
     return new Promise(function (resolve, reject) {
-      if (!document.querySelector('script[src="' + src + '"]')) {
+      if (!document.querySelector('script[src="' + src + '"], script[src^="' + src + '?"]')) {
         var el = document.createElement('script');
         el.src = src;
         el.onerror = function () { reject(new Error('could not load ' + src)); };

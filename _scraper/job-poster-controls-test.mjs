@@ -37,6 +37,9 @@ try {
   const page = await browser.newPage({viewport:{width:1280,height:900}});
   const errors=[]; page.on('pageerror',e=>errors.push(e.message));
   const docs = ['one','two','three'].map((uid,i)=>({path:'userDirectory/'+uid,data:{name:uid,email:uid+'@example.edu',affiliation:'Test University',first:1000,seen:2000}}));
+  // The signed-in admin belongs in the roster too. Seed it explicitly so
+  // this count does not race the account module's registration write.
+  docs.push({path:'userDirectory/admin-uid-0000000000',data:{name:'Kostas Stouras',email:'kstouras@gmail.com',affiliation:'Test University',first:1000,seen:2000}});
   docs.push({path:'jobSubmissions/a',data:{uid:'one',year,status:'published'}},
     {path:'jobSubmissions/b',data:{uid:'two',year:year-1,status:'withdrawn'}},
     {path:'candidateSubmissions/c',data:{uid:'one',year,status:'published'}});
@@ -46,7 +49,7 @@ try {
   await page.goto('http://127.0.0.1:'+server.address().port+'/admin-area.html');
   await page.locator('#oa-aa-users > .oa-aa-section > summary').click();
   await page.waitForSelector('#oa-u-jobyear');
-  assert.equal(await page.locator('.oa-u-table tbody tr').count(),3);
+  assert.equal(await page.locator('.oa-u-table tbody tr').count(),4);
   await page.selectOption('#oa-u-jobyear',String(year-1));
   assert.equal(await page.locator('.oa-u-table tbody tr').count(),1);
   assert.match(await page.locator('.oa-u-table tbody').innerText(),/two@example.edu/);
