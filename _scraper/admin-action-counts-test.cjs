@@ -49,7 +49,7 @@ const fix = id => ({ path: 'nameFixes/' + id, data: { kind: 'institution', from:
       const f = await fixture([job('one'), job('two'), job('three'), fix('alpha'), fix('beta')]);
       const p = f.page;
       const initialNavigation = await p.evaluate(() => performance.timeOrigin);
-      const tile = key => p.locator('[data-oa-count="' + key + '"] .oa-aa-tile-n');
+      const section = id => p.locator('#' + id + ' .oa-aa-section');
       const card = id => p.locator('#oa-review-list .oa-rv-card').filter({ hasText: 'Test ' + id + ' University' });
       async function count(key, n) {
         await p.waitForFunction(({ key, n }) => document.querySelector('[data-oa-count="' + key + '"] .oa-aa-tile-n').textContent === String(n), { key, n }, { timeout: 3000 });
@@ -64,6 +64,7 @@ const fix = id => ({ path: 'nameFixes/' + id, data: { kind: 'institution', from:
       await card('one').getByRole('button', { name: 'Approve & publish', exact: true }).click();
       await p.waitForFunction(() => __fb.docs['jobReviews/one'].status === 'approved');
       await count('jobs', 2);
+      assert.equal(await section('oa-review').evaluate(el => el.open), true, 'remaining jobs keep the section open');
       await p.evaluate(async () => { __fb.holdReads = []; __fb.release(); await window.__countRefresh; });
       await count('jobs', 2);
       // The old jobs response itself can also arrive after a rejection.
@@ -87,20 +88,34 @@ const fix = id => ({ path: 'nameFixes/' + id, data: { kind: 'institution', from:
       await count('jobs', 1);
       await p.evaluate(async () => { __releaseJobCount(); await __countRefresh; });
       await count('jobs', 1);
+      await p.evaluate(() => { window.__holdJobCount = true; window.__releaseJobCount = null; window.__countRefresh = OAAdminArea.refresh(); });
+      await p.waitForFunction(() => !!window.__releaseJobCount);
       await card('three').getByRole('button', { name: 'Reject', exact: true }).click();
       await count('jobs', 0);
+      assert.equal(await section('oa-review').evaluate(el => el.open), false, 'last rejection collapses jobs immediately');
+      assert.equal(await section('oa-review').locator('summary').evaluate(el => el === document.activeElement), true, 'focus returns to the collapsed header');
+      await p.evaluate(async () => { __releaseJobCount(); await __countRefresh; });
+      assert.equal(await section('oa-review').evaluate(el => el.open), false, 'late reads cannot reopen the cleared queue');
       assert.equal(await p.locator('[data-oa-count="jobs"]').evaluate(el => el.classList.contains('is-due')), false);
       // Name corrections must update before the list's reread finishes too.
       await p.locator('.oa-aa-fix[data-id="alpha"]').waitFor();
       await p.evaluate(() => { __fb.holdReads = ['nameFixes']; });
       await p.locator('.oa-aa-fix[data-id="alpha"] [data-act="approve"]').click();
       await count('names', 1);
+      assert.equal(await section('oa-aa-names').evaluate(el => el.open), true, 'remaining names keep the section open');
       await p.evaluate(() => { __fb.holdReads = []; __fb.release(); });
       await p.locator('.oa-aa-fix[data-id="beta"] [data-act="reject"]').click();
       await count('names', 0);
+      assert.equal(await section('oa-aa-names').evaluate(el => el.open), false, 'last name rejection collapses its section');
       assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('oa-acct-counts')).n.admin), 0, 'account badge agrees with an empty queue');
+      await section('oa-aa-names').locator('summary').click();
+      await p.evaluate(() => OAAdminArea.refresh());
+      assert.equal(await section('oa-aa-names').evaluate(el => el.open), true, 'manually reopened empty section stays open on refresh');
       await p.locator('.oa-aa-fix[data-id="alpha"] [data-act="reopen"]').click();
       await count('names', 1);
+      await p.locator('.oa-aa-fix[data-id="alpha"] [data-act="approve"]').click();
+      await count('names', 0);
+      assert.equal(await section('oa-aa-names').evaluate(el => el.open), false, 'last name approval collapses its section');
       assert.equal(await p.evaluate(() => performance.timeOrigin), initialNavigation, 'no page reload was needed');
       assert.equal(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       assert.deepEqual(f.errors, []);
@@ -121,11 +136,23 @@ const fix = id => ({ path: 'nameFixes/' + id, data: { kind: 'institution', from:
       await b.waitForFunction(() => /1 approved, 1 could not be saved/.test(document.querySelector('#oa-review-bulk-msg').textContent));
       assert.equal(await b.locator('[data-oa-count="jobs"] .oa-aa-tile-n').textContent(), '1', 'only successful bulk decisions leave the counter');
       assert.equal(await b.evaluate(() => __fb.docs['jobReviews/bulk-fail'].status), 'pending');
+      assert.equal(await b.locator('#oa-review .oa-aa-section').evaluate(el => el.open), true, 'failed decision keeps pending work open');
       await b.locator('#oa-review-list .oa-rv-card').filter({ hasText: 'Test bulk-fail University' }).getByRole('button', { name: 'Reject', exact: true }).click();
       await b.waitForFunction(() => document.querySelector('[data-oa-count="jobs"] .oa-aa-tile-n').textContent === '0');
+      assert.equal(await b.locator('#oa-review .oa-aa-section').evaluate(el => el.open), false);
       assert.deepEqual(bulk.errors, []);
       await bulk.context.close();
-      console.log('admin-action-counts: ' + viewport.width + 'px approval, rejection, name corrections, bulk failure, stale reads, badge/cache and no-reload checks passed');
+      const last = await fixture([job('last')]);
+      await last.page.evaluate(() => { __fb.holdReads = ['jobSubmissions/']; });
+      await last.page.getByRole('button', { name: 'Approve & publish', exact: true }).click();
+      await last.page.waitForFunction(() => document.querySelector('[data-oa-count="jobs"] .oa-aa-tile-n').textContent === '0');
+      assert.equal(await last.page.locator('#oa-review .oa-aa-section').evaluate(el => el.open), false, 'last approval collapses before optional mirror completes');
+      await last.page.evaluate(() => { __fb.holdReads = []; __fb.release(); });
+      await last.page.locator('#oa-review .oa-aa-section summary').click();
+      assert.equal(await last.page.locator('#oa-review .oa-aa-section').evaluate(el => el.open), true, 'cleared jobs can still be reopened manually');
+      assert.deepEqual(last.errors, []);
+      await last.context.close();
+      console.log('admin-action-counts: ' + viewport.width + 'px approval/rejection auto-collapse, focus, manual reopening, bulk failure, stale reads, badge/cache and no-reload checks passed');
     }
   } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

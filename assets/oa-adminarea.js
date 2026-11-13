@@ -341,12 +341,24 @@
   /** The owning panel knows its queue after a confirmed write. Repaint the
       tile, cache and account badge synchronously, without another read. */
   function setPendingCount(key, n) {
+    var tile = TILES.filter(function (tile) { return tile.key === key; })[0];
     if (!startedFor || !OAAccounts.isAdmin() || !validCount(n) ||
-        !TILES.some(function (tile) { return tile.key === key; })) return;
+        !tile) return;
+    var cleared = lastCounts && validCount(lastCounts[key]) && lastCounts[key] > 0 && n === 0;
     countRevision[key] = (countRevision[key] || 0) + 1;
     if (countsPending) countProgress[key] = n;
     if (key === 'candidates') lastCandidateCount = n;
     receiveCount(startedFor, key, n);
+    // Only a confirmed queue transition closes the section. A later refresh
+    // must not close an empty section the admin has reopened to inspect.
+    if (cleared) {
+      var panel = $(tile.to.slice(1));
+      var disclosure = panel && panel.querySelector('.oa-aa-section');
+      if (disclosure && disclosure.open) {
+        if (disclosure.contains(document.activeElement)) disclosure.querySelector('summary').focus();
+        disclosure.open = false;
+      }
+    }
     correctBadge(null);
   }
 
