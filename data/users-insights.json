@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-13T17:39:45.177Z",
- "members": 470,
+ "generated": "2026-11-13T22:51:29.665Z",
+ "members": 471,
  "k": 3,
  "affiliation": {
-  "listed": 388,
+  "listed": 389,
   "other": 50,
   "none": 32
  },
@@ -86,6 +86,11 @@
     "members": 5
    },
    {
+    "name": "University of Utah",
+    "country": "United States",
+    "members": 5
+   },
+   {
     "name": "A’Sharqiyah University",
     "country": "Oman",
     "members": 4
@@ -161,11 +166,6 @@
     "members": 4
    },
    {
-    "name": "University of Utah",
-    "country": "United States",
-    "members": 4
-   },
-   {
     "name": "University of Washington",
     "country": "United States",
     "members": 4
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 245
+    "members": 246
    },
    {
     "name": "Canada",
