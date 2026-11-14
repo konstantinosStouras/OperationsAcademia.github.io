@@ -16444,6 +16444,16 @@
   "facultyUrl": "https://experts.okstate.edu/groups/719762/experts"
  },
  {
+  "id": "old-dominion-university",
+  "institution": "Old Dominion University",
+  "type": "University",
+  "sources": [
+   "members"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "oregon-state-university____business-analytics",
   "institution": "Oregon State University",
   "department": "Business Analytics",
