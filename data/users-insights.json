@@ -1,14 +1,14 @@
 {
- "generated": "2026-11-13T22:51:29.665Z",
- "members": 471,
+ "generated": "2026-11-14T16:04:17.670Z",
+ "members": 473,
  "k": 3,
  "affiliation": {
-  "listed": 389,
-  "other": 50,
+  "listed": 392,
+  "other": 49,
   "none": 32
  },
  "universities": {
-  "count": 167,
+  "count": 168,
   "shown": [
    {
     "name": "National University of Singapore",
@@ -64,6 +64,11 @@
     "name": "University of Toronto",
     "country": "Canada",
     "members": 6
+   },
+   {
+    "name": "City University of Hong Kong",
+    "country": "Hong Kong",
+    "members": 5
    },
    {
     "name": "Duke University",
@@ -191,11 +196,6 @@
     "members": 3
    },
    {
-    "name": "City University of Hong Kong",
-    "country": "Hong Kong",
-    "members": 3
-   },
-   {
     "name": "Fudan University",
     "country": "China",
     "members": 3
@@ -211,7 +211,7 @@
     "members": 3
    }
   ],
-  "rest": 190
+  "rest": 191
  },
  "countries": {
   "count": 18,
@@ -225,12 +225,12 @@
     "members": 28
    },
    {
-    "name": "Singapore",
-    "members": 17
+    "name": "Hong Kong",
+    "members": 18
    },
    {
-    "name": "Hong Kong",
-    "members": 16
+    "name": "Singapore",
+    "members": 17
    },
    {
     "name": "China",
