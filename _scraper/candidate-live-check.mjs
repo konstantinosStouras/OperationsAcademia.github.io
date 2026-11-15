@@ -14,7 +14,7 @@ async function main() {
   const app = initializeApp({ credential: cert(credentials) });
   const rows = await readPrivateCandidates(getFirestore(app), { releasedOnly: true });
   if (!rows || !rows.length) throw new Error('No released private snapshot.');
-  const endpoint = 'https://us-central1-operations-academia.cloudfunctions.net/readCandidateProfiles';
+  const endpoint = 'https://europe-west1-operations-academia.cloudfunctions.net/readCandidateProfiles';
   const call = token => fetch(endpoint, { method: 'POST', headers: {
     'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {})
   }, body: JSON.stringify({ data: {} }) });

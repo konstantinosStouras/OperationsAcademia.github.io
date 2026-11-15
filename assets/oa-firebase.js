@@ -57,6 +57,7 @@
 
   var SDK = 'https://www.gstatic.com/firebasejs/10.12.5/';
   var PARTS = ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js'];
+  var earlySdk = !!(document.currentScript && document.currentScript.hasAttribute('data-oa-early'));
 
   // How long we wait for gstatic before giving up.
   //
@@ -104,11 +105,18 @@
       // app -> auth -> firestore execution order the compat bundles need while
       // letting the browser download them in parallel.
       var left = PARTS.length;
-      PARTS.forEach(function (part) {
+      function appendPart(part) {
         var s = document.createElement('script');
         s.src = SDK + part;
-        s.async = false;
+        s.async = earlySdk;
         s.onload = function () {
+          // On the candidates page the head preloads all bundles. Execute App
+          // first, then Auth/Firestore asynchronously so a slow stylesheet
+          // cannot postpone session restoration. Other pages keep ordered SDKs.
+          if (earlySdk && part === 'firebase-app-compat.js') {
+            appendPart('firebase-auth-compat.js');
+            appendPart('firebase-firestore-compat.js');
+          }
           if (part === 'firebase-auth-compat.js') {
             try {
               if (!window.firebase.apps.length) window.firebase.initializeApp(FB_CONFIG);
@@ -124,7 +132,9 @@
         };
         s.onerror = fail;
         document.head.appendChild(s);
-      });
+      }
+      if (earlySdk) appendPart('firebase-app-compat.js');
+      else PARTS.forEach(appendPart);
     });
     return readyPromise;
   }

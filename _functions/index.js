@@ -116,7 +116,9 @@ function adminApp() {
 const candidateAccess = require('./candidate-access');
 const candidateReveal = require('./reveal');
 exports.readCandidateProfiles = onCall(
-  { region: 'us-central1', maxInstances: 10, memory: '256MiB', timeoutSeconds: 30 },
+  // eur3 Firestore is closest to europe-west1. Retain the old region for
+  // already-open pages while new clients use the colocated reader.
+  { region: ['us-central1', 'europe-west1'], maxInstances: 10, memory: '256MiB', timeoutSeconds: 30 },
   candidateAccess.createReader({
     db: () => { adminApp(); return getFirestore(); },
     HttpsError,

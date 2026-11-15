@@ -27,10 +27,11 @@
     entry.promise = functions().then(function (fb) {
       timing('sdk');
       if (!fb.auth().currentUser || fb.auth().currentUser.uid !== account.uid) return { data: { rows: [] } };
-      return fb.app().functions('us-central1').httpsCallable('readCandidateProfiles')({});
+      return fb.app().functions('europe-west1').httpsCallable('readCandidateProfiles')({});
     }).then(function (result) {
       timing('response');
       entry.pending = false;
+      entry.at = Date.now();
       return result;
     }, function (error) {
       if (privateRead === entry) privateRead = null;
@@ -40,13 +41,18 @@
   }
   // An unresolved session is not a signed-out session. Keep the list's loading
   // state until admission finishes instead of fetching and painting schools.
-  var accountReady = null, finishAccountWait = null;
-  if (window.OAAccounts) OAAccounts.onChange(function () {
-    epoch++;
-    var finish = finishAccountWait;
-    accountReady = null; finishAccountWait = null;
-    if (finish) finish();
-  });
+  var accountReady = null, finishAccountWait = null, accountsBound = false;
+  function bindAccounts() {
+    if (accountsBound || !window.OAAccounts) return;
+    accountsBound = true;
+    OAAccounts.onChange(function () {
+      epoch++;
+      var finish = finishAccountWait;
+      accountReady = null; finishAccountWait = null;
+      if (finish) finish();
+    });
+  }
+  bindAccounts();
   function user() {
     return window.OAAccounts && OAAccounts.resolved() ? OAAccounts.user() : null;
   }
@@ -66,6 +72,7 @@
     return request;
   }
   function load() {
+    bindAccounts();
     if (window.OAAccounts && !OAAccounts.resolved()) {
       if (!accountReady) accountReady = new Promise(function (resolve) { finishAccountWait = resolve; });
       return accountReady.then(load);
@@ -89,7 +96,7 @@
   // rather than waiting for that check and then downloading the Functions SDK.
   // OAAccounts still decides whether load() may return any private rows.
   if (window.OAFB && typeof OAFB.ready === 'function') {
-    if (OAAccounts.hint && OAAccounts.hint() === 'in') functions().catch(function () {});
+    if (window.OAAccounts && OAAccounts.hint && OAAccounts.hint() === 'in') functions().catch(function () {});
     (OAFB.readyAuth ? OAFB.readyAuth() : OAFB.ready()).then(function (fb) {
       var previous;
       fb.auth().onAuthStateChanged(function (account) {

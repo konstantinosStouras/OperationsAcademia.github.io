@@ -156,6 +156,26 @@ try {
     'early request is reused when the full SDK and account check finish');
   await early.context.close();
 
+  // Slow styling must not postpone session restoration and the private read.
+  const styling = await pageFor(member);
+  let releaseStyle;
+  const styleGate = new Promise(resolve => { releaseStyle = resolve; });
+  await styling.page.route('**/assets/v3.css', async route => {
+    await styleGate;
+    await route.fulfill({ contentType: 'text/css', body: await readFile(path.join(root, 'assets/v3.css')) });
+  });
+  await styling.page.goto(base + '/candidates', { waitUntil: 'commit' });
+  await styling.page.waitForFunction(() => window.__candidateCalls === 1, null, { polling: 50 });
+  assert.equal(await styling.page.evaluate(() => typeof window.OAAccounts), 'undefined',
+    'authenticated prefetch runs before styles and deferred account UI scripts');
+  assert.equal(await styling.page.locator('#oa-candidates .oa-card').count(), 0,
+    'early response stays private until account admission');
+  releaseStyle();
+  await styling.page.waitForFunction(() => document.getElementById('oa-candidates').hasAttribute('data-profiles-ready-ms'));
+  assert.equal(await styling.page.evaluate(() => window.__candidateCalls), 1,
+    'the deferred UI consumes the early response once');
+  await styling.context.close();
+
   const signed = await pageFor(member);
   await signed.page.goto(base + '/candidates');
   await signed.page.waitForFunction(() => document.getElementById('oa-candidates').textContent.includes('Synthetic Candidate'));

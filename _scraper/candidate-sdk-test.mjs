@@ -17,7 +17,7 @@ try {
   const page = await browser.newPage();
   await page.route('https://candidate-sdk.example/**', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>Candidate SDK check</title>' }));
   let calls = 0;
-  await page.route('https://us-central1-operations-academia.cloudfunctions.net/readCandidateProfiles', route => {
+  await page.route('https://europe-west1-operations-academia.cloudfunctions.net/readCandidateProfiles', route => {
     calls++;
     assert.equal(route.request().method(), 'POST');
     assert.equal(route.request().headers().authorization, 'Bearer synthetic-token');
@@ -33,7 +33,7 @@ try {
     window.OAAccounts = { resolved: () => true, user: () => ({ uid: 'synthetic-user' }), onChange: () => {} };
     firebase.auth = () => ({ currentUser: { uid: 'synthetic-user' } });
     window.OAFB = { readyFunctions: () => Promise.resolve(firebase) };
-    const functions = firebase.app().functions('us-central1');
+    const functions = firebase.app().functions('europe-west1');
     functions._delegate.contextProvider.auth = { getToken: async () => ({ accessToken: 'synthetic-token' }) };
   });
   const oldCallFails = await page.evaluate(() => {
@@ -48,6 +48,7 @@ try {
 
   // Exercise the actual shared loader too: Functions must execute while the
   // independent Firestore download is still held, using real compat bundles.
+  for (const eager of [false, true]) {
   const loading = await browser.newPage();
   await loading.route('https://candidate-sdk.example/**', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>SDK loading order</title>' }));
   let releaseFirestore;
@@ -58,7 +59,7 @@ try {
     return route.fulfill({ contentType: 'text/javascript', body: bundles[parts.indexOf(part)] });
   });
   await loading.goto('https://candidate-sdk.example/');
-  await loading.addScriptTag({ content: config });
+  await loading.addScriptTag({ content: (eager ? "document.currentScript.setAttribute('data-oa-early', '');\n" : '') + config });
   const early = await loading.evaluate(async () => {
     window.__fullSdkReady = false;
     OAFB.ready().then(() => { window.__fullSdkReady = true; });
@@ -72,5 +73,7 @@ try {
   releaseFirestore();
   await loading.waitForFunction(() => window.__fullSdkReady);
   assert.equal(await loading.evaluate(() => typeof firebase.firestore), 'function', 'existing full-SDK consumers still get Firestore');
+  await loading.close();
+  }
   console.log('candidate SDK: authenticated callable, early Auth/Functions loading, shared SDK requests and full-SDK compatibility passed');
 } finally { await browser.close(); }

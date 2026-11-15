@@ -88,13 +88,18 @@
       } catch (e) { /* private mode — the reserve is an optimisation */ }
     })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
     <link rel="preconnect" href="https://firestore.googleapis.com">
-    <link rel="preconnect" href="https://us-central1-operations-academia.cloudfunctions.net">
+    <link rel="preconnect" href="https://europe-west1-operations-academia.cloudfunctions.net">
+    <!-- Start the authenticated request before stylesheets can delay deferred
+         scripts. The loader holds private rows in memory until OAAccounts has
+         admitted the session; no local/session storage contains profiles. -->
+    <script data-oa-early src="assets/oa-firebase.js?v=20261115-early"></script>
+    <script src="assets/oa-candidate-data.js?v=20261115-early"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
     <!-- Profiles need a verified session. Preload its SDKs and warm the
          account/profile endpoints; school previews are fetched only for guests. -->
     <link href="assets/oa-list.css" rel="stylesheet">
@@ -276,7 +281,6 @@
     <script defer src="assets/oa-visit.js"></script>
     <script defer src="assets/oa-feature-badges.js?v=20261030-posting-roles"></script>
     <script defer src="assets/v3.js"></script>
-    <script defer src="assets/oa-firebase.js?v=20261115-candidates"></script>
     <script defer src="assets/oa-accounts.js?v=20261030-posting-roles"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-listing-tracking.js?v=20261013-parts"></script>
@@ -292,7 +296,6 @@
     <script defer src="assets/oa-candcard.js"></script>
     <script defer src="assets/oa-takedown.js"></script>
     <script defer src="assets/oa-candidateedit.js"></script>
-    <script defer src="assets/oa-candidate-data.js?v=20261115-latency"></script>
     <script defer src="assets/oa-candidates-page.js?v=20261115-latency"></script>
   </body>
 </html>
