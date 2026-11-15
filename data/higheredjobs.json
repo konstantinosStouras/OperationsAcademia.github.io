@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-14T14:17:32Z",
+ "generated": "2026-11-15T14:50:47Z",
  "ads": {
   "179138675": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179138675",
@@ -2515,19 +2515,19 @@
   },
   "179476158": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179476158",
-   "status": "unreadable",
+   "status": "ok",
    "via": "page",
-   "title": "",
-   "institution": "",
-   "location": "",
-   "type": "",
-   "posted": "",
+   "title": "Open Rank Professor of Business Administration",
+   "institution": "University of Pikeville",
+   "location": "Pikeville, KY",
+   "type": "Full-Time",
+   "posted": "2026-06-18",
    "applyByDate": "",
    "applyByProse": "",
-   "category": "",
-   "salary": "",
+   "category": "Business Administration",
+   "salary": "competitive salary commensurate with qualifications and experience",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179482306": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179482306",
@@ -3023,7 +3023,7 @@
    "category": "Business Analytics",
    "salary": "Commensurate",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179529368": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179529368",
@@ -4079,7 +4079,7 @@
    "category": "Business Analytics",
    "salary": "The salary is competitive, commensurate with experience and tax-free",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179586104": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179586104",
@@ -4127,7 +4127,7 @@
    "category": "Business Analytics",
    "salary": "",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179588077": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179588077",
@@ -4143,7 +4143,7 @@
    "category": "Business Analytics",
    "salary": "",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179588175": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179588175",
@@ -4159,7 +4159,7 @@
    "category": "Information Systems and Technology",
    "salary": "",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179588314": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179588314",
@@ -4191,7 +4191,7 @@
    "category": "Business Analytics",
    "salary": "$12,000.00 Monthly",
    "jobNumber": "2600402",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179589694": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179589694",
@@ -4239,7 +4239,7 @@
    "category": "Information Systems and Technology",
    "salary": "",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179590813": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179590813",
@@ -4335,7 +4335,7 @@
    "category": "Business Administration ; +1 Information Systems and Technology",
    "salary": "",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179603869": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179603869",
@@ -4367,7 +4367,7 @@
    "category": "Information Systems and Technology ; +1 Business Analytics",
    "salary": "",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179606616": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179606616",
@@ -4399,7 +4399,7 @@
    "category": "Business Analytics ; +1 Finance",
    "salary": "",
    "jobNumber": "R3329",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179608543": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179608543",
@@ -4415,7 +4415,7 @@
    "category": "",
    "salary": "",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   },
   "179609451": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179609451",
@@ -4431,7 +4431,7 @@
    "category": "Business Administration ; +1 Management",
    "salary": "",
    "jobNumber": "",
-   "checkedAt": "2026-11-08T14:21:57Z"
+   "checkedAt": "2026-11-15T14:50:47Z"
   }
  }
 }
