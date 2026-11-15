@@ -1,4 +1,5 @@
       document.addEventListener('DOMContentLoaded', function () {
+        var bootAt = Math.round(performance.now()), revealAt;
         var started = false, checking = false;
         function checkReveal() {
           if (started || checking) return;
@@ -11,6 +12,7 @@
               return;
             }
             started = true;
+            revealAt = Math.round(performance.now());
             note.hidden = true;
             document.getElementById('oa-candidates-content').hidden = false;
             document.getElementById('oa-candidates-intro').hidden = false;
@@ -43,6 +45,9 @@
                 snapshot.rows.some(function (row) { return !row.previewOnly; })) {
               // Navigation-to-visible-profiles, measured in the page rather
               // than including browser automation overhead. No user data.
+              list.setAttribute('data-profiles-timing', JSON.stringify({
+                boot: bootAt, reveal: revealAt, rendered: Math.round(performance.now())
+              }));
               requestAnimationFrame(function () {
                 list.setAttribute('data-profiles-ready-ms', Math.round(performance.now()));
               });
