@@ -75,8 +75,8 @@ assert.equal(cachedReads.filter(name => name === PROFILE_COLLECTION).length, 0,
   'repeat readers reuse the generation without rereading the full collection');
 assert.equal(cachedReads.filter(name => name === 'accountBlocks/registered').length, 3,
   'every cached response still checks the account block');
-assert.equal(cachedReads.filter(name => name === STATE_COLLECTION + '/current').length, 6,
-  'every cached response still validates the live manifest before and after reading');
+assert.equal(cachedReads.filter(name => name === STATE_COLLECTION + '/current').length, 3,
+  'every cached response validates the live manifest without a redundant serial read');
 db.documents.set('accountBlocks/registered', { blocked: true });
 await assert.rejects(reader(request), error => error.code === 'permission-denied',
   'a blocked account cannot reuse a warm profile cache');

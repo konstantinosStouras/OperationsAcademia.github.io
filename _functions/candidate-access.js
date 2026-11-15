@@ -45,6 +45,11 @@ function createReader({ db, HttpsError, revealed }) {
     if (!state.exists || !state.data().ready) throw new HttpsError('unavailable', 'Candidate profiles are being updated. Please try again shortly.');
     const metadata = state.data();
     if (!revealed(metadata.revealAt)) return { rows: [] };
+    // A previously validated immutable snapshot is already complete. The live
+    // manifest and account block above are the only reads a cache hit needs.
+    if (cached && cached.generation === metadata.generated && cached.rows) {
+      return { rows: cached.rows, previewTargets: metadata.previewTargets || {} };
+    }
     const rows = await readGeneration(database, metadata.generated);
     // If a build began while this request was reading, fail closed rather than
     // returning a partial or mixed snapshot.
@@ -54,6 +59,7 @@ function createReader({ db, HttpsError, revealed }) {
       cached = null;
       throw new HttpsError('unavailable', 'Candidate profiles are being updated.');
     }
+    if (cached && cached.generation === metadata.generated) cached.rows = rows;
     return { rows, previewTargets: metadata.previewTargets || {} };
   };
 }
