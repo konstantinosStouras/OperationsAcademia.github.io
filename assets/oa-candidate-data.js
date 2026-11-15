@@ -2,6 +2,10 @@
 (function () {
   'use strict';
   var epoch = 0, pendingPreview = null, privateRead = null, functionsReady = null;
+  function timing(stage) {
+    var root = document.documentElement, name = 'data-candidate-' + stage + '-ms';
+    if (!root.hasAttribute(name)) root.setAttribute(name, Math.round(performance.now()));
+  }
   function functions() {
     if (!functionsReady) functionsReady = OAFB.readyFunctions().catch(function (error) {
       functionsReady = null;
@@ -21,9 +25,11 @@
     var entry = { uid: account.uid, pending: true, warm: !!warm, at: Date.now() };
     privateRead = entry;
     entry.promise = functions().then(function (fb) {
+      timing('sdk');
       if (!fb.auth().currentUser || fb.auth().currentUser.uid !== account.uid) return { data: { rows: [] } };
       return fb.app().functions('us-central1').httpsCallable('readCandidateProfiles')({});
     }).then(function (result) {
+      timing('response');
       entry.pending = false;
       return result;
     }, function (error) {
@@ -66,6 +72,7 @@
     }
     var account = user();
     if (!account) return previews();
+    timing('account');
     var uid = account.uid, started = epoch;
     return readProfiles(account, false).then(function (result) {
       // Never admit a response that arrived after sign-out or an account switch.
@@ -90,7 +97,10 @@
         if (next === previous) return;
         previous = next;
         privateRead = null;
-        if (account && !account.isAnonymous) readProfiles(account, true).catch(function () {});
+        if (account && !account.isAnonymous) {
+          timing('auth');
+          readProfiles(account, true).catch(function () {});
+        }
       });
     }).catch(function () {});
   }

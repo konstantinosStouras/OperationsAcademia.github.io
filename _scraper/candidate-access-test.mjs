@@ -20,22 +20,23 @@ assert.deepEqual(researchSummary([row]), [
 // A small Firestore stand-in exercises the manifest switch and failed builds.
 function database() {
   const documents = new Map();
+  const reads = [];
   let failCommit = false;
   function collection(name, generation) {
     return {
       doc(id) {
         const key = name + '/' + id;
-        return { key, async get() { return { exists: documents.has(key), data: () => documents.get(key) }; },
+        return { key, async get() { reads.push(key); return { exists: documents.has(key), data: () => documents.get(key) }; },
           async set(value) { documents.set(key, value); } };
       },
       where(field, op, value) { assert.equal(field, 'generation'); assert.equal(op, '=='); return collection(name, value); },
-      async get() { return { docs: [...documents.entries()].filter(([key, value]) => key.startsWith(name + '/') &&
+      async get() { reads.push(name); return { docs: [...documents.entries()].filter(([key, value]) => key.startsWith(name + '/') &&
         (generation === undefined || value.generation === generation)).map(([key, value]) => ({
           id: key.slice(name.length + 1), ref: { key }, data: () => value,
         })) }; },
     };
   }
-  return { documents, collection, fail() { failCommit = true; },
+  return { documents, reads, collection, fail() { failCommit = true; },
     batch() {
       const writes = [];
       return { set(ref, value) { writes.push(() => documents.set(ref.key, value)); },
@@ -64,7 +65,24 @@ const request = { auth: { uid: 'registered', token: { firebase: { sign_in_provid
 assert.deepEqual((await reader(request)).rows, [row], 'registered reader gets full released profiles');
 assert.deepEqual((await reader(request)).previewTargets, { 'candidate-preview-1': row.id }, 'preview targets are returned only after authentication');
 db.documents.get(PROFILE_COLLECTION + '/first_' + row.id).row = { ...row, authEmail: 'private@example.org', uid: 'private-owner', note: 'private note' };
-assert.deepEqual((await reader(request)).rows, [row], 'private account fields cannot pass the callable allowlist');
+const freshReader = createReader({ db: () => db, HttpsError, revealed: () => true });
+assert.deepEqual((await freshReader(request)).rows, [row], 'private account fields cannot pass the callable allowlist');
+
+const beforeCachedReads = db.reads.length;
+await Promise.all([reader(request), reader(request), reader(request)]);
+const cachedReads = db.reads.slice(beforeCachedReads);
+assert.equal(cachedReads.filter(name => name === PROFILE_COLLECTION).length, 0,
+  'repeat readers reuse the generation without rereading the full collection');
+assert.equal(cachedReads.filter(name => name === 'accountBlocks/registered').length, 3,
+  'every cached response still checks the account block');
+assert.equal(cachedReads.filter(name => name === STATE_COLLECTION + '/current').length, 6,
+  'every cached response still validates the live manifest before and after reading');
+db.documents.set('accountBlocks/registered', { blocked: true });
+await assert.rejects(reader(request), error => error.code === 'permission-denied',
+  'a blocked account cannot reuse a warm profile cache');
+db.documents.delete('accountBlocks/registered');
+await assert.rejects(reader({}), error => error.code === 'unauthenticated',
+  'a warm profile cache does not admit guests');
 db.fail();
 await assert.rejects(writePrivateCandidates(db, [{ ...row, id: 'replacement' }], { revealAt: '2026-01-01', generated: 'failed' }));
 assert.equal(db.documents.get(STATE_COLLECTION + '/current').generated, 'first');
@@ -73,6 +91,15 @@ await writePrivateCandidates(db, [{ ...row, id: 'replacement' }], { revealAt: '2
 assert.deepEqual((await reader(request)).rows, [], 'even registered users cannot read pre-reveal profiles');
 assert.deepEqual(await readPrivateCandidates(db, { releasedOnly: true }), [], 'mailers and analytics respect the reveal gate');
 assert.equal(db.documents.has(PROFILE_COLLECTION + '/first_' + row.id), false, 'superseded profile snapshot is removed');
+await writePrivateCandidates(db, [{ ...row, id: 'new-generation' }], { revealAt: '2026-01-01', generated: 'new' });
+const beforeConcurrent = db.reads.length;
+const concurrent = await Promise.all([reader(request), reader(request), reader(request)]);
+assert.ok(concurrent.every(result => result.rows[0].id === 'new-generation'),
+  'a new manifest replaces the cached generation, including withdrawals');
+assert.equal(db.reads.slice(beforeConcurrent).filter(name => name === PROFILE_COLLECTION).length, 1,
+  'simultaneous requests share one collection read for a new generation');
+db.documents.get(STATE_COLLECTION + '/current').revealAt = '2099-01-01';
+assert.deepEqual((await reader(request)).rows, [], 'moving the reveal closes access even with a warm cache');
 assert.deepEqual(JSON.parse(await readFile(new URL('../data/candidates.json', import.meta.url), 'utf8')), [], 'public candidate URL contains no details');
 const previews = JSON.parse(await readFile(new URL('../data/candidate-previews.json', import.meta.url), 'utf8'));
 for (const preview of previews) assert.deepEqual(Object.keys(preview).sort(), ['affiliation', 'id', 'previewOnly', 'year']);

@@ -37,6 +37,17 @@
           protectedSource: true,
           perPage: 10,
           urlPrefix: 'c_',
+          onRender: function (snapshot) {
+            var list = document.getElementById('oa-candidates');
+            if (!list.hasAttribute('data-profiles-ready-ms') && OAGate.signedIn() &&
+                snapshot.rows.some(function (row) { return !row.previewOnly; })) {
+              // Navigation-to-visible-profiles, measured in the page rather
+              // than including browser automation overhead. No user data.
+              requestAnimationFrame(function () {
+                list.setAttribute('data-profiles-ready-ms', Math.round(performance.now()));
+              });
+            }
+          },
           strings: {
             loading: 'Loading candidate profiles…',
             emptyData: 'No candidate profiles are listed at the moment.',
