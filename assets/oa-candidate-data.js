@@ -32,7 +32,15 @@
     });
     return entry.promise;
   }
-  if (window.OAAccounts) OAAccounts.onChange(function () { epoch++; });
+  // An unresolved session is not a signed-out session. Keep the list's loading
+  // state until admission finishes instead of fetching and painting schools.
+  var accountReady = null, finishAccountWait = null;
+  if (window.OAAccounts) OAAccounts.onChange(function () {
+    epoch++;
+    var finish = finishAccountWait;
+    accountReady = null; finishAccountWait = null;
+    if (finish) finish();
+  });
   function user() {
     return window.OAAccounts && OAAccounts.resolved() ? OAAccounts.user() : null;
   }
@@ -52,6 +60,10 @@
     return request;
   }
   function load() {
+    if (window.OAAccounts && !OAAccounts.resolved()) {
+      if (!accountReady) accountReady = new Promise(function (resolve) { finishAccountWait = resolve; });
+      return accountReady.then(load);
+    }
     var account = user();
     if (!account) return previews();
     var uid = account.uid, started = epoch;
@@ -71,7 +83,7 @@
   // OAAccounts still decides whether load() may return any private rows.
   if (window.OAFB && typeof OAFB.ready === 'function') {
     if (OAAccounts.hint && OAAccounts.hint() === 'in') functions().catch(function () {});
-    OAFB.ready().then(function (fb) {
+    (OAFB.readyAuth ? OAFB.readyAuth() : OAFB.ready()).then(function (fb) {
       var previous;
       fb.auth().onAuthStateChanged(function (account) {
         var next = account ? account.uid : '';

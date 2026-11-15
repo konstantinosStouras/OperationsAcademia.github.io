@@ -114,6 +114,8 @@ try {
   await context.close();
 
   const warming = await pageFor(member);
+  let previewRequests = 0;
+  warming.page.on('request', request => { if (request.url().includes('/data/candidate-previews.json')) previewRequests++; });
   await warming.page.addInitScript(() => {
     window.__FAKE_FB.holdReads = ['profiles/synthetic-reader'];
   });
@@ -121,15 +123,38 @@ try {
   await warming.page.waitForFunction(() => window.__candidateCalls === 1);
   assert.equal(await warming.page.evaluate(() => OAAccounts.resolved()), false,
     'private request starts in parallel with the still-pending account-profile check');
-  await warming.page.waitForSelector('#oa-candidates .oa-card');
-  assert.equal(await warming.page.evaluate(() => OACandidateList.rows().every(row => row.previewOnly)), true,
-    'only safe school previews render before the account is admitted');
+  await warming.page.waitForSelector('#oa-candidates .oa-loading');
+  assert.equal(await warming.page.locator('#oa-candidates .oa-card').count(), 0,
+    'session restoration never flashes school-only cards');
+  assert.equal(await warming.page.locator('#v3-lock-card').isVisible(), false,
+    'session restoration never flashes the sign-in prompt');
+  assert.equal(previewRequests, 0, 'restoring a session does not download guest previews');
   await warming.page.evaluate(() => { __fb.holdReads = []; __fb.release(); });
   await warming.page.waitForFunction(() => document.getElementById('oa-candidates').textContent.includes('Synthetic Candidate'));
   assert.equal(await warming.page.evaluate(() => window.__candidateCalls), 1,
     'the admitted account consumes the prefetched response without a duplicate call');
   assert.equal(await warming.page.locator('#oa-candidates .oa-loading').count(), 0);
   await warming.context.close();
+
+  // Hold Firestore indefinitely: authenticated candidate reads must already
+  // run, but private rows must still wait for the account's admission check.
+  const early = await pageFor(member);
+  let releaseFirestore;
+  const firestoreGate = new Promise(resolve => { releaseFirestore = resolve; });
+  await early.page.route('**/firebase-firestore-compat.js', async route => {
+    await firestoreGate;
+    await route.fulfill({ contentType: 'text/javascript', body: fake });
+  });
+  await early.page.goto(base + '/candidates', { waitUntil: 'domcontentloaded' });
+  await early.page.waitForFunction(() => window.__candidateCalls === 1);
+  assert.equal(await early.page.evaluate(() => OAAccounts.resolved()), false,
+    'candidate request no longer waits for the Firestore SDK');
+  assert.equal(await early.page.locator('#oa-candidates .oa-card').count(), 0);
+  releaseFirestore();
+  await early.page.waitForFunction(() => document.getElementById('oa-candidates').textContent.includes('Synthetic Candidate'));
+  assert.equal(await early.page.evaluate(() => window.__candidateCalls), 1,
+    'early request is reused when the full SDK and account check finish');
+  await early.context.close();
 
   const signed = await pageFor(member);
   await signed.page.goto(base + '/candidates');

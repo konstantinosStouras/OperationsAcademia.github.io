@@ -100,7 +100,7 @@
         function updateLock() {
           var locked = !OAGate.signedIn();
           host.classList.toggle('oa-candidates-locked', locked);
-          lock.hidden = !locked;
+          lock.hidden = !OAAccounts.resolved() || !locked;
         }
         updateLock();
         var initialAccount = OAAccounts.resolved() ? OAAccounts.user() : null;
@@ -111,9 +111,11 @@
           if (next === lastAccount) return;
           var previous = lastAccount;
           lastAccount = next;
-          if (previous === undefined && !next) return;
-          // Keep safe school previews during sign-in; clear private rows on exit.
-          if (previous) cands.clear({ loading: true });
+          // The initial source is already waiting for account resolution.
+          // Refreshing here would race it and can duplicate a completed read.
+          if (previous === undefined) return;
+          // Clear both school previews on sign-in and private rows on exit.
+          cands.clear({ loading: true });
           cands.refresh().then(function () { OAGate.resume(cands); });
         });
         // Preview cards stay gated until their authenticated replacement arrives.

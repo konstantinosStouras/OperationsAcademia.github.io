@@ -6,7 +6,8 @@ import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
 const config = await readFile(new URL('../assets/oa-firebase.js', import.meta.url), 'utf8');
 const sdk = config.match(/var SDK = '([^']+)'/)[1];
-const bundles = await Promise.all(['firebase-app-compat.js', 'firebase-functions-compat.js'].map(async file => {
+const parts = ['firebase-app-compat.js', 'firebase-functions-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js'];
+const bundles = await Promise.all(parts.map(async file => {
   const response = await fetch(sdk + file, { signal: AbortSignal.timeout(20000) });
   if (!response.ok) throw new Error('Firebase SDK download failed: ' + response.status);
   return response.text();
@@ -26,7 +27,7 @@ try {
     } }) });
   });
   await page.goto('https://candidate-sdk.example/');
-  for (const bundle of bundles) await page.addScriptTag({ content: bundle });
+  for (const bundle of bundles.slice(0, 2)) await page.addScriptTag({ content: bundle });
   await page.evaluate(() => {
     firebase.initializeApp({ projectId: 'operations-academia', apiKey: 'synthetic-key' });
     window.OAAccounts = { resolved: () => true, user: () => ({ uid: 'synthetic-user' }), onChange: () => {} };
@@ -44,5 +45,32 @@ try {
   assert.equal(rows[0].name, 'Synthetic Candidate');
   assert.equal(rows[0].cvUrl, 'https://example.org/cv');
   assert.equal(calls, 1, 'loader reaches the authenticated callable with the real SDK');
-  console.log('candidate SDK: real Firebase compat client sends authenticated request and loads full profiles; former invalid app call rejected');
+
+  // Exercise the actual shared loader too: Functions must execute while the
+  // independent Firestore download is still held, using real compat bundles.
+  const loading = await browser.newPage();
+  await loading.route('https://candidate-sdk.example/**', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>SDK loading order</title>' }));
+  let releaseFirestore;
+  const firestoreGate = new Promise(resolve => { releaseFirestore = resolve; });
+  await loading.route(sdk + '*', async route => {
+    const part = route.request().url().slice(sdk.length);
+    if (part === 'firebase-firestore-compat.js') await firestoreGate;
+    return route.fulfill({ contentType: 'text/javascript', body: bundles[parts.indexOf(part)] });
+  });
+  await loading.goto('https://candidate-sdk.example/');
+  await loading.addScriptTag({ content: config });
+  const early = await loading.evaluate(async () => {
+    window.__fullSdkReady = false;
+    OAFB.ready().then(() => { window.__fullSdkReady = true; });
+    const first = OAFB.readyFunctions(), second = OAFB.readyFunctions();
+    const fb = await first;
+    return { shared: first === second, full: window.__fullSdkReady,
+      auth: typeof fb.auth, callable: typeof fb.app().functions('us-central1').httpsCallable('readCandidateProfiles') };
+  });
+  assert.deepEqual(early, { shared: true, full: false, auth: 'function', callable: 'function' },
+    'real Functions SDK is ready before Firestore, with concurrent SDK requests deduplicated');
+  releaseFirestore();
+  await loading.waitForFunction(() => window.__fullSdkReady);
+  assert.equal(await loading.evaluate(() => typeof firebase.firestore), 'function', 'existing full-SDK consumers still get Firestore');
+  console.log('candidate SDK: authenticated callable, early Auth/Functions loading, shared SDK requests and full-SDK compatibility passed');
 } finally { await browser.close(); }

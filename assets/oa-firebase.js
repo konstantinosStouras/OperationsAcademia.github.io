@@ -72,22 +72,28 @@
   var LOAD_TIMEOUT_MS = 15000;
 
   var readyPromise = null;
+  var authPromise = null, resolveAuth, rejectAuth, functionsPromise = null;
 
   /** Resolves with the firebase namespace, or rejects when not configured. */
   function ready() {
     if (readyPromise) return readyPromise;
+    authPromise = new Promise(function (resolve, reject) { resolveAuth = resolve; rejectAuth = reject; });
+    // Most pages only use ready(); handle this companion rejection as well.
+    authPromise.catch(function () {});
     readyPromise = new Promise(function (resolve, reject) {
       if (!enabled) {
+        rejectAuth(new Error('firebase-not-configured'));
         reject(new Error('firebase-not-configured'));
         return;
       }
 
       var timer = setTimeout(function () {
-        reject(new Error('firebase-sdk-load-failed'));
+        fail();
       }, LOAD_TIMEOUT_MS);
 
       function fail() {
         clearTimeout(timer);
+        rejectAuth(new Error('firebase-sdk-load-failed'));
         reject(new Error('firebase-sdk-load-failed'));
       }
 
@@ -103,6 +109,12 @@
         s.src = SDK + part;
         s.async = false;
         s.onload = function () {
+          if (part === 'firebase-auth-compat.js') {
+            try {
+              if (!window.firebase.apps.length) window.firebase.initializeApp(FB_CONFIG);
+              resolveAuth(window.firebase);
+            } catch (e) { rejectAuth(e); }
+          }
           if (--left) return;             // the last one to execute wins
           clearTimeout(timer);
           try {
@@ -117,12 +129,20 @@
     return readyPromise;
   }
 
+  // Callable reads need App + Auth, not the much larger Firestore bundle.
+  // Keep ready()'s full-SDK contract for existing database consumers.
+  function readyAuth() {
+    ready().catch(function () {});
+    return authPromise;
+  }
+
   window.OAFB = {
     enabled: enabled,
     config: FB_CONFIG,
     providers: AUTH_PROVIDERS,
     adminEmail: ADMIN_EMAIL,
     ready: ready,
+    readyAuth: readyAuth,
 
     /* The Storage SDK, loaded ONLY when asked for. The posting form is the one
        page that uploads anything, and the compat bundle is ~40 KB — putting it
@@ -149,20 +169,32 @@
        nothing is a load failure, which is the branch the caller falls back
        on (Firebase's own verification message), so nobody is stranded. */
     readyFunctions: function () {
-      return ready().then(function (fb) {
+      if (functionsPromise) return functionsPromise;
+      functionsPromise = readyAuth().then(function (fb) {
         if (fb.functions) return fb;
         return new Promise(function (resolve, reject) {
+          var timer = setTimeout(fail, LOAD_TIMEOUT_MS);
+          function fail() {
+            clearTimeout(timer);
+            reject(new Error('firebase-sdk-load-failed'));
+          }
           var s = document.createElement('script');
           s.src = SDK + 'firebase-functions-compat.js';
-          s.async = false;
+          // App and Auth have executed; do not queue behind Firestore.
+          s.async = true;
           s.onload = function () {
+            clearTimeout(timer);
             if (fb.functions) resolve(fb);
             else reject(new Error('firebase-sdk-load-failed'));
           };
-          s.onerror = function () { reject(new Error('firebase-sdk-load-failed')); };
+          s.onerror = fail;
           document.head.appendChild(s);
         });
+      }).catch(function (error) {
+        functionsPromise = null;
+        throw error;
       });
+      return functionsPromise;
     },
 
     /* Collection names, so a rename is a one-line change here and in the rules.

@@ -40,7 +40,6 @@
     <meta itemprop="description" content="Explore job market candidates in Operations, sorted by surname. Registered users can search profiles and view CVs and INFORMS talks.">
     <meta itemprop="image" content="https://www.operationsacademia.org/images/share-square.jpg">
     <link rel="preload" href="/data/candidates-reveal.json" as="fetch" crossorigin="anonymous">
-    <link rel="preload" href="/data/candidate-previews.json" as="fetch" crossorigin="anonymous">
     <link rel="preload" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js" as="script">
     <link rel="preload" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js" as="script">
     <link rel="preload" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js" as="script">
@@ -94,15 +93,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
-    <!-- The Firebase SDK is ~700 KB of third-party JavaScript that NOTHING on
-         screen waits for any more: the account chip is painted from the
-         localStorage hint before the SDK has even been asked for, and the
-         session it restores only confirms what the chip already shows. It was
-         being PRELOADED here, which is a high-priority fetch competing with
-         this page's own stylesheet and data at the very moment the first paint
-         is being assembled. The preconnect stays — it warms the connection, at
-         no bandwidth cost, so the SDK still arrives promptly when
-         oa-firebase.js asks for it. -->
+    <link rel="preconnect" href="https://firestore.googleapis.com">
+    <link rel="preconnect" href="https://us-central1-operations-academia.cloudfunctions.net">
+    <!-- Profiles need a verified session. Preload its SDKs and warm the
+         account/profile endpoints; school previews are fetched only for guests. -->
     <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="assets/oa-editor.css" rel="stylesheet">
@@ -282,7 +276,7 @@
     <script defer src="assets/oa-visit.js"></script>
     <script defer src="assets/oa-feature-badges.js?v=20261030-posting-roles"></script>
     <script defer src="assets/v3.js"></script>
-    <script defer src="assets/oa-firebase.js"></script>
+    <script defer src="assets/oa-firebase.js?v=20261115-candidates"></script>
     <script defer src="assets/oa-accounts.js?v=20261030-posting-roles"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-listing-tracking.js?v=20261013-parts"></script>
@@ -298,7 +292,7 @@
     <script defer src="assets/oa-candcard.js"></script>
     <script defer src="assets/oa-takedown.js"></script>
     <script defer src="assets/oa-candidateedit.js"></script>
-    <script defer src="assets/oa-candidate-data.js?v=20261014-fast"></script>
-    <script defer src="assets/oa-candidates-page.js?v=20261014-fast"></script>
+    <script defer src="assets/oa-candidate-data.js?v=20261115-fast"></script>
+    <script defer src="assets/oa-candidates-page.js?v=20261115-fast"></script>
   </body>
 </html>
