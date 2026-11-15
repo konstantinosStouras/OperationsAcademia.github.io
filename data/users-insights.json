@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-15T06:49:45.935Z",
- "members": 475,
+ "generated": "2026-11-15T23:34:54.886Z",
+ "members": 476,
  "k": 3,
  "affiliation": {
-  "listed": 394,
+  "listed": 395,
   "other": 50,
   "none": 31
  },
@@ -31,6 +31,11 @@
     "members": 8
    },
    {
+    "name": "University of Michigan",
+    "country": "United States",
+    "members": 8
+   },
+   {
     "name": "Georgia Institute of Technology",
     "country": "United States",
     "members": 7
@@ -52,11 +57,6 @@
    },
    {
     "name": "University of Massachusetts Amherst",
-    "country": "United States",
-    "members": 6
-   },
-   {
-    "name": "University of Michigan",
     "country": "United States",
     "members": 6
    },
@@ -87,11 +87,6 @@
    },
    {
     "name": "University of Southern California",
-    "country": "United States",
-    "members": 5
-   },
-   {
-    "name": "University of Utah",
     "country": "United States",
     "members": 5
    },
@@ -171,6 +166,11 @@
     "members": 4
    },
    {
+    "name": "University of Utah",
+    "country": "United States",
+    "members": 4
+   },
+   {
     "name": "University of Washington",
     "country": "United States",
     "members": 4
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 248
+    "members": 249
    },
    {
     "name": "Canada",
