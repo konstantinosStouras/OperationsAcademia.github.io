@@ -9087,8 +9087,8 @@ for (const w of [320, 360, 390, 430]) {
 
     await q.click('#pa-delete-go');
     await q.waitForSelector('#pa-delete-panel h3', { timeout: 10000 });
-    ok((await q.textContent('#pa-delete-panel')).indexOf('Your account is gone') !== -1,
-      'delete: and it says so plainly when it is done');
+    ok((await q.textContent('#pa-delete-panel')).indexOf('Your deletion is being completed.') !== -1,
+      'delete: confirms the request while server cleanup is still outstanding');
 
     const seq = await q.evaluate(() => window.__fb.log.map((e) => e.op + ' ' + e.path));
     const at = (needle) => seq.findIndex((l) => l.indexOf(needle) !== -1);
@@ -9156,8 +9156,8 @@ for (const w of [320, 360, 390, 430]) {
     await q.click('#pa-delete-go');
     await q.waitForSelector('#pa-delete-panel h3', { timeout: 10000 });
 
-    ok((await q.textContent('#pa-delete-panel')).indexOf('Your account is gone') !== -1,
-      'delete: a second attempt finishes — the order already filed is carried on ' +
+    ok((await q.textContent('#pa-delete-panel')).indexOf('Your deletion is being completed.') !== -1,
+      'delete: a second attempt resumes cleanup — the order already filed is carried on ' +
       'from, not written over and refused');
     const seq = await q.evaluate(() => window.__fb.log.map((e) => e.op + ' ' + e.path));
     ok(seq.some((l) => l.indexOf('get accountDeletions/') === 0),
@@ -9232,8 +9232,8 @@ for (const w of [320, 360, 390, 430]) {
 
     await q.click('#pa-delete-go');
     await q.waitForSelector('#pa-delete-panel h3', { timeout: 10000 });
-    ok((await q.textContent('#pa-delete-panel')).indexOf('Your account is gone') !== -1,
-      'delete: and it finishes');
+    ok((await q.textContent('#pa-delete-panel')).indexOf('Your deletion is being completed.') !== -1,
+      'delete: confirms ongoing cleanup even when the survey was unreadable');
 
     const seq = await q.evaluate((n) =>
       window.__fb.log.slice(n).map((e) => e.op + ' ' + e.path), beforeOpen);
@@ -9311,22 +9311,25 @@ for (const w of [320, 360, 390, 430]) {
     q.on('dialog', (d) => d.accept('DELETE'));
     await q.click('.oa-u-kill');
     await q.waitForSelector('.oa-u-going', { timeout: 10000 });
-    ok((await q.textContent('#oa-aa-users')).indexOf('Deletion queued') !== -1,
-      'admin delete: the row says what is happening, which is the state the ' +
-      'page can actually observe');
-    ok(await q.$('.oa-u-unkill'),
-      'admin delete: …and it can be called off while it is still queued');
+    ok((await q.textContent('#oa-u-deletion-progress')).indexOf('Access blocked; deleting data') !== -1,
+      'admin delete: reports the confirmed access block while cleanup continues');
+    eq(await q.$('.oa-u-unkill'), null,
+      'admin delete: a confirmed access block cannot be cancelled');
+    const calls = await q.evaluate(() => window.__fb.log.filter(e =>
+      e.op === 'callable' && e.path === 'adminDeleteAccount').map(e => e.data));
+    eq(calls, [{ uid: LEAVER.uid }], 'admin delete: sends only the selected UID to the server');
 
     const orders = await q.evaluate(() => {
       const all = window.__fb.dump();
       return Object.keys(all).filter((k) => k.indexOf('accountDeletions/') === 0)
         .map((k) => all[k]);
     });
-    ok(orders.length === 1 && orders[0].by === 'admin' && orders[0].status === 'requested',
-      'admin delete: it files a work order and nothing else — the browser cannot ' +
-      'delete another account\'s alerts, details or sign-in, so it must not pretend to');
+    ok(orders.length === 1 && orders[0].by === 'admin' && orders[0].status === 'requested' &&
+       orders[0].accessBlockedAt > 0,
+      'admin delete: the roster reads the server-created blocked cleanup order');
     const ops = await q.evaluate(() => window.__fb.log.map((e) => e.op + ' ' + e.path));
-    ok(!ops.some((l) => l.indexOf('deleteUser') === 0) &&
+    ok(!ops.some((l) => l.indexOf('set accountDeletions/') === 0) &&
+       !ops.some((l) => l.indexOf('deleteUser') === 0) &&
        !ops.some((l) => l.indexOf('delete userDirectory/') === 0) &&
        !ops.some((l) => l.indexOf('delete profiles/') === 0),
       'admin delete: and nothing of the account itself is touched from here — the ' +

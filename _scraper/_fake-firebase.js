@@ -643,6 +643,24 @@
      the handle document's guideAt, in the one form the sim needs */
   var simAccepted = false;
 
+  function adminDeleteSim(data) {
+    // Simulate only the server receipt and the records the roster reads.
+    // Server authorization, identity blocking and cleanup have dedicated
+    // coverage in _functions/test/account-deletion.cjs.
+    var uid = data && data.uid;
+    var person = docs['userDirectory/' + uid];
+    if (!person) return Promise.reject({ code: 'functions/not-found' });
+    var orderPath = 'accountDeletions/' + uid;
+    var prior = docs[orderPath] || {};
+    docs['accountBlocks/' + uid] = { blocked: true };
+    docs[orderPath] = Object.assign({}, prior, { uid: uid, by: 'admin',
+      status: prior.status || 'requested', askedAt: prior.askedAt || Date.now(),
+      accessBlockedAt: prior.accessBlockedAt || Date.now(), email: person.email || '' });
+    record('server-set', orderPath, docs[orderPath]);
+    notifySubscribers(orderPath);
+    return Promise.resolve({ data: { uid: uid, accessBlocked: true } });
+  }
+
   function forumSim(name, data) {
     data = data || {};
     var u = simUser();
@@ -988,6 +1006,7 @@
             return Promise.reject({ code: seed.callableFails, message: seed.callableMessage || seed.callableFails });
           }
           if (name === 'readCandidateProfiles') return candidateSim();
+          if (name === 'adminDeleteAccount') return adminDeleteSim(data);
           if (FORUM_NAMES.indexOf(String(name)) !== -1) return forumSim(String(name), data);
           return Promise.resolve({ data: { sent: true, to: 'r***@example.edu' } });
         };
