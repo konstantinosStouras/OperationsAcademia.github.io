@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-15T12:07:49.052Z",
+ "generated": "2026-11-15T14:46:04.280Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -9318,7 +9318,7 @@
    "to": "2026-11-15",
    "metric": "visits",
    "zone": "",
-   "total": 7174,
+   "total": 7176,
    "items": [
     {
      "name": "United States",
@@ -9342,7 +9342,7 @@
     },
     {
      "name": "United Kingdom",
-     "value": 201
+     "value": 202
     },
     {
      "name": "Japan",
@@ -9382,7 +9382,7 @@
     },
     {
      "name": "Australia",
-     "value": 46
+     "value": 47
     },
     {
      "name": "Not recorded",
@@ -9564,11 +9564,11 @@
    "to": "2026-11-15",
    "metric": "visits",
    "zone": "",
-   "total": 7154,
+   "total": 7156,
    "items": [
     {
      "name": "desktop",
-     "value": 6050
+     "value": 6052
     },
     {
      "name": "mobile",
@@ -9586,11 +9586,11 @@
    "to": "2026-11-15",
    "metric": "visits",
    "zone": "",
-   "total": 7132,
+   "total": 7135,
    "items": [
     {
      "name": "Direct",
-     "value": 4466
+     "value": 4469
     },
     {
      "name": "Organic Search",
@@ -9620,11 +9620,11 @@
    "to": "2026-11-15",
    "metric": "visits",
    "zone": "",
-   "total": 6861,
+   "total": 6864,
    "items": [
     {
      "name": "Typed or bookmarked",
-     "value": 4466
+     "value": 4469
     },
     {
      "name": "google",
@@ -11576,7 +11576,7 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "property",
-    "total": 2609,
+    "total": 2611,
     "items": [
      {
       "name": "00",
@@ -11632,7 +11632,7 @@
      },
      {
       "name": "13",
-      "value": 75
+      "value": 77
      },
      {
       "name": "14",
@@ -11682,7 +11682,7 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "",
-    "total": 2437,
+    "total": 2439,
     "items": [
      {
       "name": "United States",
@@ -11714,7 +11714,7 @@
      },
      {
       "name": "United Kingdom",
-      "value": 53
+      "value": 54
      },
      {
       "name": "China",
@@ -11729,12 +11729,12 @@
       "value": 24
      },
      {
-      "name": "India",
+      "name": "Australia",
       "value": 19
      },
      {
-      "name": "Australia",
-      "value": 18
+      "name": "India",
+      "value": 19
      },
      {
       "name": "Spain",
@@ -11852,11 +11852,11 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "",
-    "total": 2430,
+    "total": 2432,
     "items": [
      {
       "name": "desktop",
-      "value": 2046
+      "value": 2048
      },
      {
       "name": "mobile",
@@ -11874,11 +11874,11 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "",
-    "total": 2430,
+    "total": 2432,
     "items": [
      {
       "name": "Direct",
-      "value": 1460
+      "value": 1462
      },
      {
       "name": "Organic Search",
@@ -11908,11 +11908,11 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "",
-    "total": 2347,
+    "total": 2349,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 1460
+      "value": 1462
      },
      {
       "name": "google",
@@ -11988,7 +11988,7 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "property",
-    "total": 7545,
+    "total": 7547,
     "items": [
      {
       "name": "00",
@@ -12044,7 +12044,7 @@
      },
      {
       "name": "13",
-      "value": 185
+      "value": 187
      },
      {
       "name": "14",
@@ -12094,7 +12094,7 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "",
-    "total": 7174,
+    "total": 7176,
     "items": [
      {
       "name": "United States",
@@ -12118,7 +12118,7 @@
      },
      {
       "name": "United Kingdom",
-      "value": 201
+      "value": 202
      },
      {
       "name": "Japan",
@@ -12158,7 +12158,7 @@
      },
      {
       "name": "Australia",
-      "value": 46
+      "value": 47
      },
      {
       "name": "Not recorded",
@@ -12340,11 +12340,11 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "",
-    "total": 7154,
+    "total": 7156,
     "items": [
      {
       "name": "desktop",
-      "value": 6050
+      "value": 6052
      },
      {
       "name": "mobile",
@@ -12362,11 +12362,11 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "",
-    "total": 7132,
+    "total": 7135,
     "items": [
      {
       "name": "Direct",
-      "value": 4466
+      "value": 4469
      },
      {
       "name": "Organic Search",
@@ -12396,11 +12396,11 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "",
-    "total": 6861,
+    "total": 6864,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 4466
+      "value": 4469
      },
      {
       "name": "google",
@@ -12548,7 +12548,7 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "property",
-    "total": 15339,
+    "total": 15341,
     "items": [
      {
       "name": "00",
@@ -12604,7 +12604,7 @@
      },
      {
       "name": "13",
-      "value": 373
+      "value": 375
      },
      {
       "name": "14",
@@ -12654,7 +12654,7 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "",
-    "total": 14726,
+    "total": 14728,
     "items": [
      {
       "name": "United States",
@@ -12682,7 +12682,7 @@
      },
      {
       "name": "United Kingdom",
-      "value": 342
+      "value": 343
      },
      {
       "name": "India",
@@ -12710,7 +12710,7 @@
      },
      {
       "name": "Australia",
-      "value": 157
+      "value": 158
      },
      {
       "name": "Türkiye",
@@ -13276,7 +13276,7 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "property",
-    "total": 59368,
+    "total": 59370,
     "items": [
      {
       "name": "00",
@@ -13332,7 +13332,7 @@
      },
      {
       "name": "13",
-      "value": 1768
+      "value": 1770
      },
      {
       "name": "14",
@@ -13382,7 +13382,7 @@
     "to": "2026-11-15",
     "metric": "visits",
     "zone": "",
-    "total": 58324,
+    "total": 58326,
     "items": [
      {
       "name": "United States",
@@ -13406,7 +13406,7 @@
      },
      {
       "name": "United Kingdom",
-      "value": 1513
+      "value": 1514
      },
      {
       "name": "France",
@@ -13446,7 +13446,7 @@
      },
      {
       "name": "Australia",
-      "value": 312
+      "value": 313
      },
      {
       "name": "Ireland",
@@ -14279,7 +14279,7 @@
    "source": "ga4",
    "from": "2026-10-17",
    "to": "2026-11-15",
-   "sessions": 2429,
+   "sessions": 2431,
    "avgSessionSec": 280,
    "viewsPerSession": 2.41
   },
@@ -14288,7 +14288,7 @@
    "from": "2026-08-18",
    "to": "2026-11-15",
    "sessions": 7164,
-   "avgSessionSec": 229,
+   "avgSessionSec": 230,
    "viewsPerSession": 2.25
   },
   "365": {
@@ -14304,7 +14304,7 @@
    "from": "2023-06-16",
    "to": "2026-11-15",
    "sessions": 57960,
-   "avgSessionSec": 102,
+   "avgSessionSec": 103,
    "viewsPerSession": 2.42
   }
  },
