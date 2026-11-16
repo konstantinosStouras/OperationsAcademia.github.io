@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-16T11:00:48.936Z",
- "members": 477,
+ "generated": "2026-11-16T12:38:14.742Z",
+ "members": 478,
  "k": 3,
  "affiliation": {
-  "listed": 396,
+  "listed": 397,
   "other": 50,
   "none": 31
  },
@@ -101,6 +101,11 @@
     "members": 4
    },
    {
+    "name": "The Chinese University of Hong Kong, Shenzhen",
+    "country": "China",
+    "members": 4
+   },
+   {
     "name": "ESSEC",
     "country": "France",
     "members": 4
@@ -191,11 +196,6 @@
     "members": 3
    },
    {
-    "name": "The Chinese University of Hong Kong, Shenzhen",
-    "country": "China",
-    "members": 3
-   },
-   {
     "name": "Fudan University",
     "country": "China",
     "members": 3
@@ -234,7 +234,7 @@
    },
    {
     "name": "China",
-    "members": 13
+    "members": 14
    },
    {
     "name": "France",
