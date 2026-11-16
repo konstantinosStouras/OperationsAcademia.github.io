@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-15T23:34:54.886Z",
- "members": 476,
+ "generated": "2026-11-16T11:00:48.936Z",
+ "members": 477,
  "k": 3,
  "affiliation": {
-  "listed": 395,
+  "listed": 396,
   "other": 50,
   "none": 31
  },
@@ -211,7 +211,7 @@
     "members": 3
    }
   ],
-  "rest": 193
+  "rest": 194
  },
  "countries": {
   "count": 18,
@@ -262,6 +262,6 @@
    }
   ],
   "rest": 9,
-  "unknown": 103
+  "unknown": 104
  }
 }
