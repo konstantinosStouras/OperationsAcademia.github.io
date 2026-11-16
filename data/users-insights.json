@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-16T12:38:14.742Z",
- "members": 478,
+ "generated": "2026-11-16T20:57:32.206Z",
+ "members": 479,
  "k": 3,
  "affiliation": {
-  "listed": 397,
+  "listed": 398,
   "other": 50,
   "none": 31
  },
@@ -81,6 +81,11 @@
     "members": 5
    },
    {
+    "name": "University of Alberta",
+    "country": "Canada",
+    "members": 5
+   },
+   {
     "name": "University of Illinois at Urbana-Champaign",
     "country": "United States",
     "members": 5
@@ -138,11 +143,6 @@
    {
     "name": "Rutgers University",
     "country": "United States",
-    "members": 4
-   },
-   {
-    "name": "University of Alberta",
-    "country": "Canada",
     "members": 4
    },
    {
@@ -222,7 +222,7 @@
    },
    {
     "name": "Canada",
-    "members": 28
+    "members": 29
    },
    {
     "name": "Hong Kong",
