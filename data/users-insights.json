@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-16T20:57:32.206Z",
- "members": 479,
+ "generated": "2026-11-18T02:57:54.821Z",
+ "members": 480,
  "k": 3,
  "affiliation": {
-  "listed": 398,
+  "listed": 399,
   "other": 50,
   "none": 31
  },
@@ -86,6 +86,11 @@
     "members": 5
    },
    {
+    "name": "University of California, Berkeley",
+    "country": "United States",
+    "members": 5
+   },
+   {
     "name": "University of Illinois at Urbana-Champaign",
     "country": "United States",
     "members": 5
@@ -142,11 +147,6 @@
    },
    {
     "name": "Rutgers University",
-    "country": "United States",
-    "members": 4
-   },
-   {
-    "name": "University of California, Berkeley",
     "country": "United States",
     "members": 4
    },
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 249
+    "members": 250
    },
    {
     "name": "Canada",
