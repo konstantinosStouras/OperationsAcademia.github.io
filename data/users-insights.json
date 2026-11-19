@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-19T01:27:24.182Z",
- "members": 481,
+ "generated": "2026-11-19T18:38:01.293Z",
+ "members": 482,
  "k": 3,
  "affiliation": {
-  "listed": 400,
+  "listed": 401,
   "other": 50,
   "none": 31
  },
@@ -111,6 +111,11 @@
     "members": 4
    },
    {
+    "name": "Chinese University of Hong Kong",
+    "country": "Hong Kong",
+    "members": 4
+   },
+   {
     "name": "The Chinese University of Hong Kong, Shenzhen",
     "country": "China",
     "members": 4
@@ -191,11 +196,6 @@
     "members": 3
    },
    {
-    "name": "Chinese University of Hong Kong",
-    "country": "Hong Kong",
-    "members": 3
-   },
-   {
     "name": "Fudan University",
     "country": "China",
     "members": 3
@@ -226,7 +226,7 @@
    },
    {
     "name": "Hong Kong",
-    "members": 18
+    "members": 19
    },
    {
     "name": "Singapore",
