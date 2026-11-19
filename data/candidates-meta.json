@@ -1,28 +1,28 @@
 {
- "generated": "2026-11-10T04:20:07.145Z",
- "count": 45,
+ "generated": "2026-11-19T15:47:54.608Z",
+ "count": 46,
  "years": {
-  "2027": 45
+  "2027": 46
  },
  "positions": {
   "PhD Candidate": 27,
-  "Post-Doctoral Researcher": 12,
+  "Post-Doctoral Researcher": 13,
   "Assistant Professor": 4,
   "Research Scientist": 2
  },
  "researchAreas": {
-  "Machine Learning and Data Science": 21,
-  "Operations Research / Optimization": 16,
+  "Machine Learning and Data Science": 22,
+  "Operations Research / Optimization": 17,
   "Empirical Operations": 14,
   "Technology, Platforms and Marketplaces": 14,
   "Service Operations": 12,
   "Supply Chain Management": 11,
+  "Healthcare Operations": 10,
   "Sustainable Operations": 10,
   "Behavioral Operations": 9,
-  "Healthcare Operations": 9,
   "Revenue Management and Pricing": 8,
   "Innovation and New Product Development": 6,
-  "Transportation and Logistics": 3,
+  "Transportation and Logistics": 4,
   "AI": 2,
   "Sequential Decision Making": 2,
   "AI and Ethics": 1,
@@ -36,6 +36,7 @@
   "Approximation Algorithms": 1,
   "Biomedical Applications": 1,
   "Business Model Innovation": 1,
+  "combinatorial optimization": 1,
   "Control Theory": 1,
   "Deep Learning": 1,
   "DRO": 1,
@@ -57,6 +58,7 @@
   "Machine Learning": 1,
   "Market Design": 1,
   "Marketplace Aanlytics": 1,
+  "metaheuristics": 1,
   "OM-Finance": 1,
   "Online Algorithms": 1,
   "Policies and Practices for Social Good": 1,
@@ -78,23 +80,23 @@
   "Tuesday": 5,
   "Wednesday": 1
  },
- "withCv": 41,
- "newestPosted": "2026-11-10",
+ "withCv": 42,
+ "newestPosted": "2026-11-19",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
  "heldCount": 0,
  "researchSummary": [
   {
    "label": "Machine learning",
-   "count": 21
+   "count": 22
   },
   {
    "label": "Optimization",
-   "count": 16
+   "count": 17
   },
   {
    "label": "Healthcare operations",
-   "count": 9
+   "count": 10
   }
  ]
 }
