@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-20T18:48:12.134Z",
+ "generated": "2026-11-21T00:21:11.800Z",
  "sources": [
   {
    "source": "usage",
@@ -9,14 +9,14 @@
   },
   {
    "source": "ga4",
-   "days": 1158,
+   "days": 1159,
    "from": "",
    "to": ""
   }
  ],
- "days": 1254,
+ "days": 1255,
  "from": "2023-06-16",
- "to": "2026-11-20",
- "visitors": 49288,
- "pageviews": 144102
+ "to": "2026-11-21",
+ "visitors": 49304,
+ "pageviews": 144133
 }
