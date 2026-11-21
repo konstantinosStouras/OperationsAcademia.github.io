@@ -2490,6 +2490,10 @@
    "n": 0
   },
   {
+   "v": "University of Quebec",
+   "n": 0
+  },
+  {
    "v": "University of Queensland",
    "n": 0
   },
@@ -13773,6 +13777,11 @@
      "Management"
     ]
    }
+  },
+  "University of Quebec": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "University of Queensland": {
    "schools": [],

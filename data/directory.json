@@ -30633,6 +30633,16 @@
   "facultyUrl": "https://www.pugetsound.edu/academics/business-leadership/faculty"
  },
  {
+  "id": "university-of-quebec",
+  "institution": "University of Quebec",
+  "type": "University",
+  "sources": [
+   "members"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "university-of-queensland",
   "institution": "University of Queensland",
   "type": "University",
