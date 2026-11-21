@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-21T03:33:25.754Z",
- "members": 484,
+ "generated": "2026-11-21T11:42:39.813Z",
+ "members": 486,
  "k": 3,
  "affiliation": {
-  "listed": 402,
+  "listed": 404,
   "other": 51,
   "none": 31
  },
@@ -76,6 +76,11 @@
     "members": 5
    },
    {
+    "name": "The Hong Kong University of Science and Technology",
+    "country": "Hong Kong",
+    "members": 5
+   },
+   {
     "name": "Ohio State University",
     "country": "United States",
     "members": 5
@@ -141,8 +146,8 @@
     "members": 4
    },
    {
-    "name": "The Hong Kong University of Science and Technology",
-    "country": "Hong Kong",
+    "name": "IE University",
+    "country": "Spain",
     "members": 4
    },
    {
@@ -204,11 +209,6 @@
     "name": "Fudan University",
     "country": "China",
     "members": 3
-   },
-   {
-    "name": "George Mason University",
-    "country": "United States",
-    "members": 3
    }
   ],
   "rest": 195
@@ -226,7 +226,7 @@
    },
    {
     "name": "Hong Kong",
-    "members": 20
+    "members": 21
    },
    {
     "name": "Singapore",
@@ -250,7 +250,7 @@
    },
    {
     "name": "Spain",
-    "members": 5
+    "members": 6
    },
    {
     "name": "Oman",
