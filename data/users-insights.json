@@ -1,14 +1,14 @@
 {
- "generated": "2026-11-23T00:27:42.900Z",
- "members": 488,
+ "generated": "2026-11-23T14:26:28.800Z",
+ "members": 490,
  "k": 3,
  "affiliation": {
-  "listed": 407,
+  "listed": 409,
   "other": 50,
   "none": 31
  },
  "universities": {
-  "count": 172,
+  "count": 173,
   "shown": [
    {
     "name": "National University of Singapore",
@@ -73,6 +73,11 @@
    {
     "name": "Duke University",
     "country": "United States",
+    "members": 5
+   },
+   {
+    "name": "The Hong Kong Polytechnic University",
+    "country": "Hong Kong",
     "members": 5
    },
    {
@@ -141,11 +146,6 @@
     "members": 4
    },
    {
-    "name": "The Hong Kong Polytechnic University",
-    "country": "Hong Kong",
-    "members": 4
-   },
-   {
     "name": "IE University",
     "country": "Spain",
     "members": 4
@@ -211,7 +211,7 @@
     "members": 3
    }
   ],
-  "rest": 198
+  "rest": 199
  },
  "countries": {
   "count": 18,
@@ -226,7 +226,7 @@
    },
    {
     "name": "Hong Kong",
-    "members": 21
+    "members": 22
    },
    {
     "name": "Singapore",
@@ -262,6 +262,6 @@
    }
   ],
   "rest": 9,
-  "unknown": 106
+  "unknown": 107
  }
 }
