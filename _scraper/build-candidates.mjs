@@ -44,6 +44,8 @@ import { adminUids } from './_mail.mjs';
 import { ADMIN_EMAILS } from './build-candidate-stats.mjs';
 import { createRequire } from 'node:module';
 import { candidatePreviews, candidatePreviewTargets } from './candidate-previews.mjs';
+import { fileSubmissionUpload } from './drive-retention.mjs';
+import { isMain } from './_main.mjs';
 import { researchSummary } from './candidate-summary.mjs';
 import { readPrivateCandidates, writePrivateCandidates } from './private-candidates.mjs';
 
@@ -154,7 +156,7 @@ function clearedSlot(slot) {
    snapshot taken before this ran, and without the overlay a CV filed here
    reached the served file one build later (a REPLACEMENT, whose old link the
    form blanks, published the profile with no CV until then). */
-async function transferUploads(db, live, { now }) {
+export async function transferUploads(db, live, { now, loadBucket = storageBucket }) {
   const patched = new Map();
   // a document is pending when ANY slot has an upload waiting and no link —
   // the same "prefer the typed link" rule the old display tab's formula had:
@@ -180,7 +182,7 @@ async function transferUploads(db, live, { now }) {
     return patched;
   }
 
-  const bucket = await storageBucket();
+  const bucket = await loadBucket();
   if (!bucket) {
     warn('candidate uploads: no Storage bucket available — left for the next run');
     return;
@@ -245,7 +247,7 @@ async function transferUploads(db, live, { now }) {
           original: v[slot.name] || m[2],
         });
 
-        const uploaded = await drive.uploadFile({
+        const patch = await fileSubmissionUpload(db, d, slot, {
           token,
           folderId: folders.folderFor(config, year, 'candidates'),
           resourceKey: folders.resourceKeyHeader(config, year, 'candidates'),
@@ -254,40 +256,9 @@ async function transferUploads(db, live, { now }) {
           contentType: v[slot.type] || 'application/pdf',
         });
 
-        /* A REPLACEMENT retires the file it replaces (owner, 2026-08-24:
-           "show only the newest version … and remove the former PDF version
-           from my files"). The document still carries the PREVIOUS filing's
-           Drive id at this point — the form blanks the link when a new file
-           is chosen but never touches the id — so that is the file the new
-           upload supersedes. Deleted AFTER the document points at the new
-           one: a crash in between leaves an orphaned OLD file in Drive
-           (harmless, and said so below) rather than a profile whose CV link
-           is dead. Best-effort, like the Storage delete — a leftover file is
-           a tidiness problem, never a reason to fail the filing. */
-        const supersededId = String(v[slot.driveId] || '');
-
-        /* Write the link BEFORE deleting the landing-strip object: a crash in
-           between leaves a stray object in Storage (harmless, cleaned by
-           hand) rather than a filed-and-forgotten upload with no link. */
-        const patch = {
-          [slot.url]: uploaded.webViewLink,
-          [slot.driveId]: uploaded.id,
-          ...clearedSlot(slot),
-        };
-        await d.ref.update(patch);
+        if (!patch) continue;
         patched.set(d.id, Object.assign(patched.get(d.id) || {}, patch));
         await file.delete().catch(() => {});
-
-        if (supersededId && supersededId !== uploaded.id) {
-          try {
-            await drive.deleteFile({ token, id: supersededId });
-            log(`  removed the superseded ${slot.label} for ${v.ref || d.id} from Drive`);
-          } catch (e) {
-            warn(`candidate uploads: the superseded ${slot.label} for ` +
-              `${v.ref || d.id} could not be removed from Drive (${e.message}) — ` +
-              'the profile already points at the new file; delete the old one by hand');
-          }
-        }
 
         /* THE FILE'S NAME IS THE PERSON'S NAME. driveFileName builds
            "2026-10-02 Jane Doe — CV (OA-CAND-…).pdf", and this line prints
@@ -865,7 +836,7 @@ function selftest() {
   return fails.length === 0;
 }
 
-main().catch((err) => {
+if (isMain(import.meta.url)) main().catch((err) => {
   // A build failure must not wedge the workflow into a red state forever; the
   // next scheduled run retries from the same queue.
   console.error('build-candidates failed:', err);

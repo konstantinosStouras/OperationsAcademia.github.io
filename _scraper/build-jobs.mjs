@@ -28,6 +28,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { fileSubmissionUpload } from './drive-retention.mjs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import { retireJobs } from './job-retention.mjs';
@@ -200,6 +201,11 @@ async function storageBucket() {
    does not see its own later updates — without the overlay the link filed
    here reached the served file one build later, and a CV replacement (whose
    old link the form blanks) published the profile with no CV for ~20 min. */
+const ADVERT_SLOT = {
+  url: 'adUrl', driveId: 'adDriveId', path: 'adUploadPath', name: 'adUploadName',
+  type: 'adUploadType', size: 'adUploadSize',
+};
+
 async function transferUploads(db, live, { now }) {
   const patched = new Map();
   const pending = live.filter((d) => {
@@ -293,7 +299,7 @@ async function transferUploads(db, live, { now }) {
         original: v.adUploadName || m[3],
       });
 
-      const uploaded = await drive.uploadFile({
+      const patch = await fileSubmissionUpload(db, d, ADVERT_SLOT, {
         token,
         folderId: folders.folderFor(config, year, m[2]),
         resourceKey: folders.resourceKeyHeader(config, year, m[2]),
@@ -302,19 +308,11 @@ async function transferUploads(db, live, { now }) {
         contentType: v.adUploadType || 'application/pdf',
       });
 
-      /* Write the link BEFORE deleting the landing-strip object: a crash in
-         between leaves a stray object in Storage (harmless, cleaned by hand)
-         rather than a filed-and-forgotten upload with no link anywhere. */
-      const patch = {
-        adUrl: uploaded.webViewLink,
-        adDriveId: uploaded.id,
-        adUploadPath: null, adUploadName: null, adUploadType: null, adUploadSize: null,
-      };
-      await d.ref.update(patch);
+      if (!patch) continue;
       patched.set(d.id, patch);
       await file.delete().catch(() => {});
 
-      log(`  filed advert for ${v.ref || d.id}: ${uploaded.name}`);
+      log(`  filed advert for ${v.ref || d.id}`);
     } catch (e) {
       warn(`advert uploads: ${v.ref || d.id}: ${e.message} — left for the next run`);
     }

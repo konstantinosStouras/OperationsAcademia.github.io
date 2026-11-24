@@ -200,6 +200,21 @@ async function main() {
         + 'shape checks cheaper (one map lookup per field), do not relax them'));
   }
 
+  for (const [coll, field] of [['jobSubmissions', 'adDriveId'], ['candidateSubmissions', 'cvDriveId'],
+    ['candidateSubmissions', 'rsDriveId']]) {
+    await RUT.assertFails(as(true).collection(coll).add({ ...docs[coll], [field]: 'other-file' }));
+    const id = 'filed-' + field;
+    await env.withSecurityRulesDisabled(ctx => ctx.firestore().collection(coll).doc(id)
+      .set({ ...docs[coll], [field]: 'filed-by-publisher' }));
+    const ref = as(true).collection(coll).doc(id);
+    await RUT.assertSucceeds(ref.update({ status: 'queued' }));
+    await RUT.assertFails(ref.update({ [field]: 'other-file' }));
+    await RUT.assertFails(ref.update({ [field]: FV.delete() }));
+  }
+  const privateRecord = as(true).collection('pendingDriveDeletions').doc('example');
+  await RUT.assertFails(privateRecord.get());
+  await RUT.assertFails(privateRecord.set({ uid: UID, retryAt: 0 }));
+
   /* THE NEGATIVE, so the guard cannot be satisfied by permissive rules. */
   for (const [coll, doc] of Object.entries(docs)) {
     const err = await create(as(false), coll, doc);

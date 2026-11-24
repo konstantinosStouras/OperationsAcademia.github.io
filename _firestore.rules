@@ -253,6 +253,7 @@ service cloud.firestore {
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
                     && shapeOk()
+                    && !request.resource.data.keys().hasAny(['adDriveId'])
                     && !('featured' in request.resource.data)
                     // the account merge writes this; a new posting never does
                     && !('mergedFrom' in request.resource.data)
@@ -269,6 +270,7 @@ service cloud.firestore {
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
                     && featuredUnchanged()
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['adDriveId'])
                     && mergedFromUnchanged()
                     && createdAtUnchanged()
                     && shapeOk();
@@ -446,6 +448,7 @@ service cloud.firestore {
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
                     && candShapeOk()
+                    && !request.resource.data.keys().hasAny(['cvDriveId', 'rsDriveId'])
                     && !('stats' in request.resource.data)
                     && !('mergedFrom' in request.resource.data)
                     // 35: the three affiliation parts (2026-08-24) took the
@@ -463,6 +466,7 @@ service cloud.firestore {
                     && mergedFromUnchanged()
                     && createdAtUnchanged()
                     && statsUntouched()
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['cvDriveId', 'rsDriveId'])
                     && candShapeOk();
 
       // account merge hand-over — same shape and reasoning as jobSubmissions

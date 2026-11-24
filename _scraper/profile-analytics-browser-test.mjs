@@ -17,6 +17,9 @@ try {
     try { const body = await fs.readFile(path.join(root, rel)); return route.fulfill({ body, contentType: rel.endsWith('.css') ? 'text/css' : rel.endsWith('.js') ? 'application/javascript' : rel.endsWith('.html') ? 'text/html' : 'image/png' }); } catch { return route.fulfill({ status: 404, body: '' }); }
   });
   await page.addInitScript(() => {
+    // Each navigation starts during the badge launch. The expiry case below
+    // advances the clock to its cutoff explicitly.
+    Date.now = () => Date.parse('2026-11-15T12:00:00Z');
     window.testQueries = [];
     const metrics = { views: 128, viewers: 84, opens: 136, clicks: 42, seconds: 5376, countries: [{ name: 'United Kingdom', views: 48 }, { name: 'United States', views: 32 }, { name: 'Germany', views: 18 }], days: {}, universities: [{ name: 'University of Oxford', views: 24, clicks: 11, seconds: 1392, averageSeconds: 58 }, { name: 'Massachusetts Institute of Technology', views: 18, clicks: 8, seconds: 1152, averageSeconds: 64 }, { name: 'Unknown', views: 86, clicks: 23, seconds: 2832, averageSeconds: 33 }] };
     function report(col, all) {
