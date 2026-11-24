@@ -478,7 +478,7 @@
       rsHint.innerHTML = 'Your current <em>Research summary</em> link is in the box ' +
         'below. Upload a new file or paste a different link to ' +
         '<strong>replace</strong> it — or clear the box to ' +
-        '<strong>remove</strong> it from your profile.';
+        '<strong>remove</strong> it from your profile. Operations Academia stores uploaded statements in its Google Drive and links to them from the published profile.';
     }
 
     show($('oa-takedown'), true);

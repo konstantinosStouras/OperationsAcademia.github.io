@@ -102,11 +102,14 @@ export function explain(status, body) {
       'screen is still in "Testing", where Google expires refresh tokens after ' +
       '7 days — publish it under Google Auth Platform > Audience and mint a new one.';
   }
+  if (status === 429 || (status === 403 && /rateLimitExceeded|userRateLimitExceeded|rate limit|quotaExceeded/i.test(text) && !/storage/i.test(text))) {
+    return `Drive rate limit reached (${status}). Retrying on a later run.`;
+  }
   if (status === 403 && /insufficient/i.test(text)) {
     return 'The token does not carry the drive.file scope (403). Re-mint it in the ' +
       'OAuth Playground with https://www.googleapis.com/auth/drive.file.';
   }
-  if (status === 403 && /quota|storage/i.test(text)) {
+  if (status === 403 && /storage/i.test(text)) {
     return 'Drive refused for storage reasons (403). If this mentions service ' +
       'accounts, the token is for a service account rather than for ' +
       'operations.academia@gmail.com — service accounts have no My Drive quota. ' +
@@ -119,7 +122,7 @@ export function explain(status, body) {
       'second case is the one to act on — it needs a different approach, not a ' +
       'different id.';
   }
-  if (status === 429 || status >= 500) {
+  if (status >= 500) {
     return `Drive is temporarily unavailable (${status}). Retrying later should work.`;
   }
   return `Drive refused the request (${status}): ${text.slice(0, 400)}`;
@@ -190,10 +193,11 @@ export function multipartBody(metadata, bytes, contentType, boundary) {
  * what a reader wants, rather than a direct download.
  */
 export async function uploadFile({
-  token, folderId, resourceKey, name, bytes, contentType,
+  token, folderId, resourceKey, name, bytes, contentType, id,
 }) {
   const boundary = 'oa-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
   const metadata = { name, parents: [folderId] };
+  if (id) metadata.id = id;
 
   const headers = {
     authorization: 'Bearer ' + token,
@@ -204,7 +208,8 @@ export async function uploadFile({
 
   const res = await fetch(
     `${UPLOAD_URL}?uploadType=multipart&fields=id,name,webViewLink&supportsAllDrives=true`,
-    { method: 'POST', headers, body: multipartBody(metadata, bytes, contentType, boundary) });
+    { method: 'POST', headers, body: multipartBody(metadata, bytes, contentType, boundary),
+      signal: AbortSignal.timeout(120_000) });
 
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new DriveError(res.status, body);
@@ -219,6 +224,17 @@ export async function deleteFile({ token, id }) {
   if (!res.ok && res.status !== 404) {
     throw new DriveError(res.status, await res.text().catch(() => ''));
   }
+}
+
+/** Reserve an ID before sending bytes so an interrupted upload can be cleaned up. */
+export async function generateFileId(token) {
+  const res = await fetch(FILES_URL + '/generateIds?count=1&space=drive&type=files', {
+    headers: { authorization: 'Bearer ' + token },
+  });
+  const body = await res.json();
+  if (!res.ok) throw new DriveError(res.status, body);
+  if (!body.ids?.[0]) throw new Error('Drive returned no file ID');
+  return body.ids[0];
 }
 
 /* --------------------------------------------------------------------- check */

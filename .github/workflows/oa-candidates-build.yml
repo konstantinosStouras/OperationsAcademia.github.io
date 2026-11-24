@@ -78,3 +78,6 @@ jobs:
           exit 1
       - name: Audit candidate submissions against the published private snapshot
         run: node _scraper/audit-candidate-publication.mjs
+      - name: Retry pending Drive deletions and report overdue files
+        if: ${{ !cancelled() && github.ref_name == 'master' && inputs.dry_run != true }}
+        run: node _scraper/drive-retention.mjs

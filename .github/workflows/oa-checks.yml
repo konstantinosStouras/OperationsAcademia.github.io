@@ -301,3 +301,5 @@ jobs:
         env:
           CI: 'true'
         run: firebase emulators:exec --project demo-oa-rules --only firestore "node _functions/test/rules-budget.mjs"
+      - name: A throttled Drive replacement preserves the current CV
+        run: firebase emulators:exec --project demo-oa-rules --only firestore "node _functions/test/drive-retention.mjs"

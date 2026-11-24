@@ -71,6 +71,7 @@
      (none)       carry the orders out
    --------------------------------------------------------------------------- */
 
+import { drainDriveDeletions } from './drive-retention.mjs';
 import { eraseTree, eraseUploads } from './account-erasure.mjs';
 import { isMain } from './_main.mjs';
 import { createRequire } from 'node:module';
@@ -225,11 +226,16 @@ async function builtAt() {
     person's own name, sits in the shared Drive for ever with no automated
     route to it. So the copies go BEFORE the documents, and a failure here
     holds the purge rather than being swallowed. */
-async function killDriveCopies(held) {
+export async function killDriveCopies(db, uid, held) {
+  // Reservations (including an in-flight upload) and superseded copies both
+  // outlive their submission. Keep the work order open until they are gone.
+  if (await drainDriveDeletions(db, { uid })) return null;
   const ids = [];
   for (const s of SUBMISSIONS) {
     for (const d of held[s.col] || []) {
-      for (const k of ['adDriveId', 'cvDriveId', 'rsDriveId']) {
+      if (d.data.mergedFrom && await drainDriveDeletions(db, { source: s.col + '/' + d.id })) return null;
+      const fields = s.what === 'jobs' ? ['adDriveId'] : s.what === 'cands' ? ['cvDriveId', 'rsDriveId'] : [];
+      for (const k of fields) {
         if (d.data[k]) ids.push(String(d.data[k]));
       }
     }
@@ -604,7 +610,7 @@ async function purgeSubmissions(fb, uid, order, held) {
     }
   }
 
-  const drive = await killDriveCopies(held);
+  const drive = await killDriveCopies(db, uid, held);
   if (drive === null) return { done: false, why: 'a file filed in Google Drive is still there' };
 
   if (Date.now() < cleared + TOKEN_TTL_MS) {

@@ -14048,16 +14048,9 @@ async function testCandidateProfilePolicy() {
   ok(/v\.uid && v\.uid === perm\.uid/.test(cards),
     'own is keyed on the uid itself, never on admin privilege');
 
-  /* the replacement rule: filing a new upload retires the Drive file it
-     supersedes, best-effort, AFTER the document points at the new one */
+  /* The emulator regression drives this publisher through a throttled replacement. */
   const build = await read('_scraper', 'build-candidates.mjs');
-  const point = build.indexOf('[slot.driveId]: uploaded.id');
-  const retire = build.indexOf('drive.deleteFile({ token, id: supersededId })');
-  ok(point !== -1 && retire !== -1 && point < retire,
-    'build-candidates: a superseded upload is removed from Drive only after ' +
-    'the profile points at its replacement');
-  ok(/supersededId !== uploaded\.id/.test(build),
-    'and never the file just filed');
+  ok(build.includes('fileSubmissionUpload(db, d, slot,'), 'candidate uploads use the durable replacement path');
 }
 
 /* ------------------- the reveal is an INSTANT, and a candidate can edit
