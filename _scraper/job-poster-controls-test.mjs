@@ -87,6 +87,8 @@ try {
   assert.equal(await own.locator('.oa-my-status').textContent(),'Live');
   for (const [jobs,cands] of [[0,0],[1,0],[0,1],[1,1]]) {
     const rolePage = await browser.newPage();
+    // Exercise the role-specific launch badges while they are eligible.
+    await rolePage.addInitScript(() => { Date.now = () => Date.parse('2026-11-15T12:00:00Z'); });
     const roleDocs = [];
     if (jobs) roleDocs.push({path:'jobSubmissions/owned',data:{uid:'role-owner',institution:'Example University',status:'published',year}});
     if (cands) roleDocs.push({path:'candidateSubmissions/owned',data:{uid:'role-owner',first:'Test',last:'Candidate',status:'published',year}});
