@@ -13309,6 +13309,40 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-houston-20260529",
+  "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
+  "posted": "2026-05-29",
+  "institution": "University of Houston",
+  "department": "C. T. Bauer College of Business, University of Houston (Bauer Human-Centered AI Institute)",
+  "school": "C. T. Bauer College of Business",
+  "unit": "University of Houston (Bauer Human-Centered AI Institute)",
+  "type": "University",
+  "levels": [
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "United States",
+  "countries": [
+   "United States"
+  ],
+  "adUrl": "https://careers.uh.edu/jobs/visiting-assistant-professor-decision-information-science-houston-texas-united-states",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Houston",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-08-27T09:20:03Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-stirling-20260529",
   "year": 2027,
   "years": [
@@ -24309,8 +24343,8 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "May 1, 2027",
-  "applyByDate": "2027-05-01",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
   "reviewDate": "2026-11-12",
   "comments": "",
   "country": "United States",
