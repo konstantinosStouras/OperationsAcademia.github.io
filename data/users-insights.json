@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-25T00:10:30.917Z",
- "members": 492,
+ "generated": "2026-11-25T08:23:44.062Z",
+ "members": 493,
  "k": 3,
  "affiliation": {
-  "listed": 411,
+  "listed": 412,
   "other": 50,
   "none": 31
  },
@@ -211,7 +211,7 @@
     "members": 3
    }
   ],
-  "rest": 201
+  "rest": 202
  },
  "countries": {
   "count": 18,
@@ -222,7 +222,7 @@
    },
    {
     "name": "Canada",
-    "members": 32
+    "members": 33
    },
    {
     "name": "Hong Kong",
