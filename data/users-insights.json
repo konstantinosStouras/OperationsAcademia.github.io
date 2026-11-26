@@ -1,10 +1,10 @@
 {
- "generated": "2026-11-26T01:58:17.274Z",
- "members": 494,
+ "generated": "2026-11-26T19:52:52.032Z",
+ "members": 496,
  "k": 3,
  "affiliation": {
-  "listed": 413,
-  "other": 50,
+  "listed": 414,
+  "other": 51,
   "none": 31
  },
  "universities": {
@@ -211,7 +211,7 @@
     "members": 3
    }
   ],
-  "rest": 202
+  "rest": 203
  },
  "countries": {
   "count": 18,
@@ -237,11 +237,11 @@
     "members": 14
    },
    {
-    "name": "France",
-    "members": 10
+    "name": "United Kingdom",
+    "members": 11
    },
    {
-    "name": "United Kingdom",
+    "name": "France",
     "members": 10
    },
    {
@@ -262,6 +262,6 @@
    }
   ],
   "rest": 9,
-  "unknown": 107
+  "unknown": 108
  }
 }
