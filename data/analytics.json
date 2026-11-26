@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-26T12:55:29.704Z",
+ "generated": "2026-11-26T14:07:53.803Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -6317,9 +6317,9 @@
    97
   ],
   "2026-11-26": [
-   24,
-   43,
-   43
+   26,
+   45,
+   45
   ]
  },
  "pages": [
@@ -6350,8 +6350,8 @@
   {
    "path": "/universities.html",
    "title": "",
-   "views": 696,
-   "avgSec": 501
+   "views": 698,
+   "avgSec": 500
   },
   {
    "path": "/verify-email.html",
@@ -6472,20 +6472,20 @@
   "source": "usage",
   "from": "2026-08-29",
   "to": "2026-11-26",
-  "views": 19023
+  "views": 19025
  },
  "pagesWindows": {
   "30": {
    "days": 30,
    "from": "2026-10-28",
    "to": "2026-11-26",
-   "views": 4678,
+   "views": 4680,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
      "views": 1968,
-     "avgSec": 398
+     "avgSec": 399
     },
     {
      "path": "/",
@@ -6508,8 +6508,8 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 158,
-     "avgSec": 236
+     "views": 160,
+     "avgSec": 233
     },
     {
      "path": "/account.html",
@@ -6626,7 +6626,7 @@
    "days": 90,
    "from": "2026-08-29",
    "to": "2026-11-26",
-   "views": 19023,
+   "views": 19025,
    "pages": [
     {
      "path": "/jobs.html",
@@ -6655,8 +6655,8 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 696,
-     "avgSec": 501
+     "views": 698,
+     "avgSec": 500
     },
     {
      "path": "/verify-email.html",
@@ -6779,13 +6779,13 @@
    "days": 365,
    "from": "2025-11-27",
    "to": "2026-11-26",
-   "views": 36561,
+   "views": 36563,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
      "views": 13969,
-     "avgSec": 372
+     "avgSec": 373
     },
     {
      "path": "/",
@@ -6808,8 +6808,8 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 1079,
-     "avgSec": 342
+     "views": 1081,
+     "avgSec": 341
     },
     {
      "path": "/post-a-job.html",
@@ -7532,13 +7532,13 @@
    "days": 0,
    "from": "2023-06-16",
    "to": "2026-11-26",
-   "views": 144598,
+   "views": 144600,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
      "views": 50270,
-     "avgSec": 103
+     "avgSec": 104
     },
     {
      "path": "/",
@@ -7567,7 +7567,7 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 3093,
+     "views": 3095,
      "avgSec": 119
     },
     {
@@ -9249,7 +9249,7 @@
    "to": "2026-11-26",
    "metric": "visits",
    "zone": "UTC",
-   "total": 19023,
+   "total": 19025,
    "items": [
     {
      "name": "00",
@@ -9305,7 +9305,7 @@
     },
     {
      "name": "13",
-     "value": 782
+     "value": 784
     },
     {
      "name": "14",
@@ -9842,7 +9842,7 @@
   "source": "usage",
   "from": "2026-08-29",
   "to": "2026-11-26",
-  "sessions": 19023,
+  "sessions": 19025,
   "avgSessionSec": 448,
   "viewsPerSession": 1
  },
@@ -10287,8 +10287,8 @@
     "days": 30,
     "from": "2026-10-28",
     "to": "2026-11-26",
-    "seen": 2258,
-    "resolved": 766,
+    "seen": 2260,
+    "resolved": 767,
     "academic": 69,
     "placed": 389,
     "all": [
@@ -10538,8 +10538,8 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-11-26",
-    "seen": 10181,
-    "resolved": 3080,
+    "seen": 10183,
+    "resolved": 3081,
     "academic": 170,
     "placed": 1426,
     "all": [
@@ -10897,8 +10897,8 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-11-26",
-    "seen": 10181,
-    "resolved": 3080,
+    "seen": 10183,
+    "resolved": 3081,
     "academic": 170,
     "placed": 1426,
     "all": [
@@ -11256,8 +11256,8 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-11-26",
-    "seen": 10181,
-    "resolved": 3080,
+    "seen": 10183,
+    "resolved": 3081,
     "academic": 170,
     "placed": 1426,
     "all": [
@@ -11613,15 +11613,15 @@
    }
   },
   "recentDays": 7,
-  "seen": 10181,
-  "resolved": 3080,
+  "seen": 10183,
+  "resolved": 3081,
   "academic": 170,
   "placed": 1426
  },
  "totals": {
-  "visitors": 49561,
-  "sessions": 71392,
-  "pageviews": 144656,
+  "visitors": 49563,
+  "sessions": 71394,
+  "pageviews": 144658,
   "days": 1260,
   "universities": 87
  },
@@ -11633,7 +11633,7 @@
     "to": "2026-11-26",
     "metric": "visits",
     "zone": "property",
-    "total": 1852,
+    "total": 1853,
     "items": [
      {
       "name": "00",
@@ -11689,7 +11689,7 @@
      },
      {
       "name": "13",
-      "value": 52
+      "value": 53
      },
      {
       "name": "14",
@@ -11929,11 +11929,11 @@
     "to": "2026-11-26",
     "metric": "visits",
     "zone": "",
-    "total": 1732,
+    "total": 1733,
     "items": [
      {
       "name": "desktop",
-      "value": 1427
+      "value": 1428
      },
      {
       "name": "mobile",
@@ -11951,11 +11951,11 @@
     "to": "2026-11-26",
     "metric": "visits",
     "zone": "",
-    "total": 1732,
+    "total": 1733,
     "items": [
      {
       "name": "Direct",
-      "value": 1071
+      "value": 1072
      },
      {
       "name": "Organic Search",
@@ -11985,11 +11985,11 @@
     "to": "2026-11-26",
     "metric": "visits",
     "zone": "",
-    "total": 1687,
+    "total": 1688,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 1071
+      "value": 1072
      },
      {
       "name": "google",
@@ -12061,7 +12061,7 @@
     "to": "2026-11-26",
     "metric": "visits",
     "zone": "property",
-    "total": 8078,
+    "total": 8079,
     "items": [
      {
       "name": "00",
@@ -12117,7 +12117,7 @@
      },
      {
       "name": "13",
-      "value": 206
+      "value": 207
      },
      {
       "name": "14",
@@ -12657,7 +12657,7 @@
     "to": "2026-11-26",
     "metric": "visits",
     "zone": "property",
-    "total": 15231,
+    "total": 15232,
     "items": [
      {
       "name": "00",
@@ -12713,7 +12713,7 @@
      },
      {
       "name": "13",
-      "value": 384
+      "value": 385
      },
      {
       "name": "14",
@@ -13401,7 +13401,7 @@
     "to": "2026-11-26",
     "metric": "visits",
     "zone": "property",
-    "total": 59870,
+    "total": 59871,
     "items": [
      {
       "name": "00",
@@ -13457,7 +13457,7 @@
      },
      {
       "name": "13",
-      "value": 1789
+      "value": 1790
      },
      {
       "name": "14",
@@ -14416,7 +14416,7 @@
    "source": "ga4",
    "from": "2026-10-28",
    "to": "2026-11-26",
-   "sessions": 1732,
+   "sessions": 1733,
    "avgSessionSec": 267,
    "viewsPerSession": 2.48
   },
