@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-25T08:23:44.062Z",
- "members": 493,
+ "generated": "2026-11-26T01:58:17.274Z",
+ "members": 494,
  "k": 3,
  "affiliation": {
-  "listed": 412,
+  "listed": 413,
   "other": 50,
   "none": 31
  },
@@ -166,6 +166,11 @@
     "members": 4
    },
    {
+    "name": "Stanford University",
+    "country": "United States",
+    "members": 4
+   },
+   {
     "name": "University of Chicago",
     "country": "United States",
     "members": 4
@@ -204,11 +209,6 @@
     "name": "Boston University",
     "country": "United States",
     "members": 3
-   },
-   {
-    "name": "Fudan University",
-    "country": "China",
-    "members": 3
    }
   ],
   "rest": 202
@@ -218,7 +218,7 @@
   "shown": [
    {
     "name": "United States",
-    "members": 251
+    "members": 252
    },
    {
     "name": "Canada",
