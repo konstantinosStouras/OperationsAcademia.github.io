@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-27T14:01:04.397Z",
+ "generated": "2026-11-27T14:07:46.648Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -10,6 +10,12 @@
   {
    "source": "usage",
    "days": 103,
+   "from": "",
+   "to": ""
+  },
+  {
+   "source": "ga4",
+   "days": 1158,
    "from": "",
    "to": ""
   }
@@ -6776,39 +6782,45 @@
   },
   "365": {
    "days": 365,
-   "from": "2026-08-17",
+   "from": "2025-11-28",
    "to": "2026-11-27",
-   "views": 20893,
+   "views": 36607,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 8478,
-     "avgSec": 617
+     "views": 13985,
+     "avgSec": 374
     },
     {
      "path": "/",
      "title": "",
-     "views": 6137,
-     "avgSec": 302
+     "views": 10340,
+     "avgSec": 180
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 1783,
-     "avgSec": 498
+     "views": 3961,
+     "avgSec": 224
+    },
+    {
+     "path": "/placements.html",
+     "title": "",
+     "views": 1491,
+     "avgSec": 0
+    },
+    {
+     "path": "/universities.html",
+     "title": "",
+     "views": 1082,
+     "avgSec": 341
     },
     {
      "path": "/post-a-job.html",
      "title": "",
      "views": 906,
      "avgSec": 216
-    },
-    {
-     "path": "/universities.html",
-     "title": "",
-     "views": 784,
-     "avgSec": 471
     },
     {
      "path": "/verify-email.html",
@@ -6823,22 +6835,34 @@
      "avgSec": 213
     },
     {
-     "path": "/post-a-candidate.html",
-     "title": "",
-     "views": 398,
-     "avgSec": 363
-    },
-    {
      "path": "/recent-faculty.html",
      "title": "",
-     "views": 269,
-     "avgSec": 254
+     "views": 408,
+     "avgSec": 167
+    },
+    {
+     "path": "/post-a-candidate.html",
+     "title": "",
+     "views": 399,
+     "avgSec": 362
+    },
+    {
+     "path": "/survey.html",
+     "title": "",
+     "views": 383,
+     "avgSec": 10
+    },
+    {
+     "path": "/resources-for-candidates.html",
+     "title": "",
+     "views": 367,
+     "avgSec": 0
     },
     {
      "path": "/previous-markets.html",
      "title": "",
-     "views": 210,
-     "avgSec": 244
+     "views": 308,
+     "avgSec": 166
     },
     {
      "path": "/profile-analytics.html",
@@ -6849,8 +6873,26 @@
     {
      "path": "/analytics.html",
      "title": "",
+     "views": 173,
+     "avgSec": 516
+    },
+    {
+     "path": "/logoHeader.html",
+     "title": "",
      "views": 150,
-     "avgSec": 596
+     "avgSec": 13
+    },
+    {
+     "path": "/jobsFooterWasClicked.html",
+     "title": "",
+     "views": 108,
+     "avgSec": 9
+    },
+    {
+     "path": "/faqs.html",
+     "title": "",
+     "views": 106,
+     "avgSec": 0
     },
     {
      "path": "/my-postings.html",
@@ -6865,28 +6907,58 @@
      "avgSec": 268
     },
     {
-     "path": "/survey.html",
+     "path": "/survey-faqs.html",
      "title": "",
-     "views": 67,
-     "avgSec": 56
+     "views": 71,
+     "avgSec": 1
     },
     {
-     "path": "/whats-new.html",
+     "path": "/contact.html",
      "title": "",
-     "views": 55,
-     "avgSec": 603
+     "views": 64,
+     "avgSec": 0
     },
     {
-     "path": "/feedback.html",
+     "path": "/placementsFooterWasClicked.html",
      "title": "",
-     "views": 40,
-     "avgSec": 419
+     "views": 63,
+     "avgSec": 12
     },
     {
      "path": "/terms-and-conditions.html",
      "title": "",
-     "views": 33,
-     "avgSec": 141
+     "views": 63,
+     "avgSec": 74
+    },
+    {
+     "path": "/whats-new.html",
+     "title": "",
+     "views": 56,
+     "avgSec": 593
+    },
+    {
+     "path": "/candidatesFooterWasClicked.html",
+     "title": "",
+     "views": 42,
+     "avgSec": 11
+    },
+    {
+     "path": "/feedback.html",
+     "title": "",
+     "views": 41,
+     "avgSec": 409
+    },
+    {
+     "path": "/privacy-policy.html",
+     "title": "",
+     "views": 32,
+     "avgSec": 175
+    },
+    {
+     "path": "/directors-and-contributors.html",
+     "title": "",
+     "views": 29,
+     "avgSec": 0
     },
     {
      "path": "/messages.html",
@@ -6895,22 +6967,106 @@
      "avgSec": 271
     },
     {
-     "path": "/survey-faqs.html",
+     "path": "/recent-facultyFooterWasClicked.html",
      "title": "",
-     "views": 19,
-     "avgSec": 3
+     "views": 28,
+     "avgSec": 11
     },
     {
-     "path": "/privacy-policy.html",
+     "path": "/Research Summaries of the 2017-2018 Candidates.html",
      "title": "",
-     "views": 16,
-     "avgSec": 351
+     "views": 27,
+     "avgSec": 6
+    },
+    {
+     "path": "/Survey Slides by Kostas and Serguei.html",
+     "title": "",
+     "views": 25,
+     "avgSec": 13
+    },
+    {
+     "path": "/Nikhil Garg Job Market Advice.html",
+     "title": "",
+     "views": 24,
+     "avgSec": 12
+    },
+    {
+     "path": "/JMbook.html",
+     "title": "",
+     "views": 23,
+     "avgSec": 11
     },
     {
      "path": "/post-a-placement.html",
      "title": "",
-     "views": 15,
-     "avgSec": 83
+     "views": 18,
+     "avgSec": 69
+    },
+    {
+     "path": "/Tarek Abdallah Recent Faculty.html",
+     "title": "",
+     "views": 17,
+     "avgSec": 0
+    },
+    {
+     "path": "/How to create a website.html",
+     "title": "",
+     "views": 12,
+     "avgSec": 11
+    },
+    {
+     "path": "/donateFooterWasClicked.html",
+     "title": "",
+     "views": 12,
+     "avgSec": 27
+    },
+    {
+     "path": "/blogFooterWasClicked.html",
+     "title": "",
+     "views": 10,
+     "avgSec": 10
+    },
+    {
+     "path": "/resources-for-candidatesFooterWasClicked.html",
+     "title": "",
+     "views": 9,
+     "avgSec": 46
+    },
+    {
+     "path": "/Yufeng Cao Recent Faculty.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 5
+    },
+    {
+     "path": "/surveyFooterWasClicked.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 9
+    },
+    {
+     "path": "/Hartline Blog.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 8
+    },
+    {
+     "path": "/Junyu Cao Recent Faculty.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 5
+    },
+    {
+     "path": "/Nasser Barjesteh Recent Faculty.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 4
+    },
+    {
+     "path": "/analyticsFooterWasClicked.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 6
     },
     {
      "path": "/informed_consent_statement.html",
@@ -6919,49 +7075,547 @@
      "avgSec": 3
     },
     {
+     "path": "/Ali Aouad Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 4
+    },
+    {
+     "path": "/Arian Aflaki Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 2
+    },
+    {
+     "path": "/CS (Theory) jobs Resources.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 13
+    },
+    {
+     "path": "/Hamsa Bastani Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 5
+    },
+    {
+     "path": "/Jiaru Bai Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 2
+    },
+    {
+     "path": "/Lennart Baardman Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 29
+    },
+    {
+     "path": "/Priyank Arora Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 3
+    },
+    {
+     "path": "/cuhkFooterWasClicked.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 13
+    },
+    {
+     "path": "/Lina Song Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 5
+    },
+    {
+     "path": "/Zhe Liu Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 1
+    },
+    {
+     "path": "/A Guide and Advice for Economists on the US Market.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 6
+    },
+    {
+     "path": "/Athey paper - careers in Tech.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 19
+    },
+    {
+     "path": "/CvilleFooterWasClicked.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 5
+    },
+    {
+     "path": "/Fernanda Bravo Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 2
+    },
+    {
+     "path": "/Hyunwoo Park Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 6
+    },
+    {
+     "path": "/Katherine Ashley Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 3
+    },
+    {
+     "path": "/Maxime Cohen Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 0
+    },
+    {
+     "path": "/Yifan Feng Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 1
+    },
+    {
+     "path": "/contactFooterWasClicked.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 11
+    },
+    {
+     "path": "/logoFooterClicked.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 6
+    },
+    {
+     "path": "/Boxiao (Beryl) Chen Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 13
+    },
+    {
+     "path": "/Clara Carrera Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 11
+    },
+    {
+     "path": "/Econ Q&A Forum.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 18
+    },
+    {
+     "path": "/Econ/CS post Blog.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 10
+    },
+    {
+     "path": "/Philipp B. Cornelius Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 13
+    },
+    {
+     "path": "/Qi (George) Chen Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 8
+    },
+    {
+     "path": "/Rui Gao Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 3
+    },
+    {
+     "path": "/Simin Li Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 19
+    },
+    {
+     "path": "/Sina  Ansari Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/Spyros Zoumpoulis Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 9
+    },
+    {
+     "path": "/Xiaojia Guo Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 37
+    },
+    {
+     "path": "/Xiaoyang Long Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/Zhihao (Terry) Zhang Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 59
+    },
+    {
+     "path": "/faqsFooterWasClicked.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 12
+    },
+    {
+     "path": "/Alfonso J. Pedraza-Martinez Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 8
+    },
+    {
+     "path": "/Anna Saez de Tejada Cuenca Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 9
+    },
+    {
+     "path": "/Hummy Song Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 2
+    },
+    {
+     "path": "/Junghee Lee Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 2
+    },
+    {
+     "path": "/Kejia (Carrie) Hu Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 49
+    },
+    {
+     "path": "/Ken Moon Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 14
+    },
+    {
+     "path": "/M. Serkan Akturk Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 0
+    },
+    {
+     "path": "/Rowena Gan Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 6
+    },
+    {
+     "path": "/Ruomeng Cui Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 25
+    },
+    {
+     "path": "/Tinglong Dai Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 6
+    },
+    {
+     "path": "/Yao Cui Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 3
+    },
+    {
+     "path": "/Yueran  Zhuo Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 10
+    },
+    {
+     "path": "/Zhi Chen Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 7
+    },
+    {
+     "path": "/athensFooterWasClicked.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 5
+    },
+    {
+     "path": "/msomSocietyFooterWasClicked.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 5
+    },
+    {
+     "path": "/universitiesFooterWasClicked.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 2
+    },
+    {
+     "path": "/Andre Calmon Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 3
+    },
+    {
+     "path": "/Athey HBR article.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 6
+    },
+    {
+     "path": "/David F. Drake Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Harish Guda Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 13
+    },
+    {
+     "path": "/Jiding Zhang Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 73
+    },
+    {
+     "path": "/Jue Wang Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 3
+    },
+    {
+     "path": "/Lusheng Shao Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 8
+    },
+    {
+     "path": "/Marcus Bellamy Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 6
+    },
+    {
+     "path": "/Matthew Walsman Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 67
+    },
+    {
+     "path": "/Moontae Lee Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 13
+    },
+    {
+     "path": "/Nil Karacaoglu Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 45
+    },
+    {
+     "path": "/Peng Shi Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 8
+    },
+    {
+     "path": "/Qinshen Tang Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Rongqing (Brian) Han Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 10
+    },
+    {
+     "path": "/Sandun Perera Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Sasa Zorc Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 4
+    },
+    {
+     "path": "/Sheng Liu Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 8
+    },
+    {
+     "path": "/SingyFooterWasClicked.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 4
+    },
+    {
+     "path": "/Teng Huang Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Tian Chan Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 12
+    },
+    {
+     "path": "/Wei Chen Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 12
+    },
+    {
+     "path": "/Weiming Zhu Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 2
+    },
+    {
+     "path": "/Yixin (Iris) Wang Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 13
+    },
+    {
+     "path": "/Yixuan Liu Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 10
+    },
+    {
      "path": "/school-only-preview.html",
      "title": "",
      "views": 1,
      "avgSec": 420
+    },
+    {
+     "path": "/universitiesFooterLeftClicked.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 13
     }
    ],
-   "source": "usage"
+   "source": "usage+ga4"
   },
   "all": {
    "days": 0,
-   "from": "2026-08-17",
+   "from": "2023-06-16",
    "to": "2026-11-27",
-   "views": 20893,
+   "views": 144727,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 8478,
-     "avgSec": 617
+     "views": 50321,
+     "avgSec": 104
     },
     {
      "path": "/",
      "title": "",
-     "views": 6137,
-     "avgSec": 302
+     "views": 38390,
+     "avgSec": 48
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 1783,
-     "avgSec": 498
+     "views": 21960,
+     "avgSec": 40
+    },
+    {
+     "path": "/placements.html",
+     "title": "",
+     "views": 9562,
+     "avgSec": 0
+    },
+    {
+     "path": "/resources-for-candidates.html",
+     "title": "",
+     "views": 3580,
+     "avgSec": 0
+    },
+    {
+     "path": "/universities.html",
+     "title": "",
+     "views": 3097,
+     "avgSec": 119
+    },
+    {
+     "path": "/survey.html",
+     "title": "",
+     "views": 2708,
+     "avgSec": 1
+    },
+    {
+     "path": "/recent-faculty.html",
+     "title": "",
+     "views": 1535,
+     "avgSec": 44
+    },
+    {
+     "path": "/logoHeader.html",
+     "title": "",
+     "views": 1297,
+     "avgSec": 10
+    },
+    {
+     "path": "/previous-markets.html",
+     "title": "",
+     "views": 1186,
+     "avgSec": 43
+    },
+    {
+     "path": "/jobsFooterWasClicked.html",
+     "title": "",
+     "views": 973,
+     "avgSec": 10
+    },
+    {
+     "path": "/faqs.html",
+     "title": "",
+     "views": 947,
+     "avgSec": 0
     },
     {
      "path": "/post-a-job.html",
      "title": "",
      "views": 906,
      "avgSec": 216
-    },
-    {
-     "path": "/universities.html",
-     "title": "",
-     "views": 784,
-     "avgSec": 471
     },
     {
      "path": "/verify-email.html",
@@ -6976,22 +7630,64 @@
      "avgSec": 213
     },
     {
+     "path": "/candidatesFooterWasClicked.html",
+     "title": "",
+     "views": 442,
+     "avgSec": 11
+    },
+    {
+     "path": "/placementsFooterWasClicked.html",
+     "title": "",
+     "views": 413,
+     "avgSec": 11
+    },
+    {
      "path": "/post-a-candidate.html",
      "title": "",
-     "views": 398,
-     "avgSec": 363
+     "views": 399,
+     "avgSec": 362
     },
     {
-     "path": "/recent-faculty.html",
+     "path": "/analytics.html",
      "title": "",
-     "views": 269,
-     "avgSec": 254
+     "views": 377,
+     "avgSec": 237
     },
     {
-     "path": "/previous-markets.html",
+     "path": "/survey-faqs.html",
      "title": "",
-     "views": 210,
-     "avgSec": 244
+     "views": 363,
+     "avgSec": 0
+    },
+    {
+     "path": "/contact.html",
+     "title": "",
+     "views": 358,
+     "avgSec": 0
+    },
+    {
+     "path": "/recent-facultyFooterWasClicked.html",
+     "title": "",
+     "views": 254,
+     "avgSec": 11
+    },
+    {
+     "path": "/Research Summaries of the 2017-2018 Candidates.html",
+     "title": "",
+     "views": 243,
+     "avgSec": 7
+    },
+    {
+     "path": "/Yeonjoo Lee Placement.html",
+     "title": "",
+     "views": 218,
+     "avgSec": 2
+    },
+    {
+     "path": "/Helen Wang Placement.html",
+     "title": "",
+     "views": 200,
+     "avgSec": 3
     },
     {
      "path": "/profile-analytics.html",
@@ -7000,10 +7696,64 @@
      "avgSec": 426
     },
     {
-     "path": "/analytics.html",
+     "path": "/Clare Snyder Placement.html",
      "title": "",
-     "views": 150,
-     "avgSec": 596
+     "views": 147,
+     "avgSec": 3
+    },
+    {
+     "path": "/Survey Slides by Kostas and Serguei.html",
+     "title": "",
+     "views": 143,
+     "avgSec": 17
+    },
+    {
+     "path": "/directors-and-contributors.html",
+     "title": "",
+     "views": 141,
+     "avgSec": 0
+    },
+    {
+     "path": "/Research%20Summaries%20of%20the%202017-2018%20Candidates.html",
+     "title": "",
+     "views": 136,
+     "avgSec": 6
+    },
+    {
+     "path": "/Vinit Tipnis Placement.html",
+     "title": "",
+     "views": 135,
+     "avgSec": 4
+    },
+    {
+     "path": "/Marios Papachristou Placement.html",
+     "title": "",
+     "views": 129,
+     "avgSec": 3
+    },
+    {
+     "path": "/Nikhil Garg Job Market Advice.html",
+     "title": "",
+     "views": 129,
+     "avgSec": 11
+    },
+    {
+     "path": "/Parshan Pakiman Placement.html",
+     "title": "",
+     "views": 110,
+     "avgSec": 3
+    },
+    {
+     "path": "/Harriet Jeon Placement.html",
+     "title": "",
+     "views": 108,
+     "avgSec": 2
+    },
+    {
+     "path": "/terms-and-conditions.html",
+     "title": "",
+     "views": 107,
+     "avgSec": 43
     },
     {
      "path": "/my-postings.html",
@@ -7012,34 +7762,124 @@
      "avgSec": 318
     },
     {
+     "path": "/privacy-policy.html",
+     "title": "",
+     "views": 104,
+     "avgSec": 54
+    },
+    {
      "path": "/alerts.html",
      "title": "",
      "views": 94,
      "avgSec": 268
     },
     {
-     "path": "/survey.html",
+     "path": "/resources-for-candidatesFooterWasClicked.html",
      "title": "",
-     "views": 67,
-     "avgSec": 56
+     "views": 90,
+     "avgSec": 16
+    },
+    {
+     "path": "/Nikhil%20Garg%20Job%20Market%20Advice.html",
+     "title": "",
+     "views": 80,
+     "avgSec": 10
+    },
+    {
+     "path": "/universitiesFooterWasClicked.html",
+     "title": "",
+     "views": 80,
+     "avgSec": 12
+    },
+    {
+     "path": "/JMbook.html",
+     "title": "",
+     "views": 79,
+     "avgSec": 11
+    },
+    {
+     "path": "/blogFooterWasClicked.html",
+     "title": "",
+     "views": 69,
+     "avgSec": 17
+    },
+    {
+     "path": "/Angela Kohlenberg Placement.html",
+     "title": "",
+     "views": 60,
+     "avgSec": 3
+    },
+    {
+     "path": "/How to create a website.html",
+     "title": "",
+     "views": 60,
+     "avgSec": 11
     },
     {
      "path": "/whats-new.html",
      "title": "",
-     "views": 55,
-     "avgSec": 603
+     "views": 56,
+     "avgSec": 593
+    },
+    {
+     "path": "/Survey%20Slides%20by%20Kostas%20and%20Serguei.html",
+     "title": "",
+     "views": 51,
+     "avgSec": 13
+    },
+    {
+     "path": "/contactFooterWasClicked.html",
+     "title": "",
+     "views": 48,
+     "avgSec": 12
+    },
+    {
+     "path": "/Tarek Abdallah Recent Faculty.html",
+     "title": "",
+     "views": 47,
+     "avgSec": 1
+    },
+    {
+     "path": "/surveyFooterWasClicked.html",
+     "title": "",
+     "views": 47,
+     "avgSec": 10
+    },
+    {
+     "path": "/How%20to%20create%20a%20website.html",
+     "title": "",
+     "views": 45,
+     "avgSec": 9
     },
     {
      "path": "/feedback.html",
      "title": "",
-     "views": 40,
-     "avgSec": 419
+     "views": 41,
+     "avgSec": 409
     },
     {
-     "path": "/terms-and-conditions.html",
+     "path": "/MKT%20Academia%20tips%20for%20Candidates.html",
      "title": "",
-     "views": 33,
-     "avgSec": 141
+     "views": 39,
+     "avgSec": 11
+    },
+    {
+     "path": "/Hartline Blog.html",
+     "title": "",
+     "views": 32,
+     "avgSec": 10
+    },
+    {
+     "path": "/analyticsFooterWasClicked.html",
+     "title": "",
+     "views": 32,
+     "avgSec": 21
+    },
+    {
+     "path": "/donateFooterWasClicked.html",
+     "title": "",
+     "views": 32,
+     "avgSec": 20
     },
     {
      "path": "/messages.html",
@@ -7048,22 +7888,304 @@
      "avgSec": 271
     },
     {
-     "path": "/survey-faqs.html",
+     "path": "/faqsFooterWasClicked.html",
      "title": "",
-     "views": 19,
+     "views": 27,
+     "avgSec": 10
+    },
+    {
+     "path": "/Jiaru Bai Recent Faculty.html",
+     "title": "",
+     "views": 26,
      "avgSec": 3
     },
     {
-     "path": "/privacy-policy.html",
+     "path": "/CS (Theory) jobs Resources.html",
      "title": "",
-     "views": 16,
-     "avgSec": 351
+     "views": 24,
+     "avgSec": 10
+    },
+    {
+     "path": "/Hartline%20Blog.html",
+     "title": "",
+     "views": 22,
+     "avgSec": 9
+    },
+    {
+     "path": "/A%20Guide%20and%20Advice%20for%20Economists%20on%20the%20US%20Market.html",
+     "title": "",
+     "views": 21,
+     "avgSec": 11
+    },
+    {
+     "path": "/CS%20(Theory)%20jobs%20Resources.html",
+     "title": "",
+     "views": 18,
+     "avgSec": 9
+    },
+    {
+     "path": "/Priyank Arora Recent Faculty.html",
+     "title": "",
+     "views": 18,
+     "avgSec": 3
     },
     {
      "path": "/post-a-placement.html",
      "title": "",
+     "views": 18,
+     "avgSec": 69
+    },
+    {
+     "path": "/Ali Aouad Recent Faculty.html",
+     "title": "",
+     "views": 17,
+     "avgSec": 2
+    },
+    {
+     "path": "/Arian Aflaki Recent Faculty.html",
+     "title": "",
+     "views": 17,
+     "avgSec": 1
+    },
+    {
+     "path": "/Nasser Barjesteh Recent Faculty.html",
+     "title": "",
+     "views": 16,
+     "avgSec": 6
+    },
+    {
+     "path": "/logoFooterClicked.html",
+     "title": "",
+     "views": 16,
+     "avgSec": 16
+    },
+    {
+     "path": "/Yufeng Cao Recent Faculty.html",
+     "title": "",
      "views": 15,
-     "avgSec": 83
+     "avgSec": 5
+    },
+    {
+     "path": "/Qi (George) Chen Recent Faculty.html",
+     "title": "",
+     "views": 14,
+     "avgSec": 7
+    },
+    {
+     "path": "/cuhkFooterWasClicked.html",
+     "title": "",
+     "views": 14,
+     "avgSec": 10
+    },
+    {
+     "path": "/Econ/CS%20post%20Blog.html",
+     "title": "",
+     "views": 13,
+     "avgSec": 6
+    },
+    {
+     "path": "/A Guide and Advice for Economists on the US Market.html",
+     "title": "",
+     "views": 12,
+     "avgSec": 18
+    },
+    {
+     "path": "/Athey paper - careers in Tech.html",
+     "title": "",
+     "views": 12,
+     "avgSec": 19
+    },
+    {
+     "path": "/Lennart Baardman Recent Faculty.html",
+     "title": "",
+     "views": 12,
+     "avgSec": 18
+    },
+    {
+     "path": "/MKT Academia tips for Candidates.html",
+     "title": "",
+     "views": 12,
+     "avgSec": 34
+    },
+    {
+     "path": "/universitiesFooterLeftClicked.html",
+     "title": "",
+     "views": 12,
+     "avgSec": 6
+    },
+    {
+     "path": "/CvilleFooterWasClicked.html",
+     "title": "",
+     "views": 11,
+     "avgSec": 8
+    },
+    {
+     "path": "/Econ/CS post Blog.html",
+     "title": "",
+     "views": 11,
+     "avgSec": 19
+    },
+    {
+     "path": "/Ekaterina (Kate) Astashkina Recent Faculty.html",
+     "title": "",
+     "views": 11,
+     "avgSec": 9
+    },
+    {
+     "path": "/Fernanda Bravo Recent Faculty.html",
+     "title": "",
+     "views": 11,
+     "avgSec": 7
+    },
+    {
+     "path": "/Tian Chan Recent Faculty.html",
+     "title": "",
+     "views": 11,
+     "avgSec": 4
+    },
+    {
+     "path": "/athensFooterWasClicked.html",
+     "title": "",
+     "views": 11,
+     "avgSec": 10
+    },
+    {
+     "path": "/Econ%20Job%20Market%20Resources.html",
+     "title": "",
+     "views": 10,
+     "avgSec": 11
+    },
+    {
+     "path": "/Junyu Cao Recent Faculty.html",
+     "title": "",
+     "views": 10,
+     "avgSec": 11
+    },
+    {
+     "path": "/Lina Song Recent Faculty.html",
+     "title": "",
+     "views": 10,
+     "avgSec": 5
+    },
+    {
+     "path": "/Xiaojia Guo Recent Faculty.html",
+     "title": "",
+     "views": 10,
+     "avgSec": 33
+    },
+    {
+     "path": "/Andre Calmon Recent Faculty.html",
+     "title": "",
+     "views": 9,
+     "avgSec": 11
+    },
+    {
+     "path": "/Emmanouil  Avgerinos Recent Faculty.html",
+     "title": "",
+     "views": 9,
+     "avgSec": 4
+    },
+    {
+     "path": "/Zhe Liu Recent Faculty.html",
+     "title": "",
+     "views": 9,
+     "avgSec": 3
+    },
+    {
+     "path": "/Athey%20paper%20-%20careers%20in%20Tech.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 31
+    },
+    {
+     "path": "/Econ Q&A Forum.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 13
+    },
+    {
+     "path": "/Feyza G. Sahinyazan Recent Faculty.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 3
+    },
+    {
+     "path": "/Hamsa Bastani Recent Faculty.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 4
+    },
+    {
+     "path": "/Katherine Ashley Recent Faculty.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 2
+    },
+    {
+     "path": "/Philipp B. Cornelius Recent Faculty.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 11
+    },
+    {
+     "path": "/Simin Li Recent Faculty.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 11
+    },
+    {
+     "path": "/Spyros Zoumpoulis Recent Faculty.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 21
+    },
+    {
+     "path": "/Zhihao (Terry) Zhang Recent Faculty.html",
+     "title": "",
+     "views": 8,
+     "avgSec": 27
+    },
+    {
+     "path": "/Boxiao (Beryl) Chen Recent Faculty.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 6
+    },
+    {
+     "path": "/Hyunwoo Park Recent Faculty.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 6
+    },
+    {
+     "path": "/Maxime Cohen Recent Faculty.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 1
+    },
+    {
+     "path": "/Michael Klein Recent Faculty.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 4
+    },
+    {
+     "path": "/Mohammadreza (M. Reza) Skandari Recent Faculty.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 1
+    },
+    {
+     "path": "/Shadi Goodarzi Recent Faculty.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 12
+    },
+    {
+     "path": "/Yao Cui Recent Faculty.html",
+     "title": "",
+     "views": 7,
+     "avgSec": 19
     },
     {
      "path": "/informed_consent_statement.html",
@@ -7072,13 +8194,1057 @@
      "avgSec": 3
     },
     {
+     "path": "/Andres Jola-Sanchez Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 5
+    },
+    {
+     "path": "/Jacob Chestnut Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 1
+    },
+    {
+     "path": "/Juan Serpa Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 1
+    },
+    {
+     "path": "/Kejia (Carrie) Hu Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 19
+    },
+    {
+     "path": "/Marcus Bellamy Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 4
+    },
+    {
+     "path": "/Oguz Cetin Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 4
+    },
+    {
+     "path": "/Sina  Ansari Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 4
+    },
+    {
+     "path": "/Yiangos Papanastasiou Recent Faculty.html",
+     "title": "",
+     "views": 6,
+     "avgSec": 1
+    },
+    {
+     "path": "/Amrita Kundu Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 2
+    },
+    {
+     "path": "/Athey HBR article.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 7
+    },
+    {
+     "path": "/Dipayan Banerjee Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 5
+    },
+    {
+     "path": "/Evgeny Kagan Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 0
+    },
+    {
+     "path": "/FontyFooterWasClicked.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 3
+    },
+    {
+     "path": "/Sheng Liu Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 6
+    },
+    {
+     "path": "/Wei Chen Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 15
+    },
+    {
+     "path": "/Xiaoyang Long Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 0
+    },
+    {
+     "path": "/Yanzhe (Murray) Lei Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 4
+    },
+    {
+     "path": "/Yueran  Zhuo Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 4
+    },
+    {
+     "path": "/Zhi Chen Recent Faculty.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 3
+    },
+    {
+     "path": "/privacy-policyFooterWasClicked.html",
+     "title": "",
+     "views": 5,
+     "avgSec": 11
+    },
+    {
+     "path": "/A. Serdar Simsek Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 5
+    },
+    {
+     "path": "/Christian Blanco Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 9
+    },
+    {
+     "path": "/Christopher Chen Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 8
+    },
+    {
+     "path": "/Daniel Freund Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 16
+    },
+    {
+     "path": "/Hummy Song Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 6
+    },
+    {
+     "path": "/Jonas Oddur Jonasson Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 10
+    },
+    {
+     "path": "/Lakshminarayana Nittala Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 0
+    },
+    {
+     "path": "/Masoud Kamalahmadi Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 6
+    },
+    {
+     "path": "/Moontae Lee Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 6
+    },
+    {
+     "path": "/OperationsAcademia.github.io/contact.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 0
+    },
+    {
+     "path": "/Rad Niazadeh Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 5
+    },
+    {
+     "path": "/Rakesh Mallipeddi Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 3
+    },
+    {
+     "path": "/Rowena Gan Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 8
+    },
+    {
+     "path": "/Rui Gao Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 3
+    },
+    {
+     "path": "/Safak Yucel Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 7
+    },
+    {
+     "path": "/SingyFooterWasClicked.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 11
+    },
+    {
+     "path": "/Weiming Zhu Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 4
+    },
+    {
+     "path": "/Yifan Feng Recent Faculty.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 1
+    },
+    {
+     "path": "/feedbackFooterWasClicked.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 7
+    },
+    {
+     "path": "/msomSocietyFooterWasClicked.html",
+     "title": "",
+     "views": 4,
+     "avgSec": 9
+    },
+    {
+     "path": "/Abhishek Roy Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 5
+    },
+    {
+     "path": "/Adam Elmachtoub Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 15
+    },
+    {
+     "path": "/Andrew E. Frazelle Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 12
+    },
+    {
+     "path": "/Athey%20HBR%20article.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 4
+    },
+    {
+     "path": "/Clara Carrera Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 11
+    },
+    {
+     "path": "/Dongyuan Zhan Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 5
+    },
+    {
+     "path": "/Hale Erkan Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 13
+    },
+    {
+     "path": "/Hayri (Alper) Arslan Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 2
+    },
+    {
+     "path": "/Long Zhao Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 5
+    },
+    {
+     "path": "/M. Serkan Akturk Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/Matthew Walsman Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 29
+    },
+    {
+     "path": "/Negin Golrezaei Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 3
+    },
+    {
+     "path": "/New%20York%20University%20Shanghai%202024.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 6
+    },
+    {
+     "path": "/Nil Karacaoglu Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 28
+    },
+    {
+     "path": "/OperationsAcademia.github.io/",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/analytics.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/analytics.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/candidates.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/contact.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/directors-and-contributors.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/faqs.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/informed_consent_statement.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/jobs.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/placements.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/previous-markets.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/privacy-policy.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/recent-faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/resources-for-candidates.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/survey-faqs.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/terms-and-conditions.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/universities.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/candidates.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/faqs.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/informed_consent_statement.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/jobs%20-%20Copy.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/jobs.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/placements.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/previous-markets.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/privacy-policy.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/recent-faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/resources-for-candidates.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/survey-faqs.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/survey.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/terms-and-conditions.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/universities.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/Ovunc Yilmaz Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 1
+    },
+    {
+     "path": "/Ozlem Yildiz Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 1
+    },
+    {
+     "path": "/Panos Markou Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 23
+    },
+    {
+     "path": "/Rongqing (Brian) Han Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 8
+    },
+    {
+     "path": "/Ruomeng Cui Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 20
+    },
+    {
+     "path": "/Sanjith Gopalakrishnan Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 42
+    },
+    {
+     "path": "/Sasa Zorc Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 3
+    },
+    {
+     "path": "/Shima Nassiri Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 9
+    },
+    {
+     "path": "/Thiago Serra Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 0
+    },
+    {
+     "path": "/University%20of%20Oklahoma%202024.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 6
+    },
+    {
+     "path": "/Yeqing Zhou Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 3
+    },
+    {
+     "path": "/Yixin (Iris) Wang Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 4
+    },
+    {
+     "path": "/Yixuan Liu Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 6
+    },
+    {
+     "path": "/Zhaohui (Zoey) Jiang Recent Faculty.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 6
+    },
+    {
+     "path": "/terms-and-conditionsFooterWasClicked.html",
+     "title": "",
+     "views": 3,
+     "avgSec": 48
+    },
+    {
+     "path": "/Ahmet Colak Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 25
+    },
+    {
+     "path": "/Alfonso J. Pedraza-Martinez Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 8
+    },
+    {
+     "path": "/Angela Zhou Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 3
+    },
+    {
+     "path": "/Anna Saez de Tejada Cuenca Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 9
+    },
+    {
+     "path": "/Ashish Kabra Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 10
+    },
+    {
+     "path": "/Changseung (Chang) Yoo Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 1
+    },
+    {
+     "path": "/Daniela Saban Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 27
+    },
+    {
+     "path": "/David F. Drake Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 0
+    },
+    {
+     "path": "/Econ Job Market Resources.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 11
+    },
+    {
+     "path": "/Econ%20Q&A%20Forum.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 4
+    },
+    {
+     "path": "/Fei Gao Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 12
+    },
+    {
+     "path": "/Harish Guda Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 7
+    },
+    {
+     "path": "/Jue Wang Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 16
+    },
+    {
+     "path": "/Junghee Lee Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 2
+    },
+    {
+     "path": "/Ken Moon Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 14
+    },
+    {
+     "path": "/Kris Johnson Ferreira Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 13
+    },
+    {
+     "path": "/OperationsAcademia.github.io/back%20up/2024/survey.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 0
+    },
+    {
+     "path": "/OperationsAcademia.github.io/directors-and-contributors.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 0
+    },
+    {
+     "path": "/Park Sinchaisri Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 22
+    },
+    {
+     "path": "/Parshuram Hotkar Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 0
+    },
+    {
+     "path": "/Peng Shi Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 9
+    },
+    {
+     "path": "/Qinshen Tang Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 9
+    },
+    {
+     "path": "/Rachel Cummings Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 1
+    },
+    {
+     "path": "/Sajad Modaresi Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 7
+    },
+    {
+     "path": "/Sandun Perera Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 7
+    },
+    {
+     "path": "/Siddharth Prakash Singh Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 4
+    },
+    {
+     "path": "/Soudipta (Dip) Chakraborty Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 15
+    },
+    {
+     "path": "/Swati Gupta Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 25
+    },
+    {
+     "path": "/Teng Huang Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 0
+    },
+    {
+     "path": "/Tilburg%20University%202024.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 3
+    },
+    {
+     "path": "/Tinglong Dai Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 6
+    },
+    {
+     "path": "/University%20of%20Mannheim%202024.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 6
+    },
+    {
+     "path": "/Wenchang Zhang Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 21
+    },
+    {
+     "path": "/Youngsoo Kim Recent Faculty.html",
+     "title": "",
+     "views": 2,
+     "avgSec": 8
+    },
+    {
+     "path": "/Aleksandr Kazachkov Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 17
+    },
+    {
+     "path": "/Dawson Kaaua  Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/DublinFooterWasClicked.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 6
+    },
+    {
+     "path": "/Eric Webb Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Ersin Korpeoglu Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 4
+    },
+    {
+     "path": "/Florin Ciocan Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Isil Koyuncu Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 5
+    },
+    {
+     "path": "/Jiding Zhang Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 73
+    },
+    {
+     "path": "/Kashish Arora Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Konstantinos Stouras Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 4
+    },
+    {
+     "path": "/Kraig Delana Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 27
+    },
+    {
+     "path": "/Levi DeValve Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 9
+    },
+    {
+     "path": "/Lusheng Shao Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 8
+    },
+    {
+     "path": "/Luyi Yang Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 13
+    },
+    {
+     "path": "/Marat Salikhov Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 7
+    },
+    {
+     "path": "/Maria Ibanez Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 4
+    },
+    {
+     "path": "/Mohamad Soltani Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/National%20University%20of%20Singapore%202024.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 22
+    },
+    {
+     "path": "/Nitish Jain Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Olga Bountali Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Ozge Yapar Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 13
+    },
+    {
+     "path": "/Remi Charpin Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 5
+    },
+    {
+     "path": "/Rice%20University%202024.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Ruslan Momot Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Sam Kirshner Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Sara Rezaee Vessal Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 17
+    },
+    {
+     "path": "/Scott Rodilitz Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 3
+    },
+    {
+     "path": "/Sreyaa Guha Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 51
+    },
+    {
+     "path": "/The%20Nanyang%20Business%20School%20(NBS),%20Nanyang%20Technological%20University,%20Singapore.%202024.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 16
+    },
+    {
+     "path": "/University%20College%20London%202024.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 10
+    },
+    {
+     "path": "/University%20of%20Notre%20Dame%202024.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 25
+    },
+    {
+     "path": "/University%20of%20San%20Diego%202024.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 6
+    },
+    {
+     "path": "/University%20of%20Toronto%202024.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 21
+    },
+    {
+     "path": "/Utku Serhatli Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 14
+    },
+    {
+     "path": "/Velibor Misic Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 2
+    },
+    {
+     "path": "/Vijay Kamble Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Ville Satopää Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
+     "path": "/Yue Zhang Recent Faculty.html",
+     "title": "",
+     "views": 1,
+     "avgSec": 14
+    },
+    {
+     "path": "/proxy_u/en-ru.ru.d3e9962c-66312add-06233735-74722d776562/www.operationsacademia.org/",
+     "title": "",
+     "views": 1,
+     "avgSec": 0
+    },
+    {
      "path": "/school-only-preview.html",
      "title": "",
      "views": 1,
      "avgSec": 420
     }
    ],
-   "source": "usage"
+   "source": "usage+ga4"
   }
  },
  "breakdowns": {
@@ -7194,11 +9360,11 @@
    "to": "2026-11-27",
    "metric": "visits",
    "zone": "",
-   "total": 7681,
+   "total": 7697,
    "items": [
     {
      "name": "United States",
-     "value": 4705
+     "value": 4707
     },
     {
      "name": "Canada",
@@ -7206,11 +9372,11 @@
     },
     {
      "name": "Singapore",
-     "value": 348
+     "value": 350
     },
     {
      "name": "Hong Kong",
-     "value": 332
+     "value": 333
     },
     {
      "name": "Greece",
@@ -7218,11 +9384,11 @@
     },
     {
      "name": "United Kingdom",
-     "value": 214
+     "value": 215
     },
     {
      "name": "South Korea",
-     "value": 203
+     "value": 205
     },
     {
      "name": "Japan",
@@ -7234,7 +9400,7 @@
     },
     {
      "name": "France",
-     "value": 92
+     "value": 93
     },
     {
      "name": "Ireland",
@@ -7258,11 +9424,11 @@
     },
     {
      "name": "Australia",
-     "value": 55
+     "value": 57
     },
     {
      "name": "Not recorded",
-     "value": 42
+     "value": 43
     },
     {
      "name": "Portugal",
@@ -7278,7 +9444,7 @@
     },
     {
      "name": "Brazil",
-     "value": 18
+     "value": 19
     },
     {
      "name": "Denmark",
@@ -7299,6 +9465,10 @@
     {
      "name": "Iran",
      "value": 9
+    },
+    {
+     "name": "Pakistan",
+     "value": 7
     },
     {
      "name": "Chile",
@@ -7333,10 +9503,6 @@
      "value": 5
     },
     {
-     "name": "Pakistan",
-     "value": 5
-    },
-    {
      "name": "Thailand",
      "value": 4
     },
@@ -7361,6 +9527,10 @@
      "value": 3
     },
     {
+     "name": "Argentina",
+     "value": 2
+    },
+    {
      "name": "Cambodia",
      "value": 2
     },
@@ -7383,10 +9553,6 @@
     {
      "name": "Ukraine",
      "value": 2
-    },
-    {
-     "name": "Argentina",
-     "value": 1
     },
     {
      "name": "Austria",
@@ -7468,15 +9634,15 @@
    "to": "2026-11-27",
    "metric": "visits",
    "zone": "",
-   "total": 7683,
+   "total": 7713,
    "items": [
     {
      "name": "desktop",
-     "value": 6495
+     "value": 6521
     },
     {
      "name": "mobile",
-     "value": 1179
+     "value": 1183
     },
     {
      "name": "tablet",
@@ -7490,7 +9656,7 @@
    "to": "2026-11-27",
    "metric": "visits",
    "zone": "",
-   "total": 7643,
+   "total": 7648,
    "items": [
     {
      "name": "Direct",
@@ -7498,7 +9664,7 @@
     },
     {
      "name": "Organic Search",
-     "value": 2109
+     "value": 2114
     },
     {
      "name": "Referral",
@@ -7524,7 +9690,7 @@
    "to": "2026-11-27",
    "metric": "visits",
    "zone": "",
-   "total": 7369,
+   "total": 7374,
    "items": [
     {
      "name": "Typed or bookmarked",
@@ -7532,7 +9698,7 @@
     },
     {
      "name": "google",
-     "value": 2059
+     "value": 2064
     },
     {
      "name": "francesxwang.substack.com",
@@ -9447,108 +11613,108 @@
  "breakdownWindows": {
   "30": {
    "hours": {
-    "source": "usage",
+    "source": "ga4",
     "from": "2026-10-29",
     "to": "2026-11-27",
     "metric": "visits",
-    "zone": "UTC",
-    "total": 4580,
+    "zone": "property",
+    "total": 1809,
     "items": [
      {
       "name": "00",
-      "value": 169
+      "value": 77
      },
      {
       "name": "01",
-      "value": 169
+      "value": 67
      },
      {
       "name": "02",
-      "value": 195
+      "value": 72
      },
      {
       "name": "03",
-      "value": 154
+      "value": 82
      },
      {
       "name": "04",
-      "value": 147
+      "value": 89
      },
      {
       "name": "05",
-      "value": 111
+      "value": 81
      },
      {
       "name": "06",
-      "value": 143
+      "value": 63
      },
      {
       "name": "07",
-      "value": 111
+      "value": 77
      },
      {
       "name": "08",
-      "value": 106
+      "value": 56
      },
      {
       "name": "09",
-      "value": 1015
+      "value": 48
      },
      {
       "name": "10",
-      "value": 91
+      "value": 62
      },
      {
       "name": "11",
-      "value": 97
+      "value": 68
      },
      {
       "name": "12",
-      "value": 155
+      "value": 44
      },
      {
       "name": "13",
-      "value": 115
+      "value": 54
      },
      {
       "name": "14",
-      "value": 110
+      "value": 60
      },
      {
       "name": "15",
-      "value": 177
+      "value": 60
      },
      {
       "name": "16",
-      "value": 186
+      "value": 75
      },
      {
       "name": "17",
-      "value": 216
+      "value": 88
      },
      {
       "name": "18",
-      "value": 181
+      "value": 88
      },
      {
       "name": "19",
-      "value": 186
+      "value": 124
      },
      {
       "name": "20",
-      "value": 195
+      "value": 98
      },
      {
       "name": "21",
-      "value": 226
+      "value": 88
      },
      {
       "name": "22",
-      "value": 166
+      "value": 93
      },
      {
       "name": "23",
-      "value": 159
+      "value": 95
      }
     ]
    },
@@ -9558,11 +11724,11 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 1677,
+    "total": 1698,
     "items": [
      {
       "name": "United States",
-      "value": 1005
+      "value": 1012
      },
      {
       "name": "Canada",
@@ -9570,11 +11736,11 @@
      },
      {
       "name": "South Korea",
-      "value": 97
+      "value": 99
      },
      {
       "name": "Singapore",
-      "value": 66
+      "value": 68
      },
      {
       "name": "Greece",
@@ -9582,7 +11748,7 @@
      },
      {
       "name": "Hong Kong",
-      "value": 52
+      "value": 53
      },
      {
       "name": "China",
@@ -9590,19 +11756,19 @@
      },
      {
       "name": "United Kingdom",
-      "value": 38
+      "value": 39
+     },
+     {
+      "name": "Australia",
+      "value": 21
      },
      {
       "name": "France",
-      "value": 20
+      "value": 21
      },
      {
       "name": "Japan",
       "value": 20
-     },
-     {
-      "name": "Australia",
-      "value": 19
      },
      {
       "name": "Ireland",
@@ -9613,16 +11779,16 @@
       "value": 14
      },
      {
-      "name": "India",
+      "name": "Not recorded",
       "value": 12
      },
      {
-      "name": "Not recorded",
-      "value": 11
+      "name": "Brazil",
+      "value": 12
      },
      {
-      "name": "Brazil",
-      "value": 11
+      "name": "India",
+      "value": 12
      },
      {
       "name": "Spain",
@@ -9693,12 +11859,20 @@
       "value": 2
      },
      {
+      "name": "Pakistan",
+      "value": 2
+     },
+     {
       "name": "Türkiye",
       "value": 2
      },
      {
       "name": "Ukraine",
       "value": 2
+     },
+     {
+      "name": "Argentina",
+      "value": 1
      },
      {
       "name": "Bangladesh",
@@ -9752,15 +11926,15 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 1672,
+    "total": 1691,
     "items": [
      {
       "name": "desktop",
-      "value": 1371
+      "value": 1386
      },
      {
       "name": "mobile",
-      "value": 299
+      "value": 303
      },
      {
       "name": "tablet",
@@ -9774,15 +11948,15 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 1673,
+    "total": 1692,
     "items": [
      {
       "name": "Direct",
-      "value": 1039
+      "value": 1054
      },
      {
       "name": "Organic Search",
-      "value": 487
+      "value": 491
      },
      {
       "name": "Referral",
@@ -9808,15 +11982,15 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 1632,
+    "total": 1651,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 1039
+      "value": 1054
      },
      {
       "name": "google",
-      "value": 479
+      "value": 483
      },
      {
       "name": "francesxwang.substack.com",
@@ -9883,108 +12057,108 @@
   },
   "90": {
    "hours": {
-    "source": "usage",
+    "source": "ga4",
     "from": "2026-08-30",
     "to": "2026-11-27",
     "metric": "visits",
-    "zone": "UTC",
-    "total": 18993,
+    "zone": "property",
+    "total": 8112,
     "items": [
      {
       "name": "00",
-      "value": 764
+      "value": 427
      },
      {
       "name": "01",
-      "value": 744
+      "value": 353
      },
      {
       "name": "02",
-      "value": 791
+      "value": 284
      },
      {
       "name": "03",
-      "value": 620
+      "value": 358
      },
      {
       "name": "04",
-      "value": 643
+      "value": 335
      },
      {
       "name": "05",
-      "value": 556
+      "value": 337
      },
      {
       "name": "06",
-      "value": 552
+      "value": 280
      },
      {
       "name": "07",
-      "value": 540
+      "value": 289
      },
      {
       "name": "08",
-      "value": 489
+      "value": 233
      },
      {
       "name": "09",
-      "value": 1525
+      "value": 235
      },
      {
       "name": "10",
-      "value": 475
+      "value": 248
      },
      {
       "name": "11",
-      "value": 501
+      "value": 230
      },
      {
       "name": "12",
-      "value": 640
+      "value": 241
      },
      {
       "name": "13",
-      "value": 780
+      "value": 211
      },
      {
       "name": "14",
-      "value": 920
+      "value": 246
      },
      {
       "name": "15",
-      "value": 976
+      "value": 304
      },
      {
       "name": "16",
-      "value": 989
+      "value": 450
      },
      {
       "name": "17",
-      "value": 920
+      "value": 476
      },
      {
       "name": "18",
-      "value": 883
+      "value": 433
      },
      {
       "name": "19",
-      "value": 1006
+      "value": 444
      },
      {
       "name": "20",
-      "value": 1069
+      "value": 400
      },
      {
       "name": "21",
-      "value": 1009
+      "value": 430
      },
      {
       "name": "22",
-      "value": 840
+      "value": 407
      },
      {
       "name": "23",
-      "value": 761
+      "value": 461
      }
     ]
    },
@@ -9994,11 +12168,11 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 7681,
+    "total": 7697,
     "items": [
      {
       "name": "United States",
-      "value": 4705
+      "value": 4707
      },
      {
       "name": "Canada",
@@ -10006,11 +12180,11 @@
      },
      {
       "name": "Singapore",
-      "value": 348
+      "value": 350
      },
      {
       "name": "Hong Kong",
-      "value": 332
+      "value": 333
      },
      {
       "name": "Greece",
@@ -10018,11 +12192,11 @@
      },
      {
       "name": "United Kingdom",
-      "value": 214
+      "value": 215
      },
      {
       "name": "South Korea",
-      "value": 203
+      "value": 205
      },
      {
       "name": "Japan",
@@ -10034,7 +12208,7 @@
      },
      {
       "name": "France",
-      "value": 92
+      "value": 93
      },
      {
       "name": "Ireland",
@@ -10058,11 +12232,11 @@
      },
      {
       "name": "Australia",
-      "value": 55
+      "value": 57
      },
      {
       "name": "Not recorded",
-      "value": 42
+      "value": 43
      },
      {
       "name": "Portugal",
@@ -10078,7 +12252,7 @@
      },
      {
       "name": "Brazil",
-      "value": 18
+      "value": 19
      },
      {
       "name": "Denmark",
@@ -10099,6 +12273,10 @@
      {
       "name": "Iran",
       "value": 9
+     },
+     {
+      "name": "Pakistan",
+      "value": 7
      },
      {
       "name": "Chile",
@@ -10133,10 +12311,6 @@
       "value": 5
      },
      {
-      "name": "Pakistan",
-      "value": 5
-     },
-     {
       "name": "Thailand",
       "value": 4
      },
@@ -10161,6 +12335,10 @@
       "value": 3
      },
      {
+      "name": "Argentina",
+      "value": 2
+     },
+     {
       "name": "Cambodia",
       "value": 2
      },
@@ -10183,10 +12361,6 @@
      {
       "name": "Ukraine",
       "value": 2
-     },
-     {
-      "name": "Argentina",
-      "value": 1
      },
      {
       "name": "Austria",
@@ -10268,15 +12442,15 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 7683,
+    "total": 7713,
     "items": [
      {
       "name": "desktop",
-      "value": 6495
+      "value": 6521
      },
      {
       "name": "mobile",
-      "value": 1179
+      "value": 1183
      },
      {
       "name": "tablet",
@@ -10290,7 +12464,7 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 7643,
+    "total": 7648,
     "items": [
      {
       "name": "Direct",
@@ -10298,7 +12472,7 @@
      },
      {
       "name": "Organic Search",
-      "value": 2109
+      "value": 2114
      },
      {
       "name": "Referral",
@@ -10324,7 +12498,7 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 7369,
+    "total": 7374,
     "items": [
      {
       "name": "Typed or bookmarked",
@@ -10332,7 +12506,7 @@
      },
      {
       "name": "google",
-      "value": 2059
+      "value": 2064
      },
      {
       "name": "francesxwang.substack.com",
@@ -10483,108 +12657,108 @@
   },
   "365": {
    "hours": {
-    "source": "usage",
-    "from": "2026-08-17",
+    "source": "ga4",
+    "from": "2025-11-28",
     "to": "2026-11-27",
     "metric": "visits",
-    "zone": "UTC",
-    "total": 20893,
+    "zone": "property",
+    "total": 15249,
     "items": [
      {
       "name": "00",
-      "value": 829
+      "value": 788
      },
      {
       "name": "01",
-      "value": 825
+      "value": 626
      },
      {
       "name": "02",
-      "value": 858
+      "value": 587
      },
      {
       "name": "03",
-      "value": 730
+      "value": 642
      },
      {
       "name": "04",
-      "value": 716
+      "value": 602
      },
      {
       "name": "05",
-      "value": 665
+      "value": 657
      },
      {
       "name": "06",
-      "value": 608
+      "value": 577
      },
      {
       "name": "07",
-      "value": 620
+      "value": 540
      },
      {
       "name": "08",
-      "value": 548
+      "value": 443
      },
      {
       "name": "09",
-      "value": 1608
+      "value": 431
      },
      {
       "name": "10",
-      "value": 569
+      "value": 450
      },
      {
       "name": "11",
-      "value": 559
+      "value": 422
      },
      {
       "name": "12",
-      "value": 715
+      "value": 407
      },
      {
       "name": "13",
-      "value": 846
+      "value": 389
      },
      {
       "name": "14",
-      "value": 1010
+      "value": 441
      },
      {
       "name": "15",
-      "value": 1092
+      "value": 576
      },
      {
       "name": "16",
-      "value": 1083
+      "value": 778
      },
      {
       "name": "17",
-      "value": 1036
+      "value": 900
      },
      {
       "name": "18",
-      "value": 956
+      "value": 861
      },
      {
       "name": "19",
-      "value": 1116
+      "value": 795
      },
      {
       "name": "20",
-      "value": 1157
+      "value": 758
      },
      {
       "name": "21",
-      "value": 1067
+      "value": 852
      },
      {
       "name": "22",
-      "value": 871
+      "value": 895
      },
      {
       "name": "23",
-      "value": 809
+      "value": 832
      }
     ]
    },
@@ -10594,11 +12768,11 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 14538,
+    "total": 14554,
     "items": [
      {
       "name": "United States",
-      "value": 8679
+      "value": 8680
      },
      {
       "name": "Canada",
@@ -10606,11 +12780,11 @@
      },
      {
       "name": "Singapore",
-      "value": 626
+      "value": 629
      },
      {
       "name": "Hong Kong",
-      "value": 557
+      "value": 558
      },
      {
       "name": "China",
@@ -10622,19 +12796,19 @@
      },
      {
       "name": "United Kingdom",
-      "value": 347
+      "value": 348
      },
      {
       "name": "South Korea",
-      "value": 276
+      "value": 278
+     },
+     {
+      "name": "France",
+      "value": 255
      },
      {
       "name": "Spain",
       "value": 255
-     },
-     {
-      "name": "France",
-      "value": 254
      },
      {
       "name": "India",
@@ -10650,7 +12824,7 @@
      },
      {
       "name": "Australia",
-      "value": 153
+      "value": 155
      },
      {
       "name": "Türkiye",
@@ -10666,11 +12840,11 @@
      },
      {
       "name": "Brazil",
-      "value": 75
+      "value": 76
      },
      {
       "name": "Not recorded",
-      "value": 64
+      "value": 65
      },
      {
       "name": "Belgium",
@@ -10737,6 +12911,10 @@
       "value": 10
      },
      {
+      "name": "Pakistan",
+      "value": 9
+     },
+     {
       "name": "Colombia",
       "value": 8
      },
@@ -10745,8 +12923,8 @@
       "value": 8
      },
      {
-      "name": "Pakistan",
-      "value": 7
+      "name": "Argentina",
+      "value": 5
      },
      {
       "name": "Finland",
@@ -10770,10 +12948,6 @@
      },
      {
       "name": "Algeria",
-      "value": 4
-     },
-     {
-      "name": "Argentina",
       "value": 4
      },
      {
@@ -10952,15 +13126,15 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 14567,
+    "total": 14641,
     "items": [
      {
       "name": "desktop",
-      "value": 11964
+      "value": 12034
      },
      {
       "name": "mobile",
-      "value": 2586
+      "value": 2590
      },
      {
       "name": "tablet",
@@ -10974,15 +13148,15 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 14456,
+    "total": 14480,
     "items": [
      {
       "name": "Direct",
-      "value": 9495
+      "value": 9518
      },
      {
       "name": "Organic Search",
-      "value": 3827
+      "value": 3828
      },
      {
       "name": "Referral",
@@ -11008,15 +13182,15 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 14100,
+    "total": 14124,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 9495
+      "value": 9518
      },
      {
       "name": "google",
-      "value": 3700
+      "value": 3701
      },
      {
       "name": "gemini.google.com",
@@ -11227,108 +13401,108 @@
   },
   "all": {
    "hours": {
-    "source": "usage",
-    "from": "2026-08-17",
+    "source": "ga4",
+    "from": "2023-06-16",
     "to": "2026-11-27",
     "metric": "visits",
-    "zone": "UTC",
-    "total": 20893,
+    "zone": "property",
+    "total": 59919,
     "items": [
      {
       "name": "00",
-      "value": 829
+      "value": 2824
      },
      {
       "name": "01",
-      "value": 825
+      "value": 2507
      },
      {
       "name": "02",
-      "value": 858
+      "value": 2216
      },
      {
       "name": "03",
-      "value": 730
+      "value": 2204
      },
      {
       "name": "04",
-      "value": 716
+      "value": 2289
      },
      {
       "name": "05",
-      "value": 665
+      "value": 2286
      },
      {
       "name": "06",
-      "value": 608
+      "value": 2084
      },
      {
       "name": "07",
-      "value": 620
+      "value": 1821
      },
      {
       "name": "08",
-      "value": 548
+      "value": 1913
      },
      {
       "name": "09",
-      "value": 1608
+      "value": 1956
      },
      {
       "name": "10",
-      "value": 569
+      "value": 2033
      },
      {
       "name": "11",
-      "value": 559
+      "value": 1990
      },
      {
       "name": "12",
-      "value": 715
+      "value": 1818
      },
      {
       "name": "13",
-      "value": 846
+      "value": 1794
      },
      {
       "name": "14",
-      "value": 1010
+      "value": 2001
      },
      {
       "name": "15",
-      "value": 1092
+      "value": 2496
      },
      {
       "name": "16",
-      "value": 1083
+      "value": 3029
      },
      {
       "name": "17",
-      "value": 1036
+      "value": 3303
      },
      {
       "name": "18",
-      "value": 956
+      "value": 3347
      },
      {
       "name": "19",
-      "value": 1116
+      "value": 3019
      },
      {
       "name": "20",
-      "value": 1157
+      "value": 3046
      },
      {
       "name": "21",
-      "value": 1067
+      "value": 3386
      },
      {
       "name": "22",
-      "value": 871
+      "value": 3498
      },
      {
       "name": "23",
-      "value": 809
+      "value": 3059
      }
     ]
    },
@@ -11338,23 +13512,23 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 58730,
+    "total": 58765,
     "items": [
      {
       "name": "United States",
-      "value": 36522
+      "value": 36541
      },
      {
       "name": "Canada",
-      "value": 5170
+      "value": 5172
      },
      {
       "name": "Singapore",
-      "value": 2098
+      "value": 2100
      },
      {
       "name": "Hong Kong",
-      "value": 1816
+      "value": 1817
      },
      {
       "name": "China",
@@ -11362,11 +13536,11 @@
      },
      {
       "name": "United Kingdom",
-      "value": 1530
+      "value": 1531
      },
      {
       "name": "France",
-      "value": 1123
+      "value": 1124
      },
      {
       "name": "Netherlands",
@@ -11386,7 +13560,7 @@
      },
      {
       "name": "South Korea",
-      "value": 701
+      "value": 703
      },
      {
       "name": "Greece",
@@ -11402,7 +13576,7 @@
      },
      {
       "name": "Australia",
-      "value": 321
+      "value": 323
      },
      {
       "name": "Ireland",
@@ -11410,7 +13584,7 @@
      },
      {
       "name": "Brazil",
-      "value": 169
+      "value": 170
      },
      {
       "name": "Taiwan",
@@ -11434,7 +13608,7 @@
      },
      {
       "name": "Not recorded",
-      "value": 111
+      "value": 112
      },
      {
       "name": "Thailand",
@@ -11522,15 +13696,15 @@
      },
      {
       "name": "Argentina",
-      "value": 25
+      "value": 26
+     },
+     {
+      "name": "Pakistan",
+      "value": 24
      },
      {
       "name": "South Africa",
       "value": 23
-     },
-     {
-      "name": "Pakistan",
-      "value": 22
      },
      {
       "name": "Egypt",
@@ -11828,15 +14002,15 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 58526,
+    "total": 58593,
     "items": [
      {
       "name": "desktop",
-      "value": 47068
+      "value": 47128
      },
      {
       "name": "mobile",
-      "value": 11317
+      "value": 11324
      },
      {
       "name": "tablet",
@@ -11850,15 +14024,15 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 58228,
+    "total": 58340,
     "items": [
      {
       "name": "Direct",
-      "value": 35400
+      "value": 35509
      },
      {
       "name": "Organic Search",
-      "value": 17909
+      "value": 17912
      },
      {
       "name": "Referral",
@@ -11884,15 +14058,15 @@
     "to": "2026-11-27",
     "metric": "visits",
     "zone": "",
-    "total": 57751,
+    "total": 57863,
     "items": [
      {
       "name": "Typed or bookmarked",
-      "value": 35400
+      "value": 35509
      },
      {
       "name": "google",
-      "value": 17193
+      "value": 17196
      },
      {
       "name": "connect.informs.org",
@@ -12244,36 +14418,36 @@
  },
  "engagementWindows": {
   "30": {
-   "source": "usage",
+   "source": "ga4",
    "from": "2026-10-29",
    "to": "2026-11-27",
-   "sessions": 4580,
-   "avgSessionSec": 296,
-   "viewsPerSession": 1
+   "sessions": 1691,
+   "avgSessionSec": 265,
+   "viewsPerSession": 2.48
   },
   "90": {
-   "source": "usage",
+   "source": "ga4",
    "from": "2026-08-30",
    "to": "2026-11-27",
-   "sessions": 18993,
-   "avgSessionSec": 445,
-   "viewsPerSession": 1
+   "sessions": 7678,
+   "avgSessionSec": 229,
+   "viewsPerSession": 2.23
   },
   "365": {
-   "source": "usage",
-   "from": "2026-08-17",
+   "source": "ga4",
+   "from": "2025-11-28",
    "to": "2026-11-27",
-   "sessions": 20893,
-   "avgSessionSec": 444,
-   "viewsPerSession": 1
+   "sessions": 14503,
+   "avgSessionSec": 156,
+   "viewsPerSession": 2.28
   },
   "all": {
-   "source": "usage",
-   "from": "2026-08-17",
+   "source": "ga4",
+   "from": "2023-06-16",
    "to": "2026-11-27",
-   "sessions": 20893,
-   "avgSessionSec": 444,
-   "viewsPerSession": 1
+   "sessions": 58428,
+   "avgSessionSec": 104,
+   "viewsPerSession": 2.42
   }
  },
  "range": {
