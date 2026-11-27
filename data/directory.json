@@ -12544,6 +12544,16 @@
   "facultyDirectoryHint": "Read the faculty entries labelled Accounting, Economics, Finance or Information Systems/Cyber Security; Darrell Carpenter is labelled chair of the combined department. The page also lists the separate Management and Marketing department."
  },
  {
+  "id": "loughborough-university",
+  "institution": "Loughborough University",
+  "type": "University",
+  "sources": [
+   "members"
+  ],
+  "mapLocationIds": [],
+  "mapLocationKind": "unresolved"
+ },
+ {
   "id": "lousiana-tech-univ____supply-chain-management",
   "institution": "Lousiana Tech Univ",
   "department": "Supply Chain Management",

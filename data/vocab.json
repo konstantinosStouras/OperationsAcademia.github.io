@@ -2254,6 +2254,10 @@
    "n": 0
   },
   {
+   "v": "Loughborough University",
+   "n": 0
+  },
+  {
    "v": "Loyola University Chicago",
    "n": 0
   },
@@ -9390,6 +9394,11 @@
      "Accounting, Economics, Finance, and Information Systems"
     ]
    }
+  },
+  "Loughborough University": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "Lousiana Tech Univ": {
    "schools": [],
