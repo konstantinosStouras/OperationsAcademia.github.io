@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-27T04:08:55.737Z",
+ "generated": "2026-11-27T14:01:04.397Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -10,12 +10,6 @@
   {
    "source": "usage",
    "days": 103,
-   "from": "",
-   "to": ""
-  },
-  {
-   "source": "ga4",
-   "days": 1158,
    "from": "",
    "to": ""
   }
@@ -6322,29 +6316,29 @@
    95
   ],
   "2026-11-27": [
-   16,
-   28,
-   28
+   36,
+   77,
+   77
   ]
  },
  "pages": [
   {
    "path": "/jobs.html",
    "title": "",
-   "views": 7758,
-   "avgSec": 621
+   "views": 7772,
+   "avgSec": 622
   },
   {
    "path": "/",
    "title": "",
-   "views": 5410,
-   "avgSec": 294
+   "views": 5428,
+   "avgSec": 293
   },
   {
    "path": "/candidates.html",
    "title": "",
-   "views": 1778,
-   "avgSec": 499
+   "views": 1783,
+   "avgSec": 498
   },
   {
    "path": "/post-a-job.html",
@@ -6355,7 +6349,7 @@
   {
    "path": "/universities.html",
    "title": "",
-   "views": 691,
+   "views": 692,
    "avgSec": 493
   },
   {
@@ -6367,20 +6361,20 @@
   {
    "path": "/account.html",
    "title": "",
-   "views": 479,
-   "avgSec": 223
+   "views": 481,
+   "avgSec": 222
   },
   {
    "path": "/post-a-candidate.html",
    "title": "",
-   "views": 370,
-   "avgSec": 370
+   "views": 375,
+   "avgSec": 366
   },
   {
    "path": "/recent-faculty.html",
    "title": "",
-   "views": 230,
-   "avgSec": 221
+   "views": 233,
+   "avgSec": 218
   },
   {
    "path": "/previous-markets.html",
@@ -6391,8 +6385,8 @@
   {
    "path": "/profile-analytics.html",
    "title": "",
-   "views": 184,
-   "avgSec": 428
+   "views": 185,
+   "avgSec": 426
   },
   {
    "path": "/analytics.html",
@@ -6477,32 +6471,32 @@
   "source": "usage",
   "from": "2026-08-30",
   "to": "2026-11-27",
-  "views": 18944
+  "views": 18993
  },
  "pagesWindows": {
   "30": {
    "days": 30,
    "from": "2026-10-29",
    "to": "2026-11-27",
-   "views": 4531,
+   "views": 4580,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 1910,
-     "avgSec": 390
+     "views": 1924,
+     "avgSec": 392
     },
     {
      "path": "/",
      "title": "",
-     "views": 1022,
-     "avgSec": 181
+     "views": 1040,
+     "avgSec": 178
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 559,
-     "avgSec": 492
+     "views": 564,
+     "avgSec": 489
     },
     {
      "path": "/post-a-job.html",
@@ -6513,14 +6507,20 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 156,
-     "avgSec": 239
+     "views": 157,
+     "avgSec": 237
     },
     {
      "path": "/account.html",
      "title": "",
-     "views": 72,
-     "avgSec": 100
+     "views": 74,
+     "avgSec": 98
+    },
+    {
+     "path": "/profile-analytics.html",
+     "title": "",
+     "views": 59,
+     "avgSec": 333
     },
     {
      "path": "/verify-email.html",
@@ -6529,22 +6529,16 @@
      "avgSec": 8
     },
     {
-     "path": "/profile-analytics.html",
-     "title": "",
-     "views": 58,
-     "avgSec": 338
-    },
-    {
      "path": "/recent-faculty.html",
      "title": "",
-     "views": 49,
-     "avgSec": 163
+     "views": 52,
+     "avgSec": 154
     },
     {
      "path": "/post-a-candidate.html",
      "title": "",
-     "views": 34,
-     "avgSec": 267
+     "views": 39,
+     "avgSec": 240
     },
     {
      "path": "/previous-markets.html",
@@ -6631,25 +6625,25 @@
    "days": 90,
    "from": "2026-08-30",
    "to": "2026-11-27",
-   "views": 18944,
+   "views": 18993,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 7758,
-     "avgSec": 621
+     "views": 7772,
+     "avgSec": 622
     },
     {
      "path": "/",
      "title": "",
-     "views": 5410,
-     "avgSec": 294
+     "views": 5428,
+     "avgSec": 293
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 1778,
-     "avgSec": 499
+     "views": 1783,
+     "avgSec": 498
     },
     {
      "path": "/post-a-job.html",
@@ -6660,7 +6654,7 @@
     {
      "path": "/universities.html",
      "title": "",
-     "views": 691,
+     "views": 692,
      "avgSec": 493
     },
     {
@@ -6672,20 +6666,20 @@
     {
      "path": "/account.html",
      "title": "",
-     "views": 479,
-     "avgSec": 223
+     "views": 481,
+     "avgSec": 222
     },
     {
      "path": "/post-a-candidate.html",
      "title": "",
-     "views": 370,
-     "avgSec": 370
+     "views": 375,
+     "avgSec": 366
     },
     {
      "path": "/recent-faculty.html",
      "title": "",
-     "views": 230,
-     "avgSec": 221
+     "views": 233,
+     "avgSec": 218
     },
     {
      "path": "/previous-markets.html",
@@ -6696,8 +6690,8 @@
     {
      "path": "/profile-analytics.html",
      "title": "",
-     "views": 184,
-     "avgSec": 428
+     "views": 185,
+     "avgSec": 426
     },
     {
      "path": "/analytics.html",
@@ -6782,45 +6776,39 @@
   },
   "365": {
    "days": 365,
-   "from": "2025-11-28",
+   "from": "2026-08-17",
    "to": "2026-11-27",
-   "views": 36558,
+   "views": 20893,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 13971,
-     "avgSec": 374
+     "views": 8478,
+     "avgSec": 617
     },
     {
      "path": "/",
      "title": "",
-     "views": 10322,
-     "avgSec": 180
+     "views": 6137,
+     "avgSec": 302
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 3956,
-     "avgSec": 224
-    },
-    {
-     "path": "/placements.html",
-     "title": "",
-     "views": 1491,
-     "avgSec": 0
-    },
-    {
-     "path": "/universities.html",
-     "title": "",
-     "views": 1081,
-     "avgSec": 341
+     "views": 1783,
+     "avgSec": 498
     },
     {
      "path": "/post-a-job.html",
      "title": "",
      "views": 906,
      "avgSec": 216
+    },
+    {
+     "path": "/universities.html",
+     "title": "",
+     "views": 784,
+     "avgSec": 471
     },
     {
      "path": "/verify-email.html",
@@ -6831,68 +6819,38 @@
     {
      "path": "/account.html",
      "title": "",
-     "views": 528,
-     "avgSec": 214
-    },
-    {
-     "path": "/recent-faculty.html",
-     "title": "",
-     "views": 405,
-     "avgSec": 169
+     "views": 530,
+     "avgSec": 213
     },
     {
      "path": "/post-a-candidate.html",
      "title": "",
-     "views": 394,
-     "avgSec": 366
+     "views": 398,
+     "avgSec": 363
     },
     {
-     "path": "/survey.html",
+     "path": "/recent-faculty.html",
      "title": "",
-     "views": 383,
-     "avgSec": 10
-    },
-    {
-     "path": "/resources-for-candidates.html",
-     "title": "",
-     "views": 367,
-     "avgSec": 0
+     "views": 269,
+     "avgSec": 254
     },
     {
      "path": "/previous-markets.html",
      "title": "",
-     "views": 308,
-     "avgSec": 166
+     "views": 210,
+     "avgSec": 244
     },
     {
      "path": "/profile-analytics.html",
      "title": "",
-     "views": 184,
-     "avgSec": 428
+     "views": 185,
+     "avgSec": 426
     },
     {
      "path": "/analytics.html",
      "title": "",
-     "views": 173,
-     "avgSec": 516
-    },
-    {
-     "path": "/logoHeader.html",
-     "title": "",
      "views": 150,
-     "avgSec": 13
-    },
-    {
-     "path": "/jobsFooterWasClicked.html",
-     "title": "",
-     "views": 108,
-     "avgSec": 9
-    },
-    {
-     "path": "/faqs.html",
-     "title": "",
-     "views": 106,
-     "avgSec": 0
+     "avgSec": 596
     },
     {
      "path": "/my-postings.html",
@@ -6907,58 +6865,28 @@
      "avgSec": 268
     },
     {
-     "path": "/survey-faqs.html",
+     "path": "/survey.html",
      "title": "",
-     "views": 71,
-     "avgSec": 1
-    },
-    {
-     "path": "/contact.html",
-     "title": "",
-     "views": 64,
-     "avgSec": 0
-    },
-    {
-     "path": "/placementsFooterWasClicked.html",
-     "title": "",
-     "views": 63,
-     "avgSec": 12
-    },
-    {
-     "path": "/terms-and-conditions.html",
-     "title": "",
-     "views": 63,
-     "avgSec": 74
+     "views": 67,
+     "avgSec": 56
     },
     {
      "path": "/whats-new.html",
      "title": "",
-     "views": 56,
-     "avgSec": 593
-    },
-    {
-     "path": "/candidatesFooterWasClicked.html",
-     "title": "",
-     "views": 42,
-     "avgSec": 11
+     "views": 55,
+     "avgSec": 603
     },
     {
      "path": "/feedback.html",
      "title": "",
-     "views": 41,
-     "avgSec": 409
+     "views": 40,
+     "avgSec": 419
     },
     {
-     "path": "/privacy-policy.html",
+     "path": "/terms-and-conditions.html",
      "title": "",
-     "views": 32,
-     "avgSec": 175
-    },
-    {
-     "path": "/directors-and-contributors.html",
-     "title": "",
-     "views": 29,
-     "avgSec": 0
+     "views": 33,
+     "avgSec": 141
     },
     {
      "path": "/messages.html",
@@ -6967,106 +6895,22 @@
      "avgSec": 271
     },
     {
-     "path": "/recent-facultyFooterWasClicked.html",
+     "path": "/survey-faqs.html",
      "title": "",
-     "views": 28,
-     "avgSec": 11
+     "views": 19,
+     "avgSec": 3
     },
     {
-     "path": "/Research Summaries of the 2017-2018 Candidates.html",
+     "path": "/privacy-policy.html",
      "title": "",
-     "views": 27,
-     "avgSec": 6
-    },
-    {
-     "path": "/Survey Slides by Kostas and Serguei.html",
-     "title": "",
-     "views": 25,
-     "avgSec": 13
-    },
-    {
-     "path": "/Nikhil Garg Job Market Advice.html",
-     "title": "",
-     "views": 24,
-     "avgSec": 12
-    },
-    {
-     "path": "/JMbook.html",
-     "title": "",
-     "views": 23,
-     "avgSec": 11
+     "views": 16,
+     "avgSec": 351
     },
     {
      "path": "/post-a-placement.html",
      "title": "",
-     "views": 18,
-     "avgSec": 69
-    },
-    {
-     "path": "/Tarek Abdallah Recent Faculty.html",
-     "title": "",
-     "views": 17,
-     "avgSec": 0
-    },
-    {
-     "path": "/How to create a website.html",
-     "title": "",
-     "views": 12,
-     "avgSec": 11
-    },
-    {
-     "path": "/donateFooterWasClicked.html",
-     "title": "",
-     "views": 12,
-     "avgSec": 27
-    },
-    {
-     "path": "/blogFooterWasClicked.html",
-     "title": "",
-     "views": 10,
-     "avgSec": 10
-    },
-    {
-     "path": "/resources-for-candidatesFooterWasClicked.html",
-     "title": "",
-     "views": 9,
-     "avgSec": 46
-    },
-    {
-     "path": "/Yufeng Cao Recent Faculty.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 5
-    },
-    {
-     "path": "/surveyFooterWasClicked.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 9
-    },
-    {
-     "path": "/Hartline Blog.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 8
-    },
-    {
-     "path": "/Junyu Cao Recent Faculty.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 5
-    },
-    {
-     "path": "/Nasser Barjesteh Recent Faculty.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 4
-    },
-    {
-     "path": "/analyticsFooterWasClicked.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 6
+     "views": 15,
+     "avgSec": 83
     },
     {
      "path": "/informed_consent_statement.html",
@@ -7075,547 +6919,49 @@
      "avgSec": 3
     },
     {
-     "path": "/Ali Aouad Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 4
-    },
-    {
-     "path": "/Arian Aflaki Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 2
-    },
-    {
-     "path": "/CS (Theory) jobs Resources.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 13
-    },
-    {
-     "path": "/Hamsa Bastani Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 5
-    },
-    {
-     "path": "/Jiaru Bai Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 2
-    },
-    {
-     "path": "/Lennart Baardman Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 29
-    },
-    {
-     "path": "/Priyank Arora Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 3
-    },
-    {
-     "path": "/cuhkFooterWasClicked.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 13
-    },
-    {
-     "path": "/Lina Song Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 5
-    },
-    {
-     "path": "/Zhe Liu Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 1
-    },
-    {
-     "path": "/A Guide and Advice for Economists on the US Market.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 6
-    },
-    {
-     "path": "/Athey paper - careers in Tech.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 19
-    },
-    {
-     "path": "/CvilleFooterWasClicked.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 5
-    },
-    {
-     "path": "/Fernanda Bravo Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 2
-    },
-    {
-     "path": "/Hyunwoo Park Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 6
-    },
-    {
-     "path": "/Katherine Ashley Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 3
-    },
-    {
-     "path": "/Maxime Cohen Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 0
-    },
-    {
-     "path": "/Yifan Feng Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 1
-    },
-    {
-     "path": "/contactFooterWasClicked.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 11
-    },
-    {
-     "path": "/logoFooterClicked.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 6
-    },
-    {
-     "path": "/Boxiao (Beryl) Chen Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 13
-    },
-    {
-     "path": "/Clara Carrera Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 11
-    },
-    {
-     "path": "/Econ Q&A Forum.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 18
-    },
-    {
-     "path": "/Econ/CS post Blog.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 10
-    },
-    {
-     "path": "/Philipp B. Cornelius Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 13
-    },
-    {
-     "path": "/Qi (George) Chen Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 8
-    },
-    {
-     "path": "/Rui Gao Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 3
-    },
-    {
-     "path": "/Simin Li Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 19
-    },
-    {
-     "path": "/Sina  Ansari Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/Spyros Zoumpoulis Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 9
-    },
-    {
-     "path": "/Xiaojia Guo Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 37
-    },
-    {
-     "path": "/Xiaoyang Long Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/Zhihao (Terry) Zhang Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 59
-    },
-    {
-     "path": "/faqsFooterWasClicked.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 12
-    },
-    {
-     "path": "/Alfonso J. Pedraza-Martinez Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 8
-    },
-    {
-     "path": "/Anna Saez de Tejada Cuenca Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 9
-    },
-    {
-     "path": "/Hummy Song Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 2
-    },
-    {
-     "path": "/Junghee Lee Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 2
-    },
-    {
-     "path": "/Kejia (Carrie) Hu Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 49
-    },
-    {
-     "path": "/Ken Moon Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 14
-    },
-    {
-     "path": "/M. Serkan Akturk Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 0
-    },
-    {
-     "path": "/Rowena Gan Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 6
-    },
-    {
-     "path": "/Ruomeng Cui Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 25
-    },
-    {
-     "path": "/Tinglong Dai Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 6
-    },
-    {
-     "path": "/Yao Cui Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 3
-    },
-    {
-     "path": "/Yueran  Zhuo Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 10
-    },
-    {
-     "path": "/Zhi Chen Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 7
-    },
-    {
-     "path": "/athensFooterWasClicked.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 5
-    },
-    {
-     "path": "/msomSocietyFooterWasClicked.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 5
-    },
-    {
-     "path": "/universitiesFooterWasClicked.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 2
-    },
-    {
-     "path": "/Andre Calmon Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 3
-    },
-    {
-     "path": "/Athey HBR article.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 6
-    },
-    {
-     "path": "/David F. Drake Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Harish Guda Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 13
-    },
-    {
-     "path": "/Jiding Zhang Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 73
-    },
-    {
-     "path": "/Jue Wang Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 3
-    },
-    {
-     "path": "/Lusheng Shao Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 8
-    },
-    {
-     "path": "/Marcus Bellamy Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 6
-    },
-    {
-     "path": "/Matthew Walsman Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 67
-    },
-    {
-     "path": "/Moontae Lee Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 13
-    },
-    {
-     "path": "/Nil Karacaoglu Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 45
-    },
-    {
-     "path": "/Peng Shi Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 8
-    },
-    {
-     "path": "/Qinshen Tang Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Rongqing (Brian) Han Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 10
-    },
-    {
-     "path": "/Sandun Perera Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Sasa Zorc Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 4
-    },
-    {
-     "path": "/Sheng Liu Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 8
-    },
-    {
-     "path": "/SingyFooterWasClicked.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 4
-    },
-    {
-     "path": "/Teng Huang Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Tian Chan Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 12
-    },
-    {
-     "path": "/Wei Chen Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 12
-    },
-    {
-     "path": "/Weiming Zhu Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 2
-    },
-    {
-     "path": "/Yixin (Iris) Wang Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 13
-    },
-    {
-     "path": "/Yixuan Liu Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 10
-    },
-    {
      "path": "/school-only-preview.html",
      "title": "",
      "views": 1,
      "avgSec": 420
-    },
-    {
-     "path": "/universitiesFooterLeftClicked.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 13
     }
    ],
-   "source": "usage+ga4"
+   "source": "usage"
   },
   "all": {
    "days": 0,
-   "from": "2023-06-16",
+   "from": "2026-08-17",
    "to": "2026-11-27",
-   "views": 144678,
+   "views": 20893,
    "pages": [
     {
      "path": "/jobs.html",
      "title": "",
-     "views": 50307,
-     "avgSec": 104
+     "views": 8478,
+     "avgSec": 617
     },
     {
      "path": "/",
      "title": "",
-     "views": 38372,
-     "avgSec": 48
+     "views": 6137,
+     "avgSec": 302
     },
     {
      "path": "/candidates.html",
      "title": "",
-     "views": 21955,
-     "avgSec": 40
-    },
-    {
-     "path": "/placements.html",
-     "title": "",
-     "views": 9562,
-     "avgSec": 0
-    },
-    {
-     "path": "/resources-for-candidates.html",
-     "title": "",
-     "views": 3580,
-     "avgSec": 0
-    },
-    {
-     "path": "/universities.html",
-     "title": "",
-     "views": 3096,
-     "avgSec": 119
-    },
-    {
-     "path": "/survey.html",
-     "title": "",
-     "views": 2708,
-     "avgSec": 1
-    },
-    {
-     "path": "/recent-faculty.html",
-     "title": "",
-     "views": 1532,
-     "avgSec": 45
-    },
-    {
-     "path": "/logoHeader.html",
-     "title": "",
-     "views": 1297,
-     "avgSec": 10
-    },
-    {
-     "path": "/previous-markets.html",
-     "title": "",
-     "views": 1186,
-     "avgSec": 43
-    },
-    {
-     "path": "/jobsFooterWasClicked.html",
-     "title": "",
-     "views": 973,
-     "avgSec": 10
-    },
-    {
-     "path": "/faqs.html",
-     "title": "",
-     "views": 947,
-     "avgSec": 0
+     "views": 1783,
+     "avgSec": 498
     },
     {
      "path": "/post-a-job.html",
      "title": "",
      "views": 906,
      "avgSec": 216
+    },
+    {
+     "path": "/universities.html",
+     "title": "",
+     "views": 784,
+     "avgSec": 471
     },
     {
      "path": "/verify-email.html",
@@ -7626,134 +6972,38 @@
     {
      "path": "/account.html",
      "title": "",
-     "views": 528,
-     "avgSec": 214
-    },
-    {
-     "path": "/candidatesFooterWasClicked.html",
-     "title": "",
-     "views": 442,
-     "avgSec": 11
-    },
-    {
-     "path": "/placementsFooterWasClicked.html",
-     "title": "",
-     "views": 413,
-     "avgSec": 11
+     "views": 530,
+     "avgSec": 213
     },
     {
      "path": "/post-a-candidate.html",
      "title": "",
-     "views": 394,
-     "avgSec": 366
+     "views": 398,
+     "avgSec": 363
     },
     {
-     "path": "/analytics.html",
+     "path": "/recent-faculty.html",
      "title": "",
-     "views": 377,
-     "avgSec": 237
+     "views": 269,
+     "avgSec": 254
     },
     {
-     "path": "/survey-faqs.html",
+     "path": "/previous-markets.html",
      "title": "",
-     "views": 363,
-     "avgSec": 0
-    },
-    {
-     "path": "/contact.html",
-     "title": "",
-     "views": 358,
-     "avgSec": 0
-    },
-    {
-     "path": "/recent-facultyFooterWasClicked.html",
-     "title": "",
-     "views": 254,
-     "avgSec": 11
-    },
-    {
-     "path": "/Research Summaries of the 2017-2018 Candidates.html",
-     "title": "",
-     "views": 243,
-     "avgSec": 7
-    },
-    {
-     "path": "/Yeonjoo Lee Placement.html",
-     "title": "",
-     "views": 218,
-     "avgSec": 2
-    },
-    {
-     "path": "/Helen Wang Placement.html",
-     "title": "",
-     "views": 200,
-     "avgSec": 3
+     "views": 210,
+     "avgSec": 244
     },
     {
      "path": "/profile-analytics.html",
      "title": "",
-     "views": 184,
-     "avgSec": 428
+     "views": 185,
+     "avgSec": 426
     },
     {
-     "path": "/Clare Snyder Placement.html",
+     "path": "/analytics.html",
      "title": "",
-     "views": 147,
-     "avgSec": 3
-    },
-    {
-     "path": "/Survey Slides by Kostas and Serguei.html",
-     "title": "",
-     "views": 143,
-     "avgSec": 17
-    },
-    {
-     "path": "/directors-and-contributors.html",
-     "title": "",
-     "views": 141,
-     "avgSec": 0
-    },
-    {
-     "path": "/Research%20Summaries%20of%20the%202017-2018%20Candidates.html",
-     "title": "",
-     "views": 136,
-     "avgSec": 6
-    },
-    {
-     "path": "/Vinit Tipnis Placement.html",
-     "title": "",
-     "views": 135,
-     "avgSec": 4
-    },
-    {
-     "path": "/Marios Papachristou Placement.html",
-     "title": "",
-     "views": 129,
-     "avgSec": 3
-    },
-    {
-     "path": "/Nikhil Garg Job Market Advice.html",
-     "title": "",
-     "views": 129,
-     "avgSec": 11
-    },
-    {
-     "path": "/Parshan Pakiman Placement.html",
-     "title": "",
-     "views": 110,
-     "avgSec": 3
-    },
-    {
-     "path": "/Harriet Jeon Placement.html",
-     "title": "",
-     "views": 108,
-     "avgSec": 2
-    },
-    {
-     "path": "/terms-and-conditions.html",
-     "title": "",
-     "views": 107,
-     "avgSec": 43
+     "views": 150,
+     "avgSec": 596
     },
     {
      "path": "/my-postings.html",
@@ -7762,124 +7012,34 @@
      "avgSec": 318
     },
     {
-     "path": "/privacy-policy.html",
-     "title": "",
-     "views": 104,
-     "avgSec": 54
-    },
-    {
      "path": "/alerts.html",
      "title": "",
      "views": 94,
      "avgSec": 268
     },
     {
-     "path": "/resources-for-candidatesFooterWasClicked.html",
+     "path": "/survey.html",
      "title": "",
-     "views": 90,
-     "avgSec": 16
-    },
-    {
-     "path": "/Nikhil%20Garg%20Job%20Market%20Advice.html",
-     "title": "",
-     "views": 80,
-     "avgSec": 10
-    },
-    {
-     "path": "/universitiesFooterWasClicked.html",
-     "title": "",
-     "views": 80,
-     "avgSec": 12
-    },
-    {
-     "path": "/JMbook.html",
-     "title": "",
-     "views": 79,
-     "avgSec": 11
-    },
-    {
-     "path": "/blogFooterWasClicked.html",
-     "title": "",
-     "views": 69,
-     "avgSec": 17
-    },
-    {
-     "path": "/Angela Kohlenberg Placement.html",
-     "title": "",
-     "views": 60,
-     "avgSec": 3
-    },
-    {
-     "path": "/How to create a website.html",
-     "title": "",
-     "views": 60,
-     "avgSec": 11
+     "views": 67,
+     "avgSec": 56
     },
     {
      "path": "/whats-new.html",
      "title": "",
-     "views": 56,
-     "avgSec": 593
-    },
-    {
-     "path": "/Survey%20Slides%20by%20Kostas%20and%20Serguei.html",
-     "title": "",
-     "views": 51,
-     "avgSec": 13
-    },
-    {
-     "path": "/contactFooterWasClicked.html",
-     "title": "",
-     "views": 48,
-     "avgSec": 12
-    },
-    {
-     "path": "/Tarek Abdallah Recent Faculty.html",
-     "title": "",
-     "views": 47,
-     "avgSec": 1
-    },
-    {
-     "path": "/surveyFooterWasClicked.html",
-     "title": "",
-     "views": 47,
-     "avgSec": 10
-    },
-    {
-     "path": "/How%20to%20create%20a%20website.html",
-     "title": "",
-     "views": 45,
-     "avgSec": 9
+     "views": 55,
+     "avgSec": 603
     },
     {
      "path": "/feedback.html",
      "title": "",
-     "views": 41,
-     "avgSec": 409
+     "views": 40,
+     "avgSec": 419
     },
     {
-     "path": "/MKT%20Academia%20tips%20for%20Candidates.html",
+     "path": "/terms-and-conditions.html",
      "title": "",
-     "views": 39,
-     "avgSec": 11
-    },
-    {
-     "path": "/Hartline Blog.html",
-     "title": "",
-     "views": 32,
-     "avgSec": 10
-    },
-    {
-     "path": "/analyticsFooterWasClicked.html",
-     "title": "",
-     "views": 32,
-     "avgSec": 21
-    },
-    {
-     "path": "/donateFooterWasClicked.html",
-     "title": "",
-     "views": 32,
-     "avgSec": 20
+     "views": 33,
+     "avgSec": 141
     },
     {
      "path": "/messages.html",
@@ -7888,304 +7048,22 @@
      "avgSec": 271
     },
     {
-     "path": "/faqsFooterWasClicked.html",
+     "path": "/survey-faqs.html",
      "title": "",
-     "views": 27,
-     "avgSec": 10
-    },
-    {
-     "path": "/Jiaru Bai Recent Faculty.html",
-     "title": "",
-     "views": 26,
+     "views": 19,
      "avgSec": 3
     },
     {
-     "path": "/CS (Theory) jobs Resources.html",
+     "path": "/privacy-policy.html",
      "title": "",
-     "views": 24,
-     "avgSec": 10
-    },
-    {
-     "path": "/Hartline%20Blog.html",
-     "title": "",
-     "views": 22,
-     "avgSec": 9
-    },
-    {
-     "path": "/A%20Guide%20and%20Advice%20for%20Economists%20on%20the%20US%20Market.html",
-     "title": "",
-     "views": 21,
-     "avgSec": 11
-    },
-    {
-     "path": "/CS%20(Theory)%20jobs%20Resources.html",
-     "title": "",
-     "views": 18,
-     "avgSec": 9
-    },
-    {
-     "path": "/Priyank Arora Recent Faculty.html",
-     "title": "",
-     "views": 18,
-     "avgSec": 3
+     "views": 16,
+     "avgSec": 351
     },
     {
      "path": "/post-a-placement.html",
      "title": "",
-     "views": 18,
-     "avgSec": 69
-    },
-    {
-     "path": "/Ali Aouad Recent Faculty.html",
-     "title": "",
-     "views": 17,
-     "avgSec": 2
-    },
-    {
-     "path": "/Arian Aflaki Recent Faculty.html",
-     "title": "",
-     "views": 17,
-     "avgSec": 1
-    },
-    {
-     "path": "/Nasser Barjesteh Recent Faculty.html",
-     "title": "",
-     "views": 16,
-     "avgSec": 6
-    },
-    {
-     "path": "/logoFooterClicked.html",
-     "title": "",
-     "views": 16,
-     "avgSec": 16
-    },
-    {
-     "path": "/Yufeng Cao Recent Faculty.html",
-     "title": "",
      "views": 15,
-     "avgSec": 5
-    },
-    {
-     "path": "/Qi (George) Chen Recent Faculty.html",
-     "title": "",
-     "views": 14,
-     "avgSec": 7
-    },
-    {
-     "path": "/cuhkFooterWasClicked.html",
-     "title": "",
-     "views": 14,
-     "avgSec": 10
-    },
-    {
-     "path": "/Econ/CS%20post%20Blog.html",
-     "title": "",
-     "views": 13,
-     "avgSec": 6
-    },
-    {
-     "path": "/A Guide and Advice for Economists on the US Market.html",
-     "title": "",
-     "views": 12,
-     "avgSec": 18
-    },
-    {
-     "path": "/Athey paper - careers in Tech.html",
-     "title": "",
-     "views": 12,
-     "avgSec": 19
-    },
-    {
-     "path": "/Lennart Baardman Recent Faculty.html",
-     "title": "",
-     "views": 12,
-     "avgSec": 18
-    },
-    {
-     "path": "/MKT Academia tips for Candidates.html",
-     "title": "",
-     "views": 12,
-     "avgSec": 34
-    },
-    {
-     "path": "/universitiesFooterLeftClicked.html",
-     "title": "",
-     "views": 12,
-     "avgSec": 6
-    },
-    {
-     "path": "/CvilleFooterWasClicked.html",
-     "title": "",
-     "views": 11,
-     "avgSec": 8
-    },
-    {
-     "path": "/Econ/CS post Blog.html",
-     "title": "",
-     "views": 11,
-     "avgSec": 19
-    },
-    {
-     "path": "/Ekaterina (Kate) Astashkina Recent Faculty.html",
-     "title": "",
-     "views": 11,
-     "avgSec": 9
-    },
-    {
-     "path": "/Fernanda Bravo Recent Faculty.html",
-     "title": "",
-     "views": 11,
-     "avgSec": 7
-    },
-    {
-     "path": "/Tian Chan Recent Faculty.html",
-     "title": "",
-     "views": 11,
-     "avgSec": 4
-    },
-    {
-     "path": "/athensFooterWasClicked.html",
-     "title": "",
-     "views": 11,
-     "avgSec": 10
-    },
-    {
-     "path": "/Econ%20Job%20Market%20Resources.html",
-     "title": "",
-     "views": 10,
-     "avgSec": 11
-    },
-    {
-     "path": "/Junyu Cao Recent Faculty.html",
-     "title": "",
-     "views": 10,
-     "avgSec": 11
-    },
-    {
-     "path": "/Lina Song Recent Faculty.html",
-     "title": "",
-     "views": 10,
-     "avgSec": 5
-    },
-    {
-     "path": "/Xiaojia Guo Recent Faculty.html",
-     "title": "",
-     "views": 10,
-     "avgSec": 33
-    },
-    {
-     "path": "/Andre Calmon Recent Faculty.html",
-     "title": "",
-     "views": 9,
-     "avgSec": 11
-    },
-    {
-     "path": "/Emmanouil  Avgerinos Recent Faculty.html",
-     "title": "",
-     "views": 9,
-     "avgSec": 4
-    },
-    {
-     "path": "/Zhe Liu Recent Faculty.html",
-     "title": "",
-     "views": 9,
-     "avgSec": 3
-    },
-    {
-     "path": "/Athey%20paper%20-%20careers%20in%20Tech.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 31
-    },
-    {
-     "path": "/Econ Q&A Forum.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 13
-    },
-    {
-     "path": "/Feyza G. Sahinyazan Recent Faculty.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 3
-    },
-    {
-     "path": "/Hamsa Bastani Recent Faculty.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 4
-    },
-    {
-     "path": "/Katherine Ashley Recent Faculty.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 2
-    },
-    {
-     "path": "/Philipp B. Cornelius Recent Faculty.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 11
-    },
-    {
-     "path": "/Simin Li Recent Faculty.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 11
-    },
-    {
-     "path": "/Spyros Zoumpoulis Recent Faculty.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 21
-    },
-    {
-     "path": "/Zhihao (Terry) Zhang Recent Faculty.html",
-     "title": "",
-     "views": 8,
-     "avgSec": 27
-    },
-    {
-     "path": "/Boxiao (Beryl) Chen Recent Faculty.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 6
-    },
-    {
-     "path": "/Hyunwoo Park Recent Faculty.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 6
-    },
-    {
-     "path": "/Maxime Cohen Recent Faculty.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 1
-    },
-    {
-     "path": "/Michael Klein Recent Faculty.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 4
-    },
-    {
-     "path": "/Mohammadreza (M. Reza) Skandari Recent Faculty.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 1
-    },
-    {
-     "path": "/Shadi Goodarzi Recent Faculty.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 12
-    },
-    {
-     "path": "/Yao Cui Recent Faculty.html",
-     "title": "",
-     "views": 7,
-     "avgSec": 19
+     "avgSec": 83
     },
     {
      "path": "/informed_consent_statement.html",
@@ -8194,1057 +7072,13 @@
      "avgSec": 3
     },
     {
-     "path": "/Andres Jola-Sanchez Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 5
-    },
-    {
-     "path": "/Jacob Chestnut Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 1
-    },
-    {
-     "path": "/Juan Serpa Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 1
-    },
-    {
-     "path": "/Kejia (Carrie) Hu Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 19
-    },
-    {
-     "path": "/Marcus Bellamy Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 4
-    },
-    {
-     "path": "/Oguz Cetin Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 4
-    },
-    {
-     "path": "/Sina  Ansari Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 4
-    },
-    {
-     "path": "/Yiangos Papanastasiou Recent Faculty.html",
-     "title": "",
-     "views": 6,
-     "avgSec": 1
-    },
-    {
-     "path": "/Amrita Kundu Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 2
-    },
-    {
-     "path": "/Athey HBR article.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 7
-    },
-    {
-     "path": "/Dipayan Banerjee Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 5
-    },
-    {
-     "path": "/Evgeny Kagan Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 0
-    },
-    {
-     "path": "/FontyFooterWasClicked.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 3
-    },
-    {
-     "path": "/Sheng Liu Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 6
-    },
-    {
-     "path": "/Wei Chen Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 15
-    },
-    {
-     "path": "/Xiaoyang Long Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 0
-    },
-    {
-     "path": "/Yanzhe (Murray) Lei Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 4
-    },
-    {
-     "path": "/Yueran  Zhuo Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 4
-    },
-    {
-     "path": "/Zhi Chen Recent Faculty.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 3
-    },
-    {
-     "path": "/privacy-policyFooterWasClicked.html",
-     "title": "",
-     "views": 5,
-     "avgSec": 11
-    },
-    {
-     "path": "/A. Serdar Simsek Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 5
-    },
-    {
-     "path": "/Christian Blanco Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 9
-    },
-    {
-     "path": "/Christopher Chen Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 8
-    },
-    {
-     "path": "/Daniel Freund Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 16
-    },
-    {
-     "path": "/Hummy Song Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 6
-    },
-    {
-     "path": "/Jonas Oddur Jonasson Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 10
-    },
-    {
-     "path": "/Lakshminarayana Nittala Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 0
-    },
-    {
-     "path": "/Masoud Kamalahmadi Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 6
-    },
-    {
-     "path": "/Moontae Lee Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 6
-    },
-    {
-     "path": "/OperationsAcademia.github.io/contact.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 0
-    },
-    {
-     "path": "/Rad Niazadeh Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 5
-    },
-    {
-     "path": "/Rakesh Mallipeddi Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 3
-    },
-    {
-     "path": "/Rowena Gan Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 8
-    },
-    {
-     "path": "/Rui Gao Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 3
-    },
-    {
-     "path": "/Safak Yucel Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 7
-    },
-    {
-     "path": "/SingyFooterWasClicked.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 11
-    },
-    {
-     "path": "/Weiming Zhu Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 4
-    },
-    {
-     "path": "/Yifan Feng Recent Faculty.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 1
-    },
-    {
-     "path": "/feedbackFooterWasClicked.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 7
-    },
-    {
-     "path": "/msomSocietyFooterWasClicked.html",
-     "title": "",
-     "views": 4,
-     "avgSec": 9
-    },
-    {
-     "path": "/Abhishek Roy Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 5
-    },
-    {
-     "path": "/Adam Elmachtoub Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 15
-    },
-    {
-     "path": "/Andrew E. Frazelle Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 12
-    },
-    {
-     "path": "/Athey%20HBR%20article.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 4
-    },
-    {
-     "path": "/Clara Carrera Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 11
-    },
-    {
-     "path": "/Dongyuan Zhan Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 5
-    },
-    {
-     "path": "/Hale Erkan Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 13
-    },
-    {
-     "path": "/Hayri (Alper) Arslan Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 2
-    },
-    {
-     "path": "/Long Zhao Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 5
-    },
-    {
-     "path": "/M. Serkan Akturk Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/Matthew Walsman Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 29
-    },
-    {
-     "path": "/Negin Golrezaei Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 3
-    },
-    {
-     "path": "/New%20York%20University%20Shanghai%202024.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 6
-    },
-    {
-     "path": "/Nil Karacaoglu Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 28
-    },
-    {
-     "path": "/OperationsAcademia.github.io/",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/analytics.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/analytics.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/candidates.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/contact.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/directors-and-contributors.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/faqs.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/informed_consent_statement.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/jobs.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/placements.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/previous-markets.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/privacy-policy.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/recent-faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/resources-for-candidates.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/survey-faqs.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/terms-and-conditions.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/universities.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/candidates.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/faqs.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/informed_consent_statement.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/jobs%20-%20Copy.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/jobs.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/placements.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/previous-markets.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/privacy-policy.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/recent-faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/resources-for-candidates.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/survey-faqs.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/survey.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/terms-and-conditions.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/universities.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/Ovunc Yilmaz Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 1
-    },
-    {
-     "path": "/Ozlem Yildiz Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 1
-    },
-    {
-     "path": "/Panos Markou Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 23
-    },
-    {
-     "path": "/Rongqing (Brian) Han Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 8
-    },
-    {
-     "path": "/Ruomeng Cui Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 20
-    },
-    {
-     "path": "/Sanjith Gopalakrishnan Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 42
-    },
-    {
-     "path": "/Sasa Zorc Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 3
-    },
-    {
-     "path": "/Shima Nassiri Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 9
-    },
-    {
-     "path": "/Thiago Serra Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 0
-    },
-    {
-     "path": "/University%20of%20Oklahoma%202024.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 6
-    },
-    {
-     "path": "/Yeqing Zhou Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 3
-    },
-    {
-     "path": "/Yixin (Iris) Wang Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 4
-    },
-    {
-     "path": "/Yixuan Liu Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 6
-    },
-    {
-     "path": "/Zhaohui (Zoey) Jiang Recent Faculty.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 6
-    },
-    {
-     "path": "/terms-and-conditionsFooterWasClicked.html",
-     "title": "",
-     "views": 3,
-     "avgSec": 48
-    },
-    {
-     "path": "/Ahmet Colak Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 25
-    },
-    {
-     "path": "/Alfonso J. Pedraza-Martinez Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 8
-    },
-    {
-     "path": "/Angela Zhou Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 3
-    },
-    {
-     "path": "/Anna Saez de Tejada Cuenca Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 9
-    },
-    {
-     "path": "/Ashish Kabra Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 10
-    },
-    {
-     "path": "/Changseung (Chang) Yoo Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 1
-    },
-    {
-     "path": "/Daniela Saban Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 27
-    },
-    {
-     "path": "/David F. Drake Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 0
-    },
-    {
-     "path": "/Econ Job Market Resources.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 11
-    },
-    {
-     "path": "/Econ%20Q&A%20Forum.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 4
-    },
-    {
-     "path": "/Fei Gao Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 12
-    },
-    {
-     "path": "/Harish Guda Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 7
-    },
-    {
-     "path": "/Jue Wang Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 16
-    },
-    {
-     "path": "/Junghee Lee Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 2
-    },
-    {
-     "path": "/Ken Moon Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 14
-    },
-    {
-     "path": "/Kris Johnson Ferreira Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 13
-    },
-    {
-     "path": "/OperationsAcademia.github.io/back%20up/2024/survey.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 0
-    },
-    {
-     "path": "/OperationsAcademia.github.io/directors-and-contributors.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 0
-    },
-    {
-     "path": "/Park Sinchaisri Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 22
-    },
-    {
-     "path": "/Parshuram Hotkar Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 0
-    },
-    {
-     "path": "/Peng Shi Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 9
-    },
-    {
-     "path": "/Qinshen Tang Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 9
-    },
-    {
-     "path": "/Rachel Cummings Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 1
-    },
-    {
-     "path": "/Sajad Modaresi Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 7
-    },
-    {
-     "path": "/Sandun Perera Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 7
-    },
-    {
-     "path": "/Siddharth Prakash Singh Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 4
-    },
-    {
-     "path": "/Soudipta (Dip) Chakraborty Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 15
-    },
-    {
-     "path": "/Swati Gupta Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 25
-    },
-    {
-     "path": "/Teng Huang Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 0
-    },
-    {
-     "path": "/Tilburg%20University%202024.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 3
-    },
-    {
-     "path": "/Tinglong Dai Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 6
-    },
-    {
-     "path": "/University%20of%20Mannheim%202024.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 6
-    },
-    {
-     "path": "/Wenchang Zhang Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 21
-    },
-    {
-     "path": "/Youngsoo Kim Recent Faculty.html",
-     "title": "",
-     "views": 2,
-     "avgSec": 8
-    },
-    {
-     "path": "/Aleksandr Kazachkov Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 17
-    },
-    {
-     "path": "/Dawson Kaaua  Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/DublinFooterWasClicked.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 6
-    },
-    {
-     "path": "/Eric Webb Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Ersin Korpeoglu Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 4
-    },
-    {
-     "path": "/Florin Ciocan Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Isil Koyuncu Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 5
-    },
-    {
-     "path": "/Jiding Zhang Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 73
-    },
-    {
-     "path": "/Kashish Arora Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Konstantinos Stouras Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 4
-    },
-    {
-     "path": "/Kraig Delana Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 27
-    },
-    {
-     "path": "/Levi DeValve Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 9
-    },
-    {
-     "path": "/Lusheng Shao Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 8
-    },
-    {
-     "path": "/Luyi Yang Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 13
-    },
-    {
-     "path": "/Marat Salikhov Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 7
-    },
-    {
-     "path": "/Maria Ibanez Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 4
-    },
-    {
-     "path": "/Mohamad Soltani Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/National%20University%20of%20Singapore%202024.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 22
-    },
-    {
-     "path": "/Nitish Jain Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Olga Bountali Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Ozge Yapar Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 13
-    },
-    {
-     "path": "/Remi Charpin Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 5
-    },
-    {
-     "path": "/Rice%20University%202024.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Ruslan Momot Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Sam Kirshner Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Sara Rezaee Vessal Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 17
-    },
-    {
-     "path": "/Scott Rodilitz Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 3
-    },
-    {
-     "path": "/Sreyaa Guha Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 51
-    },
-    {
-     "path": "/The%20Nanyang%20Business%20School%20(NBS),%20Nanyang%20Technological%20University,%20Singapore.%202024.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 16
-    },
-    {
-     "path": "/University%20College%20London%202024.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 10
-    },
-    {
-     "path": "/University%20of%20Notre%20Dame%202024.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 25
-    },
-    {
-     "path": "/University%20of%20San%20Diego%202024.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 6
-    },
-    {
-     "path": "/University%20of%20Toronto%202024.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 21
-    },
-    {
-     "path": "/Utku Serhatli Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 14
-    },
-    {
-     "path": "/Velibor Misic Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 2
-    },
-    {
-     "path": "/Vijay Kamble Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Ville Satopää Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
-     "path": "/Yue Zhang Recent Faculty.html",
-     "title": "",
-     "views": 1,
-     "avgSec": 14
-    },
-    {
-     "path": "/proxy_u/en-ru.ru.d3e9962c-66312add-06233735-74722d776562/www.operationsacademia.org/",
-     "title": "",
-     "views": 1,
-     "avgSec": 0
-    },
-    {
      "path": "/school-only-preview.html",
      "title": "",
      "views": 1,
      "avgSec": 420
     }
    ],
-   "source": "usage+ga4"
+   "source": "usage"
   }
  },
  "breakdowns": {
@@ -9254,7 +7088,7 @@
    "to": "2026-11-27",
    "metric": "visits",
    "zone": "UTC",
-   "total": 18944,
+   "total": 18993,
    "items": [
     {
      "name": "00",
@@ -9274,43 +7108,43 @@
     },
     {
      "name": "04",
-     "value": 626
+     "value": 643
     },
     {
      "name": "05",
-     "value": 555
+     "value": 556
     },
     {
      "name": "06",
-     "value": 550
+     "value": 552
     },
     {
      "name": "07",
-     "value": 534
+     "value": 540
     },
     {
      "name": "08",
-     "value": 483
+     "value": 489
     },
     {
      "name": "09",
-     "value": 1521
+     "value": 1525
     },
     {
      "name": "10",
-     "value": 472
+     "value": 475
     },
     {
      "name": "11",
-     "value": 497
+     "value": 501
     },
     {
      "name": "12",
-     "value": 635
+     "value": 640
     },
     {
      "name": "13",
-     "value": 779
+     "value": 780
     },
     {
      "name": "14",
@@ -9851,7 +7685,7 @@
   "source": "usage",
   "from": "2026-08-30",
   "to": "2026-11-27",
-  "sessions": 18944,
+  "sessions": 18993,
   "avgSessionSec": 445,
   "viewsPerSession": 1
  },
@@ -9862,7 +7696,7 @@
   "all": [
    {
     "name": "Indiana University Bloomington",
-    "visits": 414
+    "visits": 417
    },
    {
     "name": "Columbia University",
@@ -10212,7 +8046,7 @@
   "recent": [
    {
     "name": "Indiana University Bloomington",
-    "visits": 36
+    "visits": 39
    },
    {
     "name": "Columbia University",
@@ -10280,14 +8114,14 @@
     "days": 30,
     "from": "2026-10-29",
     "to": "2026-11-27",
-    "seen": 2183,
-    "resolved": 729,
+    "seen": 2214,
+    "resolved": 733,
     "academic": 68,
-    "placed": 366,
+    "placed": 369,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 122
+      "visits": 125
      },
      {
       "name": "Columbia University",
@@ -10523,14 +8357,14 @@
     "days": 90,
     "from": "2026-08-30",
     "to": "2026-11-27",
-    "seen": 10225,
-    "resolved": 3096,
+    "seen": 10256,
+    "resolved": 3100,
     "academic": 176,
-    "placed": 1431,
+    "placed": 1434,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 414
+      "visits": 417
      },
      {
       "name": "Columbia University",
@@ -10882,14 +8716,14 @@
     "days": 365,
     "from": "2026-08-30",
     "to": "2026-11-27",
-    "seen": 10225,
-    "resolved": 3096,
+    "seen": 10256,
+    "resolved": 3100,
     "academic": 176,
-    "placed": 1431,
+    "placed": 1434,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 414
+      "visits": 417
      },
      {
       "name": "Columbia University",
@@ -11241,14 +9075,14 @@
     "days": 0,
     "from": "2026-08-30",
     "to": "2026-11-27",
-    "seen": 10225,
-    "resolved": 3096,
+    "seen": 10256,
+    "resolved": 3100,
     "academic": 176,
-    "placed": 1431,
+    "placed": 1434,
     "all": [
      {
       "name": "Indiana University Bloomington",
-      "visits": 414
+      "visits": 417
      },
      {
       "name": "Columbia University",
@@ -11598,123 +9432,123 @@
    }
   },
   "recentDays": 7,
-  "seen": 10225,
-  "resolved": 3096,
+  "seen": 10256,
+  "resolved": 3100,
   "academic": 176,
-  "placed": 1431
+  "placed": 1434
  },
  "totals": {
-  "visitors": 49600,
-  "sessions": 71472,
-  "pageviews": 144736,
+  "visitors": 49620,
+  "sessions": 71521,
+  "pageviews": 144785,
   "days": 1261,
   "universities": 87
  },
  "breakdownWindows": {
   "30": {
    "hours": {
-    "source": "ga4",
+    "source": "usage",
     "from": "2026-10-29",
     "to": "2026-11-27",
     "metric": "visits",
-    "zone": "property",
-    "total": 1787,
+    "zone": "UTC",
+    "total": 4580,
     "items": [
      {
       "name": "00",
-      "value": 77
+      "value": 169
      },
      {
       "name": "01",
-      "value": 67
+      "value": 169
      },
      {
       "name": "02",
-      "value": 72
+      "value": 195
      },
      {
       "name": "03",
-      "value": 82
+      "value": 154
      },
      {
       "name": "04",
-      "value": 87
+      "value": 147
      },
      {
       "name": "05",
-      "value": 77
+      "value": 111
      },
      {
       "name": "06",
-      "value": 60
+      "value": 143
      },
      {
       "name": "07",
-      "value": 75
+      "value": 111
      },
      {
       "name": "08",
-      "value": 56
+      "value": 106
      },
      {
       "name": "09",
-      "value": 46
+      "value": 1015
      },
      {
       "name": "10",
-      "value": 60
+      "value": 91
      },
      {
       "name": "11",
-      "value": 65
+      "value": 97
      },
      {
       "name": "12",
-      "value": 41
+      "value": 155
      },
      {
       "name": "13",
-      "value": 53
+      "value": 115
      },
      {
       "name": "14",
-      "value": 60
+      "value": 110
      },
      {
       "name": "15",
-      "value": 60
+      "value": 177
      },
      {
       "name": "16",
-      "value": 75
+      "value": 186
      },
      {
       "name": "17",
-      "value": 88
+      "value": 216
      },
      {
       "name": "18",
-      "value": 88
+      "value": 181
      },
      {
       "name": "19",
-      "value": 124
+      "value": 186
      },
      {
       "name": "20",
-      "value": 98
+      "value": 195
      },
      {
       "name": "21",
-      "value": 88
+      "value": 226
      },
      {
       "name": "22",
-      "value": 93
+      "value": 166
      },
      {
       "name": "23",
-      "value": 95
+      "value": 159
      }
     ]
    },
@@ -12049,108 +9883,108 @@
   },
   "90": {
    "hours": {
-    "source": "ga4",
+    "source": "usage",
     "from": "2026-08-30",
     "to": "2026-11-27",
     "metric": "visits",
-    "zone": "property",
-    "total": 8091,
+    "zone": "UTC",
+    "total": 18993,
     "items": [
      {
       "name": "00",
-      "value": 427
+      "value": 764
      },
      {
       "name": "01",
-      "value": 353
+      "value": 744
      },
      {
       "name": "02",
-      "value": 284
+      "value": 791
      },
      {
       "name": "03",
-      "value": 358
+      "value": 620
      },
      {
       "name": "04",
-      "value": 333
+      "value": 643
      },
      {
       "name": "05",
-      "value": 333
+      "value": 556
      },
      {
       "name": "06",
-      "value": 277
+      "value": 552
      },
      {
       "name": "07",
-      "value": 288
+      "value": 540
      },
      {
       "name": "08",
-      "value": 233
+      "value": 489
      },
      {
       "name": "09",
-      "value": 233
+      "value": 1525
      },
      {
       "name": "10",
-      "value": 246
+      "value": 475
      },
      {
       "name": "11",
-      "value": 227
+      "value": 501
      },
      {
       "name": "12",
-      "value": 238
+      "value": 640
      },
      {
       "name": "13",
-      "value": 210
+      "value": 780
      },
      {
       "name": "14",
-      "value": 246
+      "value": 920
      },
      {
       "name": "15",
-      "value": 304
+      "value": 976
      },
      {
       "name": "16",
-      "value": 450
+      "value": 989
      },
      {
       "name": "17",
-      "value": 476
+      "value": 920
      },
      {
       "name": "18",
-      "value": 433
+      "value": 883
      },
      {
       "name": "19",
-      "value": 444
+      "value": 1006
      },
      {
       "name": "20",
-      "value": 400
+      "value": 1069
      },
      {
       "name": "21",
-      "value": 430
+      "value": 1009
      },
      {
       "name": "22",
-      "value": 407
+      "value": 840
      },
      {
       "name": "23",
-      "value": 461
+      "value": 761
      }
     ]
    },
@@ -12649,108 +10483,108 @@
   },
   "365": {
    "hours": {
-    "source": "ga4",
-    "from": "2025-11-28",
+    "source": "usage",
+    "from": "2026-08-17",
     "to": "2026-11-27",
     "metric": "visits",
-    "zone": "property",
-    "total": 15227,
+    "zone": "UTC",
+    "total": 20893,
     "items": [
      {
       "name": "00",
-      "value": 788
+      "value": 829
      },
      {
       "name": "01",
-      "value": 626
+      "value": 825
      },
      {
       "name": "02",
-      "value": 587
+      "value": 858
      },
      {
       "name": "03",
-      "value": 642
+      "value": 730
      },
      {
       "name": "04",
-      "value": 600
+      "value": 716
      },
      {
       "name": "05",
-      "value": 653
+      "value": 665
      },
      {
       "name": "06",
-      "value": 574
+      "value": 608
      },
      {
       "name": "07",
-      "value": 539
+      "value": 620
      },
      {
       "name": "08",
-      "value": 443
+      "value": 548
      },
      {
       "name": "09",
-      "value": 429
+      "value": 1608
      },
      {
       "name": "10",
-      "value": 448
+      "value": 569
      },
      {
       "name": "11",
-      "value": 419
+      "value": 559
      },
      {
       "name": "12",
-      "value": 404
+      "value": 715
      },
      {
       "name": "13",
-      "value": 388
+      "value": 846
      },
      {
       "name": "14",
-      "value": 441
+      "value": 1010
      },
      {
       "name": "15",
-      "value": 576
+      "value": 1092
      },
      {
       "name": "16",
-      "value": 777
+      "value": 1083
      },
      {
       "name": "17",
-      "value": 900
+      "value": 1036
      },
      {
       "name": "18",
-      "value": 861
+      "value": 956
      },
      {
       "name": "19",
-      "value": 795
+      "value": 1116
      },
      {
       "name": "20",
-      "value": 758
+      "value": 1157
      },
      {
       "name": "21",
-      "value": 852
+      "value": 1067
      },
      {
       "name": "22",
-      "value": 895
+      "value": 871
      },
      {
       "name": "23",
-      "value": 832
+      "value": 809
      }
     ]
    },
@@ -13393,108 +11227,108 @@
   },
   "all": {
    "hours": {
-    "source": "ga4",
-    "from": "2023-06-16",
+    "source": "usage",
+    "from": "2026-08-17",
     "to": "2026-11-27",
     "metric": "visits",
-    "zone": "property",
-    "total": 59899,
+    "zone": "UTC",
+    "total": 20893,
     "items": [
      {
       "name": "00",
-      "value": 2824
+      "value": 829
      },
      {
       "name": "01",
-      "value": 2507
+      "value": 825
      },
      {
       "name": "02",
-      "value": 2216
+      "value": 858
      },
      {
       "name": "03",
-      "value": 2204
+      "value": 730
      },
      {
       "name": "04",
-      "value": 2287
+      "value": 716
      },
      {
       "name": "05",
-      "value": 2282
+      "value": 665
      },
      {
       "name": "06",
-      "value": 2081
+      "value": 608
      },
      {
       "name": "07",
-      "value": 1820
+      "value": 620
      },
      {
       "name": "08",
-      "value": 1913
+      "value": 548
      },
      {
       "name": "09",
-      "value": 1953
+      "value": 1608
      },
      {
       "name": "10",
-      "value": 2031
+      "value": 569
      },
      {
       "name": "11",
-      "value": 1987
+      "value": 559
      },
      {
       "name": "12",
-      "value": 1815
+      "value": 715
      },
      {
       "name": "13",
-      "value": 1793
+      "value": 846
      },
      {
       "name": "14",
-      "value": 2001
+      "value": 1010
      },
      {
       "name": "15",
-      "value": 2496
+      "value": 1092
      },
      {
       "name": "16",
-      "value": 3027
+      "value": 1083
      },
      {
       "name": "17",
-      "value": 3303
+      "value": 1036
      },
      {
       "name": "18",
-      "value": 3348
+      "value": 956
      },
      {
       "name": "19",
-      "value": 3019
+      "value": 1116
      },
      {
       "name": "20",
-      "value": 3044
+      "value": 1157
      },
      {
       "name": "21",
-      "value": 3388
+      "value": 1067
      },
      {
       "name": "22",
-      "value": 3501
+      "value": 871
      },
      {
       "name": "23",
-      "value": 3059
+      "value": 809
      }
     ]
    },
@@ -14410,36 +12244,36 @@
  },
  "engagementWindows": {
   "30": {
-   "source": "ga4",
+   "source": "usage",
    "from": "2026-10-29",
    "to": "2026-11-27",
-   "sessions": 1672,
-   "avgSessionSec": 265,
-   "viewsPerSession": 2.49
+   "sessions": 4580,
+   "avgSessionSec": 296,
+   "viewsPerSession": 1
   },
   "90": {
-   "source": "ga4",
+   "source": "usage",
    "from": "2026-08-30",
    "to": "2026-11-27",
-   "sessions": 7665,
-   "avgSessionSec": 228,
-   "viewsPerSession": 2.23
+   "sessions": 18993,
+   "avgSessionSec": 445,
+   "viewsPerSession": 1
   },
   "365": {
-   "source": "ga4",
-   "from": "2025-11-28",
+   "source": "usage",
+   "from": "2026-08-17",
    "to": "2026-11-27",
-   "sessions": 14482,
-   "avgSessionSec": 156,
-   "viewsPerSession": 2.28
+   "sessions": 20893,
+   "avgSessionSec": 444,
+   "viewsPerSession": 1
   },
   "all": {
-   "source": "ga4",
-   "from": "2023-06-16",
+   "source": "usage",
+   "from": "2026-08-17",
    "to": "2026-11-27",
-   "sessions": 58335,
-   "avgSessionSec": 104,
-   "viewsPerSession": 2.42
+   "sessions": 20893,
+   "avgSessionSec": 444,
+   "viewsPerSession": 1
   }
  },
  "range": {
