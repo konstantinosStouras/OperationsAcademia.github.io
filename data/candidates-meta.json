@@ -1,24 +1,24 @@
 {
- "generated": "2026-11-20T16:15:28.388Z",
- "count": 47,
+ "generated": "2026-11-27T05:12:11.656Z",
+ "count": 48,
  "years": {
-  "2027": 47
+  "2027": 48
  },
  "positions": {
-  "PhD Candidate": 28,
+  "PhD Candidate": 29,
   "Post-Doctoral Researcher": 13,
   "Assistant Professor": 4,
   "Research Scientist": 2
  },
  "researchAreas": {
   "Machine Learning and Data Science": 23,
-  "Operations Research / Optimization": 18,
+  "Operations Research / Optimization": 19,
   "Empirical Operations": 14,
   "Technology, Platforms and Marketplaces": 14,
+  "Supply Chain Management": 13,
   "Service Operations": 12,
-  "Supply Chain Management": 12,
+  "Sustainable Operations": 11,
   "Healthcare Operations": 10,
-  "Sustainable Operations": 10,
   "Behavioral Operations": 9,
   "Revenue Management and Pricing": 8,
   "Innovation and New Product Development": 6,
@@ -38,6 +38,7 @@
   "Business Model Innovation": 1,
   "combinatorial optimization": 1,
   "Control Theory": 1,
+  "Decision-Making under Uncertainty": 1,
   "Deep Learning": 1,
   "DRO": 1,
   "Energy Markets": 1,
@@ -61,18 +62,23 @@
   "metaheuristics": 1,
   "OM-Finance": 1,
   "Online Algorithms": 1,
+  "Operations Management": 1,
   "Policies and Practices for Social Good": 1,
   "public sector operations": 1,
   "Public Sector Operations": 1,
   "Queueing Theory": 1,
   "Resource Allocation": 1,
   "Robust AI Systems": 1,
+  "Social Media Analytics": 1,
   "Socially Responsible Operations": 1,
   "Statistics": 1,
   "Stochastic Dynamic Programming": 1,
   "Stochastic Modeling & Simulation": 1,
   "Stochastic Processes": 1,
-  "Trustworthy AI": 1
+  "Supply Chain Resilience": 1,
+  "Trade Policy and Managerial Adjustment": 1,
+  "Trustworthy AI": 1,
+  "Wildfire Management": 1
  },
  "informsDays": {
   "Sunday": 19,
@@ -80,8 +86,8 @@
   "Tuesday": 5,
   "Wednesday": 1
  },
- "withCv": 43,
- "newestPosted": "2026-11-20",
+ "withCv": 44,
+ "newestPosted": "2026-11-27",
  "revealAt": "2026-10-11",
  "revealAtInstant": "2026-10-11T14:00:00.000Z",
  "heldCount": 0,
@@ -92,7 +98,7 @@
   },
   {
    "label": "Optimization",
-   "count": 18
+   "count": 19
   },
   {
    "label": "Healthcare operations",
